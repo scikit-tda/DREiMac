@@ -18,6 +18,7 @@ def getCircularCoordinates(X, ccl, p, thresh):
     :param thresh: Threshold at which to find representative cocycle
     """
     N = X.shape[0]
+    print "N = ", N
     D = getSSM(X)
 
     #Lift to integer cocycle
@@ -55,9 +56,8 @@ def getCircularCoordinates(X, ccl, p, thresh):
 
     W = np.ones(len(Y))
 
-    (s, I, H) = doHodge(R, W, Y, verbose = True)
-
-    print "sum(abs(Delta1.dot(H))) = ", np.sum(np.abs(Delta1.dot(H)))
+    (s, I, H) = doHodge(R, W, Y)
+    print "len(s) = ", len(s)
 
     #Cocycle resides in the harmonic component H
     cclret = np.zeros((R.shape[0], 3))
@@ -67,8 +67,8 @@ def getCircularCoordinates(X, ccl, p, thresh):
 
 if __name__ == '__main__':
     p = 41
-    np.random.seed(10)
-    N = 50
+    np.random.seed(2)
+    N = 500
     X = np.zeros((N*2, 2))
     t = np.linspace(0, 1, N+1)[0:N]**1.2
     t = 2*np.pi*t
