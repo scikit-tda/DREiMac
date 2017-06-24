@@ -13,6 +13,7 @@ import scipy.io.wavfile
 import scipy.io as sio
 import librosa
 from sklearn.decomposition import PCA
+from Laplacian import *
 
 
 def getPeriodicityScores(I1Z2, I1Z3, I2):
@@ -109,7 +110,7 @@ def doSnippetPCA(x, Win, hop):
     return A
 
 
-if __name__ == '__main__':
+if __name__ == '__main__2':
     Fs, X = scipy.io.wavfile.read("horsewhinnie.wav")
     x = X[int(Fs*0.87):int(Fs*1)]
 
@@ -172,7 +173,7 @@ if __name__ == '__main__':
 
 
 
-if __name__ == '__main__2':
+if __name__ == '__main__':
     doPlot = True
     #Read in the audio file.  Fs is the sample rate, and
     #X is the audio signal
@@ -183,8 +184,10 @@ if __name__ == '__main__2':
     G0 = 1433 #Second fundamental frequency
 
     W = int(round(Fs/G0))
+    Tau = 2
+    dT = 1
     print "W = ", W
-    Win = 2048
+    Win = 512
     hop = 128
     NBlocks = int(np.ceil(1 + (len(X) - Win)/hop))
     freqs = (np.arange(Win)/float(Win))*Fs
@@ -194,7 +197,7 @@ if __name__ == '__main__2':
     QPScores = np.zeros(NBlocks)
     QPScoresMod = np.zeros(NBlocks)
     plt.figure(figsize=(12, 12))
-    for i in range(200, NBlocks):
+    for i in range(NBlocks):
         print "Processing block %i of %i"%(i, NBlocks)
         x = X[i*hop:i*hop+Win]
 
@@ -203,7 +206,7 @@ if __name__ == '__main__2':
         F = np.log(F)
 
         #Step 2: Get the sliding window embedding
-        Y = getSlidingWindow(x, W, 2, 4)
+        Y = getSlidingWindow(x, W, Tau, dT)
         #Mean-center and normalize
         Y = Y - np.mean(Y, 1)[:, None]
         Y = Y/np.sqrt(np.sum(Y**2, 1))[:, None]
@@ -212,6 +215,7 @@ if __name__ == '__main__2':
         PDs = doRipsFiltration(Y, 2)
         I1 = PDs[1]
         I2 = PDs[2]
+        sio.savemat("Window%i.mat"%i, {"I1":I1, "I2":I2, "Win":Win, "hop":hop, "W":W, "Tau":Tau, "dT":dT, "i1":i*hop, "i2":i*hop+Win})
         (PScore, PScoreMod, HSubscore, QPScore, QPScoreMod) = getPeriodicityScores(I1, I1, I2)
         PScores[i] = PScoreMod
         QPScores[i] = QPScore
@@ -242,3 +246,32 @@ if __name__ == '__main__2':
             plt.xlim([0, 8000])
 
             plt.savefig("%i.png"%i, bbox_inches = 'tight')
+
+
+        #Do circular coordinates
+        plt.clf()
+        res = getTorusCoordinatesPC(Y, doPlot = True)
+
+        #Estimate frequencies
+        s1 = res['thetau']
+        s1 = Fs*(s1[-1] - s1[0])/(len(s1)*2*np.pi) #Cycles per sample * samples / second
+        s2 = res['phiu']
+        s2 = Fs*(s2[-1] - s2[0])/(len(s2)*2*np.pi) #Cycles per sample * samples / second
+
+
+        plt.subplot(3, 3, 1)
+        plt.plot(time + np.arange(Win)/float(Fs), x)
+        plt.title("Original Signal")
+        #drawLineColored(t, x, C[xidx, :])
+        #ax = plt.gca()
+        #ax.set_axis_bgcolor(plotbgcolor)
+        plt.subplot(3, 3, 7)
+        plt.hold(True)
+        plotDGM(I2, 'g', sz = 50)
+        plt.xlim([0, 2])
+        plt.ylim([0, 2])
+        plt.subplot(3, 3, 3)
+        plt.title('Theta, Freq = %g hz'%s1)
+        plt.subplot(3, 3, 6)
+        plt.title('Phi, Freq = %g hz'%s2)
+        plt.savefig("Circ%i.png"%i, bbox_inches = 'tight')
