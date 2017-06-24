@@ -8,6 +8,8 @@ import scipy.interpolate as interp
 from scipy import signal
 from sklearn.decomposition import PCA
 from CircularCoordinates import *
+from CSMSSMTools import *
+from Laplacian import *
 
 def drawLineColored(idx, x, C):
     plt.hold(True)
@@ -32,6 +34,8 @@ def getSlidingWindow(x, dim, Tau, dT):
     return (X, xidx)
 
 if __name__ == '__main__':
+    plotbgcolor = (0.15, 0.15, 0.15)
+
     #Step 1: Setup the signal
     T1 = 10 #The period of the first sine in number of samples
     T2 = T1*np.pi #The period of the second sine in number of samples
@@ -44,6 +48,9 @@ if __name__ == '__main__':
     x += np.cos(t2) #The second sinusoid
     np.random.seed(2)
     x = x + 0.05*np.random.randn(len(x))
+
+    x = sio.loadmat('Curto.mat')['x'].flatten()
+    print "len(x) = ", len(x)
 
     dim = 30
     Tau = 1
@@ -66,68 +73,76 @@ if __name__ == '__main__':
 
     #Do TDA
     p = 41
-    (PDs, Cocycles) = doRipsFiltration(X, 1, coeff = p, cocycles = True)
-    fig = plt.figure(figsize=(12, 10))
-    
-    ret = {"t1":t1, "t2":t2}
-    for i in range(PDs[1].shape[0]):
-        #if PDs[1][i, 1] - PDs[1][i, 0] < 0.1:
-        #    continue
-        ccl = Cocycles[1][i]
-        thresh = PDs[1][i, 1] - 0.01
-        (s, cclret) = getCircularCoordinates(X, ccl, p, thresh) 
-        s = s - np.min(s)
-        s = s/np.max(s)
-        ret["ccl%i"%i] = s
-        
-        c = plt.get_cmap('spectral')
-        C2 = c(np.array(np.round(255*s), dtype=np.int32))
-        C2 = C2[:, 0:3]
-    
-        plt.clf()
-        plt.subplot(221)
-        drawLineColored(t, x, C2[xidx, :])
-        ax = plt.gca()
-        plotbgcolor = (0.15, 0.15, 0.15)
-        ax.set_axis_bgcolor(plotbgcolor)
+    print "Doing TDA..."
+    PDs = doRipsFiltration(X, 1, coeff = p)
+    fig = plt.figure(figsize=(12, 12))
+    print "Finished TDA"
+
+    I = PDs[1]
+    diff = I[:, 1] - I[:, 0]
+    idx = np.argsort(-diff)
+    I = I[idx, :]
+    thresh = np.mean(I[1, :])
+
+    print "Doing Laplacian..."
+    res = getTorusCoordinates(X, thresh, weighted = True)
+    print "Finished Laplacian"
+    v = res['v']
+    w = res['w']
+    A = res['A']
+    #A = res['A'].toarray()
+
+    plt.clf()
+    plt.subplot(3, 3, 1)
+    plt.plot(x)
+    #drawLineColored(t, x, C[xidx, :])
+    #ax = plt.gca()
+    #ax.set_axis_bgcolor(plotbgcolor)
+    plt.ylim([-3, 3])
+    plt.title("Original Signal")
+    plt.xlabel("t")
+
+    plt.subplot(3, 3, 4)
+    plt.imshow(A, cmap = 'gray', interpolation = 'none')
+    plt.title("SSM")
+
+    plt.subplot(3, 3, 7)
+    H1 = plotDGM(PDs[1], color = np.array([1.0, 0.0, 0.2]), label = 'H1', sz = 50, axcolor = np.array([0.8]*3))
+    ax = plt.gca()
+    ax.set_axis_bgcolor(plotbgcolor)
+    plt.title("Persistence Diagram, Thresh = %g"%thresh)
 
 
-        plt.ylim([-3, 3])
-        plt.title("Original Signal")
-        plt.xlabel("t")
+    plt.subplot(3, 3, 2)
+    N = X.shape[0]
+    plt.scatter(v[0:N, 1], v[0:N, 2], 20, c=C, edgecolor = 'none')
+    ax = plt.gca()
+    ax.set_axis_bgcolor(plotbgcolor)
+    plt.xlabel("Eigvec 1")
+    plt.ylabel("Eigvec 2")
 
-#        ax2 = fig.add_subplot(222, projection = '3d')
-#        #plt.subplot(132)
-#        ax2.set_title("PCA of Sliding Window Embedding")
-#        ax2.scatter(Y[:, 0], Y[:, 1], Y[:, 3], c=C2, edgecolors='none')
-#        #plt.axis('equal')
-#        #plt.axis('off')
-#        #ax = plt.gca()
-#        ax2.set_axis_bgcolor(plotbgcolor)
-#        ax2.w_xaxis.set_pane_color(plotbgcolor)
-#        ax2.w_yaxis.set_pane_color(plotbgcolor)
-#        ax2.w_zaxis.set_pane_color(plotbgcolor)
+    plt.subplot(3, 3, 3)
+    plt.plot(res['theta'])
+    plt.title('theta')
 
+    plt.subplot(3, 3, 5)
+    N = X.shape[0]
+    plt.scatter(v[0:N, 3], v[0:N, 4], 20, c=C, edgecolor = 'none')
+    ax = plt.gca()
+    ax.set_axis_bgcolor(plotbgcolor)
+    plt.xlabel("Eigvec 3")
+    plt.ylabel("Eigvec 4")
 
-        plt.subplot(223)
-        H1 = plotDGM(PDs[1], color = np.array([1.0, 0.0, 0.2]), label = 'H1', sz = 50, axcolor = np.array([0.8]*3))
-        plt.hold(True)
-        plt.scatter([PDs[1][i, 0]], [PDs[1][i, 1]], 100, 'm')
-        #H2 = plotDGM(PDs[2], color = np.array([0.43, 0.67, 0.27]), marker = 'x', sz = 50, label = 'H2', axcolor = np.array([0.8]*3))
-        #plt.legend(handles=[H1, H2])
+    plt.subplot(3, 3, 6)
+    plt.plot(res['phi'])
+    plt.title('phi')
 
-        ax = plt.gca()
-        ax.set_axis_bgcolor(plotbgcolor)
-        plt.title('Persistence Diagram, Birth Time = %g'%PDs[1][i, 0])
-        
-        plt.subplot(222)
-        plt.plot(s)
-        
-        plt.subplot(224)
-        s2 = np.unwrap(s*2*np.pi)/(2*np.pi)
-        plt.plot(s2)
-        slope = (s2[-1] - s2[0])/len(s2)
-        plt.title("Unwrapped, Slope = %g"%slope)
-        
-        plt.savefig("Cocycle%i.svg"%i)
-    sio.savemat("cocycles.mat", ret)
+    plt.subplot(3, 3, 8)
+    plt.stem(w)
+    plt.title('Eigenvalues')
+
+    plt.subplot(3, 3, 9)
+    plt.imshow(v, cmap = 'spectral', aspect = 'auto', interpolation = 'none')
+    plt.title('Eigenvectors')
+
+    plt.show()
