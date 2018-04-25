@@ -5,7 +5,6 @@ import scipy
 from scipy import sparse
 from scipy.sparse.linalg import lsqr, cg, eigsh
 import time
-import jellyfish
 from CliqueAlgorithms import *
 
 
@@ -22,20 +21,6 @@ def getKendallTau(order1, order2):
     B = np.sign(rank2[None, :] - rank2[:, None])
     return np.sum(A*B)/float(N*(N-1))
     #tau, p_value = scipy.stats.kendalltau(rank1, rank2)
-
-
-def getJWDistance(order1, order2):
-    """
-    Given two global rankings, return the Jaro Winkler Distance
-    """
-    s = u"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    s1 = u""
-    s2 = u""
-    for i in range(len(order1)):
-        s1 += s[order1[i]]
-    for i in range(len(order2)):
-        s2 += s[order2[i]]
-    return jellyfish.jaro_winkler(s1, s2)
     
 
 def makeDelta0(R):
@@ -87,7 +72,7 @@ def makeDelta1(R):
     tic = time.time()
     (I, J, V) = get3CliquesBrute(Edges)
     toc = time.time()
-    print "Elapsed time 3 cliques brute: ", toc - tic
+    print("Elapsed time 3 cliques brute: %g"%(toc - tic))
     [I, J, V] = [a.flatten() for a in [I, J, V]]
     TriNum = len(I)/3
     Delta1 = sparse.coo_matrix((V, (I, J)), shape = (TriNum, NEdges)).tocsr()
@@ -106,12 +91,12 @@ def doHodge(R, W, Y, verbose = False):
     """
     #Step 1: Get s
     if verbose:
-        print "Making Delta0..."
+        print("Making Delta0...")
     tic = time.time()
     D0 = makeDelta0(R)
     toc = time.time()
     if verbose:
-        print "Elapsed Time: ", toc-tic, " seconds"
+        print("Elapsed Time: %g seconds"%(toc-tic))
     wSqrt = np.sqrt(W).flatten()
     WSqrt = scipy.sparse.spdiags(wSqrt, 0, len(W), len(W))
     WSqrtRecip = scipy.sparse.spdiags(1/wSqrt, 0, len(W), len(W))
@@ -121,23 +106,23 @@ def doHodge(R, W, Y, verbose = False):
     
     #Step 2: Get local inconsistencies
     if verbose:
-        print "Making Delta1..."
+        print("Making Delta1...")
     tic = time.time()
     D1 = makeDelta1(R)
     toc = time.time()
     if verbose:
-        print "Elapsed Time: ", toc-tic, " seconds"
+        print("Elapsed Time: %g seconds"%(toc-tic))
     B = WSqrtRecip*D1.T
     resid = Y - D0.dot(s)  #This has been verified to be orthogonal under <resid, D0*s>_W
     
     u = wSqrt*resid
     if verbose:
-        print "Solving for Phi..."
+        print("Solving for Phi...")
     tic = time.time()
     Phi = lsqr(B, u)[0]
     toc = time.time()
     if verbose:
-        print "Elapsed Time: ", toc - tic, " seconds"
+        print("Elapsed Time: %g seconds"%(toc-tic))
     I = WSqrtRecip.dot(B.dot(Phi)) #Delta1* dot Phi, since Delta1* = (1/W) Delta1^T
     
     #Step 3: Get harmonic cocycle

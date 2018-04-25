@@ -3,11 +3,11 @@ import os
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-from TDA import *
 from Hodge import *
+from CSMSSMTools import getSSM
 
 def integrateCocycle(ccl):
-    print "TODO"
+    print("TODO")
 
 def getCircularCoordinates(X, ccl, p, thresh):
     """
@@ -18,7 +18,6 @@ def getCircularCoordinates(X, ccl, p, thresh):
     :param thresh: Threshold at which to find representative cocycle
     """
     N = X.shape[0]
-    print "N = ", N
     D = getSSM(X)
 
     #Lift to integer cocycle
@@ -49,15 +48,15 @@ def getCircularCoordinates(X, ccl, p, thresh):
     res = np.sum(np.abs(Delta1.dot(Y)))
     isCocycle = (res == 0)
     if not isCocycle:
-        print "\n\nERROR: Not a cocycle"
-        print "Delta1.dot(Y) = ", Delta1.dot(Y)
-        print "res = ", res
-        print "\n"
+        print("\n\nERROR: Not a cocycle")
+        print("Delta1.dot(Y) = ", Delta1.dot(Y))
+        print("res = ", res)
+        print("\n")
 
     W = np.ones(len(Y))
 
     (s, I, H) = doHodge(R, W, Y)
-    print "len(s) = ", len(s)
+    print("len(s) = %i"%len(s))
 
     #Cocycle resides in the harmonic component H
     cclret = np.zeros((R.shape[0], 3))
@@ -65,8 +64,10 @@ def getCircularCoordinates(X, ccl, p, thresh):
     cclret[:, 2] = H
     return (s, cclret)
 
-if __name__ == '__main__':
+def doTwoCircleTest():
+    from ripser import Rips
     p = 41
+    r = Rips(coeff=p, do_cocycles=True)
     np.random.seed(2)
     N = 500
     X = np.zeros((N*2, 2))
@@ -79,21 +80,26 @@ if __name__ == '__main__':
     X = X[np.random.permutation(X.shape[0]), :]
     X = X + 0.2*np.random.randn(X.shape[0], 2)
 
-    (PDs, Cocycles) = doRipsFiltration(X, 1, coeff = p, cocycles = True)
+    PDs = r.fit_transform(X)
+    cocycles = r.cocycles_[1]
     
     plt.figure(figsize=(12, 5))
     for i in range(PDs[1].shape[0]):
-        ccl = Cocycles[1][i]
+        pers = PDs[1][i, 1]-PDs[1][i, 0]
+        if pers < 0.5:
+            continue
+        ccl = cocycles[i]
         thresh = PDs[1][i, 1] - 0.01
         (s, cclret) = getCircularCoordinates(X, ccl, p, thresh)
         
         plt.clf()
         plt.subplot(121)
-        plotDGM(PDs[1])
-        plt.scatter([PDs[1][i, 0]], [PDs[1][i, 1]], 40, 'r')
-        #plt.subplot(132)
-        #plotCocycle(X, ccl, thresh)
+        r.plot(diagrams=PDs, show=False)
+        plt.scatter([PDs[1][i, 0]], [PDs[1][i, 1]], 80, 'k')
         plt.subplot(122)
         plt.scatter(X[:, 0], X[:, 1], 100, s, cmap = 'afmhot', edgecolor = 'none')
         plt.colorbar()
         plt.savefig("Cocycle%i.svg"%i, bbox_inches = 'tight')
+
+if __name__ == '__main__':
+    doTwoCircleTest()

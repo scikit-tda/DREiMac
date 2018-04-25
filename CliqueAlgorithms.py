@@ -2,12 +2,14 @@ import numpy as np
 import scipy
 from scipy import sparse
 
-#Brute force function to check for all 3 cliques by checking
-#mutual neighbors between 3 vertices
 def get3CliquesBrute(Edges):
+    """
+    Brute force function to check for all 3 cliques by checking
+    mutual neighbors between 3 vertices
+    """
     [I, J, V] = [[], [], []]
     NVertices = len(Edges)
-    MaxNum = NVertices*(NVertices-1)*(NVertices-2)/6
+    MaxNum = int(NVertices*(NVertices-1)*(NVertices-2)/6)
     J = np.zeros((MaxNum, 3))
     [i, j, k] = [0, 0, 0]
     edgeNum = 0

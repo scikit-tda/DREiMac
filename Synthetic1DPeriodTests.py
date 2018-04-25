@@ -1,4 +1,3 @@
-from TDA import *
 import os
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -10,6 +9,7 @@ from sklearn.decomposition import PCA
 from CircularCoordinates import *
 from CSMSSMTools import *
 from Laplacian import *
+from ripser import Rips
 
 def getSlidingWindow(x, dim, Tau, dT):
     N = len(x)

@@ -7,7 +7,6 @@ import numpy.linalg as linalg
 import scipy.io as sio
 import matplotlib.pyplot as plt
 from CSMSSMTools import *
-from TDA import *
 
 def getLaplacianEigs(A, NEigs):
     DEG = sparse.dia_matrix((A.sum(1).flatten(), 0), A.shape)
@@ -123,88 +122,6 @@ def getTorusCoordinates(X, sigma, weighted = False):
     (theta, thetau) = getThetas(v, 1, 2)
     (phi, phiu) = getThetas(v, 3, 4)
     return {'w':w, 'v':v, 'theta':theta, 'thetau':thetau, 'phi':phi, 'phiu':phiu, 'A':A, 'D':D}
-
-def getTorusCoordinatesPC(X, weighted = True, doPlot = False):
-    #Do TDA
-    print "Doing TDA..."
-    PDs = doRipsFiltration(X, 1)
-    print "Finished TDA"
-
-    I = PDs[1]
-    diff = I[:, 1] - I[:, 0]
-    idx = np.argsort(-diff)
-    I = I[idx, :]
-    thresh = np.mean(I[1, :])
-
-    print "Doing Laplacian..."
-    res = getTorusCoordinates(X, thresh, weighted = weighted)
-    print "Finished Laplacian"
-    v = res['v']
-    w = res['w']
-    A = res['A']
-    #A = res['A'].toarray()
-
-    if doPlot:
-        plotbgcolor = (0.15, 0.15, 0.15)
-        #Make color array
-        c = plt.get_cmap('Spectral')
-        C = c(np.array(np.round(np.linspace(0, 255, X.shape[0])), dtype=np.int32))
-        C = C[:, 0:3]
-
-        plt.ylim([-3, 3])
-        plt.title("Original Signal")
-        plt.xlabel("t")
-
-        plt.subplot(3, 3, 4)
-        if weighted:
-            plt.imshow(A, cmap = 'gray', interpolation = 'none')
-        else:
-            plt.imshow(A.toarray(), cmap = 'gray', interpolation = 'none')
-        plt.title("SSM")
-
-        plt.subplot(3, 3, 7)
-        H1 = plotDGM(PDs[1], color = np.array([1.0, 0.0, 0.2]), label = 'H1', sz = 50, axcolor = np.array([0.8]*3))
-        ax = plt.gca()
-        ax.set_axis_bgcolor(plotbgcolor)
-        plt.title("Persistence Diagram, Thresh = %g"%thresh)
-
-
-        plt.subplot(3, 3, 2)
-        N = X.shape[0]
-        plt.scatter(v[0:N, 1], v[0:N, 2], 20, c=C, edgecolor = 'none')
-        ax = plt.gca()
-        ax.set_axis_bgcolor(plotbgcolor)
-        plt.xlabel("Eigvec 1")
-        plt.ylabel("Eigvec 2")
-
-        plt.subplot(3, 3, 3)
-        plt.plot(res['theta'])
-        s = res['thetau']
-        s = (s[-1] - s[0])/len(s)
-        plt.title('theta, slope = %g'%s)
-
-        plt.subplot(3, 3, 5)
-        N = X.shape[0]
-        plt.scatter(v[0:N, 3], v[0:N, 4], 20, c=C, edgecolor = 'none')
-        ax = plt.gca()
-        ax.set_axis_bgcolor(plotbgcolor)
-        plt.xlabel("Eigvec 3")
-        plt.ylabel("Eigvec 4")
-
-        plt.subplot(3, 3, 6)
-        plt.plot(res['phi'])
-        s = res['phiu']
-        s = (s[-1] - s[0])/len(s)
-        plt.title('phi, slope = %g'%s)
-
-        plt.subplot(3, 3, 8)
-        plt.stem(w)
-        plt.title('Eigenvalues')
-
-        plt.subplot(3, 3, 9)
-        plt.imshow(v, cmap = 'spectral', aspect = 'auto', interpolation = 'none')
-        plt.title('Eigenvectors')
-    return res
 
 if __name__ == '__main__':
     M = 20
