@@ -34,3 +34,60 @@ def get3CliquesBrute(Edges):
         I[:, k] = np.arange(I.shape[0])
     return (I, J, V)
 
+def get3CliquesNetworkx(Edges):
+    import networkx as nx
+    import itertools
+    G = nx.Graph()
+    edgeslist = []
+    for i, edgeDict in enumerate(Edges):
+        for j in edgeDict:
+            if i < j:
+                edgeslist.append((i, j))
+    G.add_edges_from(edgeslist)
+    cliques = list(nx.find_cliques(G))
+    #print(cliques)
+    cliques3 = []
+    for c in cliques:
+        c = sorted(c)
+        cliques3.append(c)
+        for c3 in itertools.combinations(c, 3):
+            cliques3.append(c3)
+    cliques3 = np.array(cliques3)
+    print(cliques3.size)
+
+
+
+def testCliqueTimes():
+    """
+    Compare brute force to networkx Bron Kerbosch
+    """
+    import time
+    np.random.seed(1)
+    N = 1000
+    D = np.random.rand(N, N)
+    D = 0.5*(D + D.T)
+    I, J = np.meshgrid(np.arange(N), np.arange(N))
+    D[I == J] = 100
+    I = I[D < 0.3]
+    J = J[D < 0.3]
+    #Make a list of edges for fast lookup
+    Edges = []
+    for i in range(N):
+        Edges.append({})
+    for i, (a, b) in enumerate(zip(I, J)):
+        Edges[a][b] = i
+        Edges[b][a] = i
+    
+    """
+    tic = time.time()
+    (I, J, V) = get3CliquesBrute(Edges)
+    print("Elapsed time brute force %i Edges: %g"%(I.size, time.time()-tic))
+    """
+
+    tic = time.time()
+    get3CliquesNetworkx(Edges)
+    print("Elapsed time networkx force %i Edges: %g"%(I.size, time.time()-tic))
+
+
+if __name__ == "__main__":
+    testCliqueTimes()
