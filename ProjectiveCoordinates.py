@@ -64,9 +64,6 @@ def getGreedyPermEuclidean(X, M, verbose = False):
         thisds = getCSM(X[idx, :][None, :], X).flatten()
         D[i, :] = thisds
         ds = np.minimum(ds, thisds)
-        if verbose:
-            if i%int(0.05*M) == 0:
-                print("Greedy perm %i%s done..."%(int(100.0*i/float(M)), "%"))
     Y = X[perm, :]
     return {'Y':Y, 'perm':perm, 'lambdas':lambdas, 'D':D}
 
@@ -102,9 +99,6 @@ def getGreedyPermDM(D, M, verbose = False):
         perm[i] = idx
         lambdas[i] = ds[idx]
         ds = np.minimum(ds, D[idx, :])
-        if verbose:
-            if i%int(0.05*M) == 0:
-                print("Greedy perm %i%s done..."%(int(100.0*i/float(M)), "%"))
     DLandmarks = D[perm, :] 
     return {'perm':perm, 'lambdas':lambdas, 'DLandmarks':DLandmarks}
 
@@ -133,9 +127,6 @@ def PPCA(class_map, proj_dim, verbose = False):
     # Projective dimensionality reduction : Main Loop
     XRet = None
     for i in range(n_dim-1):
-        if verbose:
-            if i%int(0.05*n_dim) == 0:
-                print("Projective coordinates %i%s done..."%(int(100.0*i/float(n_dim)), "%"))  
         # Project onto an "equator"
         _, U = linalg.eigh(X.dot(X.T))
         U = np.fliplr(U)
@@ -188,12 +179,15 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     if verbose:
         print("Elapsed time greedy permutation: %.3g seconds"%(time.time() - tic))
 
+
+
     # Step 2: Compute H1 with cocycles on the landmarks
     tic = time.time()
     dgms = rips.fit_transform(dist_land_land, distance_matrix=True)
+    dgm1 = dgms[1]
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-    dgm1 = dgms[1]
+        rips.plot()
     idx_mp1 = np.argmax(dgm1[:, 1] - dgm1[:, 0])
     cocycle = rips.cocycles_[1][idx_mp1]
 
@@ -228,7 +222,12 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     for i in range(n_data):
         class_map[i, :] *= cocycle_matrix[indx[i], :]
     
-    return PPCA(class_map, proj_dim, verbose)
+    res = PPCA(class_map, proj_dim, verbose)
+    res["cocycle"] = cocycle[:, 0:2]+1
+    res["dist_land_land"] = dist_land_land
+    res["dist_land_data"] = dist_land_data
+    res["dgm1"] = dgm1
+    return res
 
 def rotmat(a, b = np.array([])):
     """
@@ -271,7 +270,7 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def plotRP2Stereo(pX, f):
+def getStereoRP2(pX):
     X = pX.T
     # Put points all on the same hemisphere
     _, U = linalg.eigh(X.dot(X.T))
@@ -280,7 +279,10 @@ def plotRP2Stereo(pX, f):
     XX[:, ind] *= -1
     # Do stereographic projection
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
-    plt.scatter(S[0, :], S[1, :], 20, f, cmap='afmhot')
+    return S.T
+
+def plotRP2Stereo(S, f):
+    plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
     t = np.linspace(0, 2*np.pi, 200)
     plt.plot(np.cos(t), np.sin(t))
     plt.axis('equal')
@@ -300,37 +302,40 @@ def testGreedyPermEuclidean():
     plt.imshow(D, aspect = 'auto')
     plt.show()
 
-def testProjCoordsRP2():
-    phi = np.linspace(0, np.pi/2, 25)
-    theta = np.linspace(0, 2*np.pi, 100)
-    phi, theta = np.meshgrid(phi, theta)
-    phi = phi.flatten()
-    theta = theta.flatten()
-    N = len(phi)
-    X = np.zeros((N, 3))
-    X[:, 0] = np.cos(phi)*np.cos(theta)
-    X[:, 1] = np.cos(phi)*np.sin(theta)
-    X[:, 2] = np.sin(phi)
-    
-    """
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(X[:, 0], X[:, 1], X[:, 2])
-    plt.show()
-    """
+def testProjCoordsRP2(NSamples, NLandmarks):
+    np.random.seed(NSamples)
+    X = np.random.randn(NSamples, 3)
+    X = X/np.sqrt(np.sum(X**2, 1))[:, None]
 
+    SOrig = getStereoRP2(X)
+    phi = np.sqrt(np.sum(SOrig**2, 1))
+    theta = np.arctan2(SOrig[:, 1], SOrig[:, 0])
+    
     D = X.dot(X.T)
     D = np.abs(D)
     D[D > 1.0] = 1.0
     D = np.arccos(D)
     
-    res = ProjCoords(D, 100, True, verbose=True)
+    res = ProjCoords(D, NLandmarks, True, verbose=True)
+    print(res["cocycle"])
+    import scipy.io as sio
+    res["rp2_phi"] = phi
+    res["rp2_theta"] = theta
+    sio.savemat("JoseMatlabCode/RP2.mat", res)
     variance, X = res['variance'], res['X']
+
+    SFinal = getStereoRP2(X)
+    
     vcumu = np.cumsum(variance)
     vcumu = vcumu/vcumu[-1]
-    plotRP2Stereo(X, phi)
+    plt.subplot(121)
+    plotRP2Stereo(SOrig, phi)
+    plt.colorbar()
+    plt.subplot(122)
+    plotRP2Stereo(SFinal, phi)
+    plt.colorbar()
     plt.show()
 
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
-    testProjCoordsRP2()
+    testProjCoordsRP2(10000, 6)
