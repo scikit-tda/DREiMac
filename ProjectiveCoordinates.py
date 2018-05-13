@@ -65,8 +65,7 @@ def getGreedyPermEuclidean(X, M, verbose = False):
         D[i, :] = thisds
         ds = np.minimum(ds, thisds)
         if verbose:
-            interval = int(0.05*M)
-            if i%interval == 0:
+            if i%int(0.05*M) == 0:
                 print("Greedy perm %i%s done..."%(int(100.0*i/float(M)), "%"))
     Y = X[perm, :]
     return {'Y':Y, 'perm':perm, 'lambdas':lambdas, 'D':D}
@@ -104,15 +103,14 @@ def getGreedyPermDM(D, M, verbose = False):
         lambdas[i] = ds[idx]
         ds = np.minimum(ds, D[idx, :])
         if verbose:
-            interval = int(0.05*M)
-            if i%interval == 0:
+            if i%int(0.05*M) == 0:
                 print("Greedy perm %i%s done..."%(int(100.0*i/float(M)), "%"))
     DLandmarks = D[perm, :] 
     return {'perm':perm, 'lambdas':lambdas, 'DLandmarks':DLandmarks}
 
 def PPCA(class_map, proj_dim, verbose = False):
     """
-    Principal Projective Component Analysis
+    Principal Projective Component Analysis (Jose Perea 2017)
     
     Parameters
     ----------
@@ -120,7 +118,7 @@ def PPCA(class_map, proj_dim, verbose = False):
         For all N points of the dataset, membership weights to
         d different classes are the coordinates
     proj_dim : integer
-        The dimension to which to reduce the coordinates
+        The dimension of the projective space onto which to project
     verbose : boolean
         Whether to print information during iterations
     """
@@ -131,41 +129,27 @@ def PPCA(class_map, proj_dim, verbose = False):
     variance = np.zeros(X.shape[0]-1)
 
     n_dim = class_map.shape[1]
-    n_iter = n_dim-proj_dim-1
     tic = time.time()
     # Projective dimensionality reduction : Main Loop
-    for i in range(n_iter):
+    XRet = None
+    for i in range(n_dim-1):
         if verbose:
-            interval = int(0.05*n_dim)
-            if i%interval == 0:
+            if i%int(0.05*n_dim) == 0:
                 print("Projective coordinates %i%s done..."%(int(100.0*i/float(n_dim)), "%"))  
         # Project onto an "equator"
-        w, U = linalg.eigh(X.dot(X.T))
+        _, U = linalg.eigh(X.dot(X.T))
         U = np.fliplr(U)
-        variance[-i-1] = np.mean((np.pi/2-np.real(np.arccos( np.abs(U[:, -1][None, :].dot(X)))))**2)
+        variance[-i-1] = np.mean((np.pi/2-np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X)))))**2)
         Y = (U.T).dot(X)
         y = np.array(Y[-1, :])
         Y = Y[0:-1, :]
         X = Y/np.sqrt(1-np.abs(y)**2)[None, :]
-
-    # Projective dimensionality reduction : Coordinates Loop
-    Z = np.array(X)
-    for j in range(proj_dim):
-        if verbose:
-            interval = int(0.05*n_dim)
-            if i%interval == 0:
-                print("Projective coordinates %i%s done..."%(int(100.0*i/float(n_dim)), "%"))  
-        # Project onto an "equator"
-        w, U = linalg.eigh(Z.dot(Z.T))
-        U = np.fliplr(U)
-        variance[proj_dim-j-1] = np.mean((np.pi/2-np.real(np.arccos(np.abs(U[:, -1][None, :].dot(Z)))))**2)
-        Y = (U.T).dot(Z)
-        y = np.array(Y[-1, :])
-        Y = Y[0:-1, :]
-        Z = Y/np.sqrt(1-np.abs(y)**2)[None, :]
+        if i == n_dim-proj_dim-2:
+            XRet = np.array(X)
     if verbose:
-        print("Elapsed time PPCA: %.3g"%(time.time() - tic))
-    return {'variance':variance, 'X':X, 'Z':Z}
+        print("Elapsed time PPCA: %.3g"%(time.time()-tic))
+    #Return the variance and the projective coordinates
+    return {'variance':variance, 'X':XRet.T}
 
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
                 proj_dim = 3, verbose = False):
@@ -244,12 +228,63 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     for i in range(n_data):
         class_map[i, :] *= cocycle_matrix[indx[i], :]
     
-    res = PPCA(class_map, proj_dim, verbose)
-    variance, X, Z = res['variance'], res['X'], res['Z']
+    return PPCA(class_map, proj_dim, verbose)
 
-    plt.plot(variance)
-    plt.show()
+def rotmat(a, b = np.array([])):
+    """
+    Construct a d x d rotation matrix that rotates
+    a vector a so that it coincides with a vector b
+
+    Parameters
+    ----------
+    a : ndarray (d)
+        A d-dimensional vector that should be rotated to b
+    b : ndarray(d)
+        A d-dimensional vector that shoudl end up residing at 
+        the north pole (0,0,...,0,1)
+    """
+    if (len(a.shape) > 1 and np.min(a.shape) > 1)\
+         or (len(b.shape) > 1 and np.min(b.shape) > 1):
+        print("Error: a and b need to be 1D vectors")
+        return None
+    a = a.flatten()
+    a = a/np.sqrt(np.sum(a**2))
+    d = a.size
+
+    if b.size == 0:
+        b = np.zeros(d)
+        b[-1] = 1
+    b = b/np.sqrt(np.sum(b**2))
     
+    c = a - np.sum(b*a)*b
+    # If a numerically coincides with b, don't rotate at all
+    if np.sqrt(np.sum(c**2)) < 1e-15:
+        return np.eye(d)
+
+    # Otherwise, compute rotation matrix
+    c = c/np.sqrt(np.sum(c**2))
+    lam = np.sum(b*a)
+    beta = np.sqrt(1 - np.abs(lam)**2)
+    rot = np.eye(d) - (1-lam)*(c[:, None].dot(c[None, :])) \
+                    - (1-lam)*(b[:, None].dot(b[None, :])) \
+                    + beta*(b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
+    return rot
+
+
+def plotRP2Stereo(pX, f):
+    X = pX.T
+    # Put points all on the same hemisphere
+    _, U = linalg.eigh(X.dot(X.T))
+    XX = rotmat(U[:, 0]).dot(X)
+    ind = XX[-1, :] < 0
+    XX[:, ind] *= -1
+    # Do stereographic projection
+    S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
+    plt.scatter(S[0, :], S[1, :], 20, f, cmap='afmhot')
+    t = np.linspace(0, 2*np.pi, 200)
+    plt.plot(np.cos(t), np.sin(t))
+    plt.axis('equal')
+
 
 def testGreedyPermEuclidean():
     t = np.linspace(0, 2*np.pi, 10000)
@@ -266,8 +301,8 @@ def testGreedyPermEuclidean():
     plt.show()
 
 def testProjCoordsRP2():
-    phi = np.linspace(0, 2*np.pi, 100)
-    theta = np.linspace(0, np.pi, 100)
+    phi = np.linspace(0, np.pi/2, 25)
+    theta = np.linspace(0, 2*np.pi, 100)
     phi, theta = np.meshgrid(phi, theta)
     phi = phi.flatten()
     theta = theta.flatten()
@@ -283,12 +318,18 @@ def testProjCoordsRP2():
     ax.scatter(X[:, 0], X[:, 1], X[:, 2])
     plt.show()
     """
+
     D = X.dot(X.T)
     D = np.abs(D)
     D[D > 1.0] = 1.0
     D = np.arccos(D)
     
-    ProjCoords(D, 100, True, verbose=True)
+    res = ProjCoords(D, 100, True, verbose=True)
+    variance, X = res['variance'], res['X']
+    vcumu = np.cumsum(variance)
+    vcumu = vcumu/vcumu[-1]
+    plotRP2Stereo(X, phi)
+    plt.show()
 
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
