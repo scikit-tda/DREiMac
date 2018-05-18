@@ -189,7 +189,6 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     dgm1 = dgm1/2.0 #Need so that Cech is included in rips
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-        rips.plot()
     idx_mp1 = np.argmax(dgm1[:, 1] - dgm1[:, 0])
     cocycle = rips.cocycles_[1][idx_mp1]
 
@@ -231,6 +230,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["dist_land_land"] = dist_land_land
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
+    res["rips"] = rips
     return res
 
 def rotmat(a, b = np.array([])):
@@ -315,30 +315,46 @@ def testProjCoordsRP2(NSamples, NLandmarks):
 
     SOrig = getStereoRP2(X)
     phi = np.sqrt(np.sum(SOrig**2, 1))
-    
+    theta = np.arccos(np.abs(SOrig[:, 0]))
+
     D = X.dot(X.T)
     D = np.abs(D)
     D[D > 1.0] = 1.0
     D = np.arccos(D)
     
     res = ProjCoords(D, NLandmarks, proj_dim=2, distance_matrix=True, verbose=True)
-    import scipy.io as sio
-    res["rp2_phi"] = phi
-    sio.savemat("JoseMatlabCode/RP2.mat", res)
     variance, X = res['variance'], res['X']
+    varcumu = np.cumsum(variance)
+    varcumu = varcumu/varcumu[-1]
+
+    plt.subplot(231)
+    res["rips"].plot(show=False)
+    plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
+    plt.subplot(234)
+    plt.plot(varcumu)
+    plt.scatter(np.arange(len(varcumu)), varcumu)
+    plt.xlabel("Dimension")
+    plt.ylabel("Cumulative Variance")
+    plt.title("Cumulative Variance")
 
     SFinal = getStereoRP2(X)
     
     vcumu = np.cumsum(variance)
     vcumu = vcumu/vcumu[-1]
-    plt.subplot(121)
+    plt.subplot(232)
     plotRP2Stereo(SOrig, phi)
-    plt.colorbar()
-    plt.title("Ground Truth RP2")
-    plt.subplot(122)
+    plt.title("Ground Truth $\\phi$")
+    plt.subplot(233)
     plotRP2Stereo(SFinal, phi)
-    plt.colorbar()
-    plt.title("My Projective Coordinates")
+    plt.title("Projective Coordinates $\\phi$")
+
+    plt.subplot(235)
+    plotRP2Stereo(SOrig, theta)
+    plt.title("Ground Truth $\\theta$")
+    plt.subplot(236)
+    plotRP2Stereo(SFinal, theta)
+    plt.title("Projective Coordinates $\\theta$")
+
     plt.show()
 
 if __name__ == '__main__':
