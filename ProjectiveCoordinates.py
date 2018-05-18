@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt 
 from ripser import Rips
 import time
+import warnings
 
 def getCSM(X, Y):
     """
@@ -185,6 +186,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     tic = time.time()
     dgms = rips.fit_transform(dist_land_land, distance_matrix=True)
     dgm1 = dgms[1]
+    dgm1 = dgm1/2.0 #Need so that Cech is included in rips
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
         rips.plot()
@@ -194,6 +196,8 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
     coverage = np.max(np.min(dist_land_data, 1))
     r_birth = (1-perc)*max(dgm1[idx_mp1, 0], coverage) + perc*dgm1[idx_mp1, 1]
+    print("r_birth = %.3g"%r_birth)
+    
 
     # Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
@@ -271,6 +275,8 @@ def rotmat(a, b = np.array([])):
 
 
 def getStereoRP2(pX):
+    if not (pX.shape[1] == 3):
+        warnings.warn("Doing stereographic RP2 projection, but points are not 3 dimensional")
     X = pX.T
     # Put points all on the same hemisphere
     _, U = linalg.eigh(X.dot(X.T))
@@ -309,18 +315,15 @@ def testProjCoordsRP2(NSamples, NLandmarks):
 
     SOrig = getStereoRP2(X)
     phi = np.sqrt(np.sum(SOrig**2, 1))
-    theta = np.arctan2(SOrig[:, 1], SOrig[:, 0])
     
     D = X.dot(X.T)
     D = np.abs(D)
     D[D > 1.0] = 1.0
     D = np.arccos(D)
     
-    res = ProjCoords(D, NLandmarks, True, verbose=True)
-    print(res["cocycle"])
+    res = ProjCoords(D, NLandmarks, proj_dim=2, distance_matrix=True, verbose=True)
     import scipy.io as sio
     res["rp2_phi"] = phi
-    res["rp2_theta"] = theta
     sio.savemat("JoseMatlabCode/RP2.mat", res)
     variance, X = res['variance'], res['X']
 
@@ -331,11 +334,13 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     plt.subplot(121)
     plotRP2Stereo(SOrig, phi)
     plt.colorbar()
+    plt.title("Ground Truth RP2")
     plt.subplot(122)
     plotRP2Stereo(SFinal, phi)
     plt.colorbar()
+    plt.title("My Projective Coordinates")
     plt.show()
 
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
-    testProjCoordsRP2(10000, 6)
+    testProjCoordsRP2(10000, 60)

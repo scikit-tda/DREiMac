@@ -127,7 +127,7 @@ if __name__ == '__main__':
     M = 20
     N = 15
     A = getTorusAdj(M, N)
-    print A
+    print(A)
     NEigs = 20
     (w, v, L) = getLaplacianEigs(A, NEigs)
     plt.stem(w)

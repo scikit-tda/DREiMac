@@ -67,7 +67,7 @@ def getCircularCoordinates(X, ccl, p, thresh):
 def doTwoCircleTest():
     from ripser import Rips
     p = 41
-    r = Rips(coeff=p, do_cocycles=True)
+    r = Rips(coeff=p, do_cocycles=True, thresh = 3.0)
     np.random.seed(2)
     N = 500
     X = np.zeros((N*2, 2))
@@ -79,8 +79,22 @@ def doTwoCircleTest():
     X[N::, 1] = 2*np.sin(t) + 4
     X = X[np.random.permutation(X.shape[0]), :]
     X = X + 0.2*np.random.randn(X.shape[0], 2)
-
+    D = getSSM(X)
+    """
+    fout = open("noisycircles.txt", "w")
+    for i in range(D.shape[0]):
+        for j in range(0, i):
+            fout.write("%g"%D[i, j])
+            if j < i-1:
+                fout.write(",")
+            else:
+                fout.write("\n")
+    fout.close()
+    """
+    
+    tic = time.time()
     PDs = r.fit_transform(X)
+    print("Elapsed Time Rips: %g"%(time.time() - tic))
     cocycles = r.cocycles_[1]
     
     plt.figure(figsize=(12, 5))
