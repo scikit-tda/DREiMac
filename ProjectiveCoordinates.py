@@ -143,8 +143,25 @@ def PPCA(class_map, proj_dim, verbose = False):
     #Return the variance and the projective coordinates
     return {'variance':variance, 'X':XRet.T}
 
+def add_cocycles(c1, c2, p = 2):
+    S = {}
+    c = np.concatenate((c1, c2), 0)
+    for k in range(c.shape[0]):
+        [i, j, v] = c[k, :]
+        i, j = min(i, j), max(i, j)
+        if not (i, j) in S:
+            S[(i, j)] = v
+        else:
+            S[(i, j)] += v
+    cret = np.zeros((len(S), 3))
+    cret[:, 0:2] = np.array([s for s in S])
+    cret[:, 2] = np.array([np.mod(S[s], p) for s in S])
+    cret = cret[cret[:, -1] > 0, :]
+    return np.array(cret, dtype = np.int64)
+
+
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                cocycle_idx = 0, proj_dim = 3, verbose = False):
+                cocycle_idx = [0], proj_dim = 3, verbose = False):
     """
     Perform multiscale projective coordinates via persistent cohomology of 
     sparse filtrations (Jose Perea 2018)
@@ -158,8 +175,8 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         If true, then X is a distance matrix, not a Euclidean point cloud
     perc : float
         Percent coverage
-    cocycle_idx : int
-        Choose the cocyle corresponding to the top cocycle_idx persistence
+    cocycle_idx : list
+        Add the cocycles together, sorted by top
     proj_dim : integer
         Dimension down to which to project the data
     verbose : boolean
@@ -192,8 +209,12 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
     idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
-    idx_p1 = idx_p1[cocycle_idx]
-    cocycle = rips.cocycles_[1][idx_p1]
+    cocycle = rips.cocycles_[1][idx_p1[cocycle_idx[0]]]
+    if len(cocycle_idx) > 1:
+        for k in range(1, len(cocycle_idx)):
+            cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
+    cocycle = add_cocycles(rips.cocycles_[1][idx_p1[0]], rips.cocycles_[1][idx_p1[1]])
+    idx_p1 = idx_p1[cocycle_idx[-1]]
 
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
     coverage = np.max(np.min(dist_land_data, 1))
@@ -278,9 +299,7 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def getStereoRP2(pX):
-    if not (pX.shape[1] == 3):
-        warnings.warn("Doing stereographic RP2 projection, but points are not 3 dimensional")
+def getStereoProjCodim1(pX):
     X = pX.T
     # Put points all on the same hemisphere
     _, U = linalg.eigh(X.dot(X.T))
@@ -302,6 +321,8 @@ def plotRP2Stereo(S, f):
     f : ndarray (N) or ndarray (N, 3)
         A function with which to color the points, or a list of colors
     """
+    if not (S.shape[1] == 2):
+        warnings.warn("Plotting stereographic RP2 projection, but points are not 2 dimensional")
     if f.size > S.shape[0]:
         plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap='afmhot')
     else:
@@ -311,6 +332,41 @@ def plotRP2Stereo(S, f):
     plt.axis('equal')
     ax = plt.gca()
     ax.set_axis_bgcolor((0.15, 0.15, 0.15))
+
+def plotRP3Stereo(ax, S, f, draw_sphere = False):
+    """
+    Plot a 3D Stereographic Projection
+
+    Parameters
+    ----------
+    ax : matplotlib axis
+        3D subplotting axis
+    S : ndarray (N, 3)
+        An Nx3 array of N points to plot on RP3
+    f : ndarray (N) or ndarray (N, 3)
+        A function with which to color the points, or a list of colors
+    draw_sphere : boolean
+        Whether to draw the 2-sphere
+    """
+    if not (S.shape[1] == 3):
+        warnings.warn("Plotting stereographic RP3 projection, but points are not 4 dimensional")
+    if f.size > S.shape[0]:
+        ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=f, cmap='afmhot')
+    else:
+        c = plt.get_cmap('afmhot')
+        C = f - np.min(f)
+        C = C/np.max(C)
+        C = c(np.array(np.round(C*255), dtype=np.int32))
+        C = C[:, 0:3]
+        ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=C, cmap='afmhot')
+    if draw_sphere:
+        u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:20j]
+        ax.set_aspect('equal')    
+        x = np.cos(u)*np.sin(v)
+        y = np.sin(u)*np.sin(v)
+        z = np.cos(v)
+        ax.plot_wireframe(x, y, z, color="k")
+
 
 
 def testGreedyPermEuclidean():
@@ -332,7 +388,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     X = np.random.randn(NSamples, 3)
     X = X/np.sqrt(np.sum(X**2, 1))[:, None]
 
-    SOrig = getStereoRP2(X)
+    SOrig = getStereoProjCodim1(X)
     phi = np.sqrt(np.sum(SOrig**2, 1))
     theta = np.arccos(np.abs(SOrig[:, 0]))
 
@@ -356,7 +412,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     plt.ylabel("Cumulative Variance")
     plt.title("Cumulative Variance")
 
-    SFinal = getStereoRP2(X)
+    SFinal = getStereoProjCodim1(X)
     plt.subplot(232)
     plotRP2Stereo(SOrig, phi)
     plt.title("Ground Truth $\\phi$")
@@ -384,50 +440,53 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     NLandmarks : int
         Number of landmarks to take in the projective coordinates computation
     """
-    x = np.linspace(0, 1, res)
-    x, y = np.meshgrid(x, x)
-    x = x.flatten()
-    y = y.flatten()
-    NSamples = x.size
+    theta = np.linspace(0, 2*np.pi, res)
+    theta, phi = np.meshgrid(theta, theta)
+    theta = theta.flatten()
+    phi = phi.flatten()
+    NSamples = theta.size
     R = 2
     r = 1
     X = np.zeros((NSamples, 4))
-    X[:, 0] = (R + r*np.cos(2*np.pi*x))*np.cos(2*np.pi*y)
-    X[:, 1] = (R + r*np.cos(2*np.pi*x))*np.sin(2*np.pi*y)
-    X[:, 2] = r*np.sin(2*np.pi*x)*np.cos(np.pi*y)
-    X[:, 3] = r*np.sin(2*np.pi*x)*np.sin(np.pi*y)
+    X[:, 0] = (R + r*np.cos(theta))*np.cos(phi)
+    X[:, 1] = (R + r*np.cos(theta))*np.sin(phi)
+    X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
+    X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
 
-    res = ProjCoords(X, NLandmarks, cocycle_idx = 0, proj_dim=2, distance_matrix=False, verbose=True)
+    res = ProjCoords(X, NLandmarks, cocycle_idx = [0], \
+                    proj_dim=3, distance_matrix=False, verbose=True)
     variance, X = res['variance'], res['X']
     varcumu = np.cumsum(variance)
     varcumu = varcumu/varcumu[-1]
     dgm1 = res["dgm1"]
     idx = res["idx_p1"]
 
-    plt.subplot(141)
+    fig = plt.figure()
+    plt.subplot(221)
     res["rips"].plot(show=False)
     plt.scatter(dgm1[idx, 0]*2, dgm1[idx, 1]*2, 40, 'r')
 
     plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
-    plt.subplot(142)
+    plt.subplot(222)
     plt.plot(varcumu)
     plt.scatter(np.arange(len(varcumu)), varcumu)
     plt.xlabel("Dimension")
     plt.ylabel("Cumulative Variance")
     plt.title("Cumulative Variance")
 
-    SFinal = getStereoRP2(X)
+    SFinal = getStereoProjCodim1(X)
     
-    plt.subplot(143)
-    plotRP2Stereo(SFinal, x)
-    plt.title("x Coordinate")
-    plt.subplot(144)
-    plotRP2Stereo(SFinal, y)
-    plt.title("y Coordinate")
+    #plotRP2Stereo(SFinal, theta)
+    ax = fig.add_subplot(223, projection='3d')
+    plotRP3Stereo(ax, SFinal, theta)
+    plt.title("$\\theta$")
+    ax = fig.add_subplot(224, projection='3d')
+    plotRP3Stereo(ax, SFinal, phi)
+    plt.title("$\\phi$")
 
     plt.show()
 
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
-    #testProjCoordsRP2(1000, 20)
+    #testProjCoordsRP2(1000, 60)
     testProjCoordsKleinBottle(100, 100)
