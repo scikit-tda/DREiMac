@@ -144,7 +144,7 @@ def PPCA(class_map, proj_dim, verbose = False):
     return {'variance':variance, 'X':XRet.T}
 
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                proj_dim = 3, verbose = False):
+                cocycle_idx = 0, proj_dim = 3, verbose = False):
     """
     Perform multiscale projective coordinates via persistent cohomology of 
     sparse filtrations (Jose Perea 2018)
@@ -158,6 +158,8 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         If true, then X is a distance matrix, not a Euclidean point cloud
     perc : float
         Percent coverage
+    cocycle_idx : int
+        Choose the cocyle corresponding to the top cocycle_idx persistence
     proj_dim : integer
         Dimension down to which to project the data
     verbose : boolean
@@ -189,13 +191,15 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     dgm1 = dgm1/2.0 #Need so that Cech is included in rips
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-    idx_mp1 = np.argmax(dgm1[:, 1] - dgm1[:, 0])
-    cocycle = rips.cocycles_[1][idx_mp1]
+    idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
+    idx_p1 = idx_p1[cocycle_idx]
+    cocycle = rips.cocycles_[1][idx_p1]
 
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
     coverage = np.max(np.min(dist_land_data, 1))
-    r_birth = (1-perc)*max(dgm1[idx_mp1, 0], coverage) + perc*dgm1[idx_mp1, 1]
-    print("r_birth = %.3g"%r_birth)
+    r_birth = (1-perc)*max(dgm1[idx_p1, 0], coverage) + perc*dgm1[idx_p1, 1]
+    if verbose:
+        print("r_birth = %.3g"%r_birth)
     
 
     # Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
@@ -214,7 +218,6 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     # To each data point, associate the index of the first open set it belongs to
     indx = np.argmax(U, 0)
 
-
     # Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
 
     # compute all transition functions
@@ -231,6 +234,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
     res["rips"] = rips
+    res["idx_p1"] = idx_p1
     return res
 
 def rotmat(a, b = np.array([])):
@@ -288,10 +292,25 @@ def getStereoRP2(pX):
     return S.T
 
 def plotRP2Stereo(S, f):
-    plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
+    """
+    Plot a 2D Stereographic Projection
+
+    Parameters
+    ----------
+    S : ndarray (N, 2)
+        An Nx2 array of N points to plot on RP2
+    f : ndarray (N) or ndarray (N, 3)
+        A function with which to color the points, or a list of colors
+    """
+    if f.size > S.shape[0]:
+        plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap='afmhot')
+    else:
+        plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
     t = np.linspace(0, 2*np.pi, 200)
-    plt.plot(np.cos(t), np.sin(t))
+    plt.plot(np.cos(t), np.sin(t), 'c')
     plt.axis('equal')
+    ax = plt.gca()
+    ax.set_axis_bgcolor((0.15, 0.15, 0.15))
 
 
 def testGreedyPermEuclidean():
@@ -338,9 +357,6 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     plt.title("Cumulative Variance")
 
     SFinal = getStereoRP2(X)
-    
-    vcumu = np.cumsum(variance)
-    vcumu = vcumu/vcumu[-1]
     plt.subplot(232)
     plotRP2Stereo(SOrig, phi)
     plt.title("Ground Truth $\\phi$")
@@ -357,6 +373,61 @@ def testProjCoordsRP2(NSamples, NLandmarks):
 
     plt.show()
 
+def testProjCoordsKleinBottle(res, NLandmarks):
+    """
+    Test projective coordinates on the Klein bottle
+
+    Parameters
+    ----------
+    res : int
+        Resolution along each axis.  Total number of points will be res*res
+    NLandmarks : int
+        Number of landmarks to take in the projective coordinates computation
+    """
+    x = np.linspace(0, 1, res)
+    x, y = np.meshgrid(x, x)
+    x = x.flatten()
+    y = y.flatten()
+    NSamples = x.size
+    R = 2
+    r = 1
+    X = np.zeros((NSamples, 4))
+    X[:, 0] = (R + r*np.cos(2*np.pi*x))*np.cos(2*np.pi*y)
+    X[:, 1] = (R + r*np.cos(2*np.pi*x))*np.sin(2*np.pi*y)
+    X[:, 2] = r*np.sin(2*np.pi*x)*np.cos(np.pi*y)
+    X[:, 3] = r*np.sin(2*np.pi*x)*np.sin(np.pi*y)
+
+    res = ProjCoords(X, NLandmarks, cocycle_idx = 0, proj_dim=2, distance_matrix=False, verbose=True)
+    variance, X = res['variance'], res['X']
+    varcumu = np.cumsum(variance)
+    varcumu = varcumu/varcumu[-1]
+    dgm1 = res["dgm1"]
+    idx = res["idx_p1"]
+
+    plt.subplot(141)
+    res["rips"].plot(show=False)
+    plt.scatter(dgm1[idx, 0]*2, dgm1[idx, 1]*2, 40, 'r')
+
+    plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
+    plt.subplot(142)
+    plt.plot(varcumu)
+    plt.scatter(np.arange(len(varcumu)), varcumu)
+    plt.xlabel("Dimension")
+    plt.ylabel("Cumulative Variance")
+    plt.title("Cumulative Variance")
+
+    SFinal = getStereoRP2(X)
+    
+    plt.subplot(143)
+    plotRP2Stereo(SFinal, x)
+    plt.title("x Coordinate")
+    plt.subplot(144)
+    plotRP2Stereo(SFinal, y)
+    plt.title("y Coordinate")
+
+    plt.show()
+
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
-    testProjCoordsRP2(10000, 60)
+    #testProjCoordsRP2(1000, 20)
+    testProjCoordsKleinBottle(100, 100)
