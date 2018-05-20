@@ -148,7 +148,7 @@ def add_cocycles(c1, c2, p = 2):
     c = np.concatenate((c1, c2), 0)
     for k in range(c.shape[0]):
         [i, j, v] = c[k, :]
-        i, j = min(i, j), max(i, j)
+        i, j = max(i, j), min(i, j)
         if not (i, j) in S:
             S[(i, j)] = v
         else:
@@ -156,8 +156,11 @@ def add_cocycles(c1, c2, p = 2):
     cret = np.zeros((len(S), 3))
     cret[:, 0:2] = np.array([s for s in S])
     cret[:, 2] = np.array([np.mod(S[s], p) for s in S])
-    cret = cret[cret[:, -1] > 0, :]
-    return np.array(cret, dtype = np.int64)
+    cret = np.array(cret[cret[:, -1] > 0, :], dtype = np.int64)
+    print("c1 = ", c1)
+    print("c2 = ", c2)
+    print("cret = ", cret)
+    return cret
 
 
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
@@ -213,7 +216,6 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     if len(cocycle_idx) > 1:
         for k in range(1, len(cocycle_idx)):
             cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
-    cocycle = add_cocycles(rips.cocycles_[1][idx_p1[0]], rips.cocycles_[1][idx_p1[1]])
     idx_p1 = idx_p1[cocycle_idx[-1]]
 
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
@@ -250,7 +252,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         class_map[i, :] *= cocycle_matrix[indx[i], :]
     
     res = PPCA(class_map, proj_dim, verbose)
-    res["cocycle"] = cocycle[:, 0:2]+1
+    res["cocycle"] = cocycle[:, 0:2]
     res["dist_land_land"] = dist_land_land
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
@@ -300,6 +302,7 @@ def rotmat(a, b = np.array([])):
 
 
 def getStereoProjCodim1(pX):
+    from sklearn.decomposition import PCA
     X = pX.T
     # Put points all on the same hemisphere
     _, U = linalg.eigh(X.dot(X.T))
@@ -453,7 +456,7 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
     X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
 
-    res = ProjCoords(X, NLandmarks, cocycle_idx = [0], \
+    res = ProjCoords(X, NLandmarks, cocycle_idx = [0, 1], \
                     proj_dim=3, distance_matrix=False, verbose=True)
     variance, X = res['variance'], res['X']
     varcumu = np.cumsum(variance)
@@ -464,7 +467,7 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     fig = plt.figure()
     plt.subplot(221)
     res["rips"].plot(show=False)
-    plt.scatter(dgm1[idx, 0]*2, dgm1[idx, 1]*2, 40, 'r')
+    #plt.scatter(dgm1[idx, 0]*2, dgm1[idx, 1]*2, 40, 'r')
 
     plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
     plt.subplot(222)
