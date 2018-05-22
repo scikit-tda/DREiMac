@@ -340,6 +340,9 @@ def plotRP2Stereo(S, f):
     plt.plot(np.cos(t), np.sin(t), 'c')
     plt.axis('equal')
     ax = plt.gca()
+    
+    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
+    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
     ax.set_axis_bgcolor((0.15, 0.15, 0.15))
 
 def plotRP3Stereo(ax, S, f, draw_sphere = False):
@@ -497,5 +500,5 @@ def testProjCoordsKleinBottle(res, NLandmarks):
 
 if __name__ == '__main__':
     #testGreedyPermEuclidean()
-    #testProjCoordsRP2(1000, 60)
-    testProjCoordsKleinBottle(100, 100)
+    testProjCoordsRP2(1000, 60)
+    #testProjCoordsKleinBottle(100, 100)
