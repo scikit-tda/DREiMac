@@ -301,12 +301,18 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def getStereoProjCodim1(pX):
+def getStereoProjCodim1(pX, randomSeed = -1):
     from sklearn.decomposition import PCA
     X = pX.T
     # Put points all on the same hemisphere
-    _, U = linalg.eigh(X.dot(X.T))
-    XX = rotmat(U[:, 0]).dot(X)
+    if randomSeed >= 0:
+        np.random.seed(randomSeed)
+        u = np.random.randn(3)
+        u = u/np.sqrt(np.sum(u**2))
+    else:
+        _, U = linalg.eigh(X.dot(X.T))
+        u = U[:, 0]
+    XX = rotmat(u).dot(X)
     ind = XX[-1, :] < 0
     XX[:, ind] *= -1
     # Do stereographic projection
