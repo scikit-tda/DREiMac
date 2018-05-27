@@ -5,103 +5,8 @@ import matplotlib.pyplot as plt
 from ripser import Rips
 import time
 import warnings
-
-def getCSM(X, Y):
-    """
-    Return the Euclidean cross-similarity matrix between the M points
-    in the Mxd matrix X and the N points in the Nxd matrix Y.
-    
-    Parameters
-    ----------
-    X : ndarray (M, d)
-        A matrix holding the coordinates of M points
-    Y : ndarray (N, d) 
-        A matrix holding the coordinates of N points
-    Return
-    ------
-    D : ndarray (M, N)
-        An MxN Euclidean cross-similarity matrix
-    """
-    C = np.sum(X**2, 1)[:, None] + np.sum(Y**2, 1)[None, :] - 2*X.dot(Y.T)
-    C[C < 0] = 0
-    return np.sqrt(C)
-
-def getGreedyPermEuclidean(X, M, verbose = False):
-    """
-    A Naive O(NM) algorithm to do furthest points sampling, assuming
-    the input is a Euclidean point cloud.  This saves computation
-    over having compute the full distance matrix if the number of
-    landmarks M << N
-    
-    Parameters
-    ----------
-    X : ndarray (N, d) 
-        An Nxd Euclidean point cloud
-    M : integer
-        Number of landmarks to compute
-    verbose: boolean
-        Whether to print progress
-
-    Return
-    ------
-    result: Dictionary
-        {'Y': An Mxd array of landmarks, 
-         'perm': An array of indices into X of the greedy permutation
-         'lambdas': Insertion radii of the landmarks
-         'D': An MxN array of distances from landmarks to points in X}
-    """
-    # By default, takes the first point in the permutation to be the
-    # first point in the point cloud, but could be random
-    N = X.shape[0]
-    perm = np.zeros(M, dtype=np.int64)
-    lambdas = np.zeros(M)
-    ds = getCSM(X[0, :][None, :], X).flatten()
-    D = np.zeros((M, N))
-    D[0, :] = ds
-    for i in range(1, M):
-        idx = np.argmax(ds)
-        perm[i] = idx
-        lambdas[i] = ds[idx]
-        thisds = getCSM(X[idx, :][None, :], X).flatten()
-        D[i, :] = thisds
-        ds = np.minimum(ds, thisds)
-    Y = X[perm, :]
-    return {'Y':Y, 'perm':perm, 'lambdas':lambdas, 'D':D}
-
-def getGreedyPermDM(D, M, verbose = False):
-    """
-    A Naive O(NM) algorithm to do furthest points sampling, assuming
-    the input is a N x N distance matrix
-    
-    Parameters
-    ----------
-    D : ndarray (N, N) 
-        An N x N distance matrix
-    M : integer
-        Number of landmarks to compute
-    verbose: boolean
-        Whether to print progress
-
-    Return
-    ------
-    result: Dictionary
-        {'perm': An array of indices into X of the greedy permutation
-         'lambdas': Insertion radii of the landmarks
-         'DLandmarks': An MxN array of distances from landmarks to points in the point cloud}
-    """
-    # By default, takes the first point in the permutation to be the
-    # first point in the point cloud, but could be random
-    N = D.shape[0]
-    perm = np.zeros(M, dtype=np.int64)
-    lambdas = np.zeros(M)
-    ds = D[0, :]
-    for i in range(1, M):
-        idx = np.argmax(ds)
-        perm[i] = idx
-        lambdas[i] = ds[idx]
-        ds = np.minimum(ds, D[idx, :])
-    DLandmarks = D[perm, :] 
-    return {'perm':perm, 'lambdas':lambdas, 'DLandmarks':DLandmarks}
+from CSMSSMTools import getSSM, getGreedyPermDM, getGreedyPermEuclidean
+from TDAUtils import add_cocycles
 
 def PPCA(class_map, proj_dim, verbose = False):
     """
@@ -143,25 +48,6 @@ def PPCA(class_map, proj_dim, verbose = False):
     #Return the variance and the projective coordinates
     return {'variance':variance, 'X':XRet.T}
 
-def add_cocycles(c1, c2, p = 2):
-    S = {}
-    c = np.concatenate((c1, c2), 0)
-    for k in range(c.shape[0]):
-        [i, j, v] = c[k, :]
-        i, j = max(i, j), min(i, j)
-        if not (i, j) in S:
-            S[(i, j)] = v
-        else:
-            S[(i, j)] += v
-    cret = np.zeros((len(S), 3))
-    cret[:, 0:2] = np.array([s for s in S])
-    cret[:, 2] = np.array([np.mod(S[s], p) for s in S])
-    cret = np.array(cret[cret[:, -1] > 0, :], dtype = np.int64)
-    print("c1 = ", c1)
-    print("c2 = ", c2)
-    print("cret = ", cret)
-    return cret
-
 
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
                 cocycle_idx = [0], proj_dim = 3, verbose = False):
@@ -179,7 +65,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     perc : float
         Percent coverage
     cocycle_idx : list
-        Add the cocycles together, sorted by top
+        Add the cocycles together, sorted from most to least persistent
     proj_dim : integer
         Dimension down to which to project the data
     verbose : boolean
@@ -198,7 +84,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     else:    
         res = getGreedyPermEuclidean(P, n_landmarks, verbose)
         Y, dist_land_data = res['Y'], res['D']
-        dist_land_land = getCSM(Y, Y)
+        dist_land_land = getSSM(Y)
     if verbose:
         print("Elapsed time greedy permutation: %.3g seconds"%(time.time() - tic))
 
@@ -213,14 +99,17 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
     idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
     cocycle = rips.cocycles_[1][idx_p1[cocycle_idx[0]]]
-    if len(cocycle_idx) > 1:
-        for k in range(1, len(cocycle_idx)):
-            cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
-    idx_p1 = idx_p1[cocycle_idx[-1]]
+    cohomdeath = -np.inf
+    cohombirth = np.inf
+    cocycle = np.zeros((0, 3))
+    for k in range(len(cocycle_idx)):
+        cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
+        cohomdeath = max(cohomdeath, dgm1[idx_p1[cocycle_idx[k]], 0])
+        cohombirth = min(cohombirth, dgm1[idx_p1[cocycle_idx[k]], 1])
 
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
     coverage = np.max(np.min(dist_land_data, 1))
-    r_birth = (1-perc)*max(dgm1[idx_p1, 0], coverage) + perc*dgm1[idx_p1, 1]
+    r_birth = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
     if verbose:
         print("r_birth = %.3g"%r_birth)
     
@@ -257,7 +146,6 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
     res["rips"] = rips
-    res["idx_p1"] = idx_p1
     return res
 
 def rotmat(a, b = np.array([])):
@@ -379,22 +267,6 @@ def plotRP3Stereo(ax, S, f, draw_sphere = False):
         z = np.cos(v)
         ax.plot_wireframe(x, y, z, color="k")
 
-
-
-def testGreedyPermEuclidean():
-    t = np.linspace(0, 2*np.pi, 10000)
-    X = np.zeros((len(t), 2))
-    X[:, 0] = np.cos(t)
-    X[:, 1] = np.sin(t)
-    res = getGreedyPermEuclidean(X, 50, True)
-    Y, D = res['Y'], res['D']
-    plt.subplot(121)
-    plt.scatter(X[:, 0], X[:, 1], 10)
-    plt.scatter(Y[:, 0], Y[:, 1], 40)
-    plt.subplot(122)
-    plt.imshow(D, aspect = 'auto')
-    plt.show()
-
 def testProjCoordsRP2(NSamples, NLandmarks):
     np.random.seed(NSamples)
     X = np.random.randn(NSamples, 3)
@@ -471,12 +343,10 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     varcumu = np.cumsum(variance)
     varcumu = varcumu/varcumu[-1]
     dgm1 = res["dgm1"]
-    idx = res["idx_p1"]
 
     fig = plt.figure()
     plt.subplot(221)
     res["rips"].plot(show=False)
-    #plt.scatter(dgm1[idx, 0]*2, dgm1[idx, 1]*2, 40, 'r')
 
     plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
     plt.subplot(222)
@@ -499,6 +369,5 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     plt.show()
 
 if __name__ == '__main__':
-    #testGreedyPermEuclidean()
-    testProjCoordsRP2(1000, 60)
+    testProjCoordsRP2(10000, 60)
     #testProjCoordsKleinBottle(100, 100)
