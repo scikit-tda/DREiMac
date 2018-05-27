@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 
 def add_cocycles(c1, c2, p = 2):
     S = {}
@@ -15,3 +16,32 @@ def add_cocycles(c1, c2, p = 2):
     cret[:, 2] = np.array([np.mod(S[s], p) for s in S])
     cret = np.array(cret[cret[:, -1] > 0, :], dtype = np.int64)
     return cret
+
+def makeDelta0(R):
+    """
+    Return the delta0 coboundary matrix
+    :param R: NEdges x 2 matrix specifying edges, where orientation
+    is taken from the first column to the second column
+    R specifies the "natural orientation" of the edges, with the
+    understanding that the ranking will be specified later
+    It is assumed that there is at least one edge incident
+    on every vertex
+    """
+    NVertices = np.max(R) + 1
+    NEdges = R.shape[0]
+    
+    #Two entries per edge
+    I = np.zeros((NEdges, 2))
+    I[:, 0] = np.arange(NEdges)
+    I[:, 1] = np.arange(NEdges)
+    I = I.flatten()
+    
+    J = R[:, 0:2].flatten()
+    
+    V = np.zeros((NEdges, 2))
+    V[:, 0] = -1
+    V[:, 1] = 1
+    V = V.flatten()
+    
+    Delta = sparse.coo_matrix((V, (I, J)), shape=(NEdges, NVertices)).tocsr()
+    return Delta

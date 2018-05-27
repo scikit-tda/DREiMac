@@ -1,17 +1,19 @@
 import subprocess
 import os
 import numpy as np
+import scipy
+from scipy.sparse.linalg import lsqr
 import time
 import matplotlib.pyplot as plt
-from Hodge import *
 from CSMSSMTools import getSSM, getGreedyPermDM, getGreedyPermEuclidean
-from TDAUtils import add_cocycles
+from TDAUtils import add_cocycles, makeDelta0
+from ripser import Rips
 
 
 def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                prime = 41, cocycle_idx = [0], verbose = False):
+                prime = 41, do_weighted = False, cocycle_idx = [0], verbose = False):
     """
-    Perform multiscale projective coordinates via persistent cohomology of 
+    Perform circular coordinates via persistent cohomology of 
     sparse filtrations (Jose Perea 2018)
     Parameters
     ----------
@@ -23,15 +25,17 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         If true, then X is a distance matrix, not a Euclidean point cloud
     perc : float
         Percent coverage
-    cocycle_idx : list
-        Add the cocycles together, sorted from most to least persistent
     prime : int
         Field coefficient with which to compute rips on landmarks
+    do_weighted : boolean
+        Whether to make a weighted cocycle on the representatives
+    cocycle_idx : list
+        Add the cocycles together, sorted from most to least persistent
     verbose : boolean
         Whether to print detailed information during the computation
     """
     n_data = P.shape[0]
-    rips = Rips(coeff=2, maxdim=1, do_cocycles=True)
+    rips = Rips(coeff=prime, maxdim=1, do_cocycles=True)
     
     # Step 1: Compute greedy permutation
     tic = time.time()
@@ -62,57 +66,98 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     cohombirth = np.inf
     cocycle = np.zeros((0, 3))
     for k in range(len(cocycle_idx)):
-        cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
+        cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]], p=prime)
         cohomdeath = max(cohomdeath, dgm1[idx_p1[cocycle_idx[k]], 0])
         cohombirth = min(cohombirth, dgm1[idx_p1[cocycle_idx[k]], 1])
 
-    # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
+    # Step 3: Determine radius for balls
     coverage = np.max(np.min(dist_land_data, 1))
-    r_birth = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+    r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
     if verbose:
-        print("r_birth = %.3g"%r_birth)
+        print("r_cover = %.3g"%r_cover)
     
 
-    # Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
+    # Step 4: Setup coboundary matrix, delta_0, for Cech_{r_cover }
+    # and use it to find the harmonic cocycle
+    #Lift to integer cocycle
+    val = np.array(cocycle[:, 2])
+    val[val > (prime-1)/2] -= prime
+    Y = np.zeros((n_landmarks, n_landmarks))
+    Y[cocycle[:, 0], cocycle[:, 1]] = val
+    Y = Y + Y.T
+    #Select edges that are under the threshold
+    [I, J] = np.meshgrid(np.arange(n_landmarks), np.arange(n_landmarks))
+    I = I[np.triu_indices(n_landmarks, 1)]
+    J = J[np.triu_indices(n_landmarks, 1)]
+    Y = Y[np.triu_indices(n_landmarks, 1)]
+    idx = np.arange(len(I))
+    idx = idx[dist_land_land[I, J] < 2*r_cover]
+    I = I[idx]
+    J = J[idx]
+    Y = Y[idx]
+
+    NEdges = len(I)
+    R = np.zeros((NEdges, 2))
+    R[:, 0] = J
+    R[:, 1] = I
+    #Make a flat array of NEdges weights parallel to the rows of R
+    if do_weighted:
+        W = dist_land_land[I, J]
+    else:
+        W = np.ones(NEdges)
+    delta_0 = makeDelta0(R)
+    wSqrt = np.sqrt(W).flatten()
+    WSqrt = scipy.sparse.spdiags(wSqrt, 0, len(W), len(W))
+    A = WSqrt*delta_0
+    b = WSqrt.dot(Y)
+    tau = lsqr(A, b)[0]
+    theta = np.zeros((NEdges, 3))
+    theta[:, 0] = J
+    theta[:, 1] = I
+    theta[:, 2] = -delta_0.dot(tau)
+    theta = add_cocycles(cocycle, theta)
+
+    # Step 5: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
     # Let U_j be the set of data points whose distance to l_j is less than
-    # r_birth
-    U = dist_land_data < r_birth
+    # r_cover
+    U = dist_land_data < r_cover
     # Compute subordinated partition of unity varphi_1,...,varphi_{s+1}
     # Compute the bump phi_j(b) on each data point b in U_j. phi_j = 0 outside U_j.
     phi = np.zeros_like(dist_land_data)
-    phi[U] = r_birth - dist_land_data[U]
+    phi[U] = r_cover - dist_land_data[U]
 
     # Compute the partition of unity varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{s+1}(b))
     varphi = phi / np.sum(phi, 0)[None, :]
 
     # To each data point, associate the index of the first open set it belongs to
-    indx = np.argmax(U, 0)
+    ball_indx = np.argmax(U, 0)
 
-    # Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
+    # Step 6: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
 
     # compute all transition functions
-    cocycle_matrix = np.ones((n_landmarks, n_landmarks))
-    cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
-    cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
-    class_map = np.sqrt(varphi.T)
+    theta_matrix = np.zeros((n_landmarks, n_landmarks))
+    theta_matrix[theta[:, 0], theta[:, 1]] = theta[:, 2]
+    theta_matrix[theta[:, 1], theta[:, 0]] = -theta[:, 2]
+    class_map = -tau[ball_indx]
     for i in range(n_data):
-        class_map[i, :] *= cocycle_matrix[indx[i], :]
-    
-    res = PPCA(class_map, proj_dim, verbose)
-    res["cocycle"] = cocycle[:, 0:2]
+        class_map[i] += theta_matrix[ball_indx[i], :].dot(varphi[:, i])    
+    thetas = np.mod(2*np.pi*class_map, 2*np.pi)
+
+    res["cocycle"] = cocycle
     res["dist_land_land"] = dist_land_land
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
+    res["idx_p1"] = idx_p1
     res["rips"] = rips
+    res["thetas"] = thetas
     return res
 
 
 
 def doTwoCircleTest():
     from ripser import Rips
-    p = 41
-    r = Rips(coeff=p, do_cocycles=True, thresh = 3.0)
+    prime = 41
     np.random.seed(2)
     N = 500
     X = np.zeros((N*2, 2))
@@ -124,39 +169,18 @@ def doTwoCircleTest():
     X[N::, 1] = 2*np.sin(t) + 4
     X = X[np.random.permutation(X.shape[0]), :]
     X = X + 0.2*np.random.randn(X.shape[0], 2)
-    D = getSSM(X)
-    """
-    fout = open("noisycircles.txt", "w")
-    for i in range(D.shape[0]):
-        for j in range(0, i):
-            fout.write("%g"%D[i, j])
-            if j < i-1:
-                fout.write(",")
-            else:
-                fout.write("\n")
-    fout.close()
-    """
-    
-    tic = time.time()
-    PDs = r.fit_transform(X)
-    print("Elapsed Time Rips: %g"%(time.time() - tic))
-    cocycles = r.cocycles_[1]
     
     plt.figure(figsize=(12, 5))
-    for i in range(PDs[1].shape[0]):
-        pers = PDs[1][i, 1]-PDs[1][i, 0]
-        if pers < 0.5:
-            continue
-        ccl = cocycles[i]
-        thresh = PDs[1][i, 1] - 0.01
-        (s, cclret) = getCircularCoordinates(X, ccl, p, thresh)
-        
+    for i in range(2):
+        res = CircularCoords(X, 100, prime = prime, cocycle_idx = [i])
+        I = res["dgm1"][res["idx_p1"][0], :]
         plt.clf()
         plt.subplot(121)
-        r.plot(diagrams=PDs, show=False)
-        plt.scatter([PDs[1][i, 0]], [PDs[1][i, 1]], 80, 'k')
+        res["rips"].plot(show=False)
+        plt.scatter(I[0], I[1], 20, 'r')
         plt.subplot(122)
-        plt.scatter(X[:, 0], X[:, 1], 100, s, cmap = 'afmhot', edgecolor = 'none')
+        plt.scatter(X[:, 0], X[:, 1], 100, res['thetas'], cmap = 'afmhot', edgecolor = 'none')
+        plt.axis('equal')
         plt.colorbar()
         plt.savefig("Cocycle%i.svg"%i, bbox_inches = 'tight')
 

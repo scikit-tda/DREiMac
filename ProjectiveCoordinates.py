@@ -109,26 +109,26 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
 
     # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
     coverage = np.max(np.min(dist_land_data, 1))
-    r_birth = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+    r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
     if verbose:
-        print("r_birth = %.3g"%r_birth)
+        print("r_cover = %.3g"%r_cover)
     
 
     # Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
     # Let U_j be the set of data points whose distance to l_j is less than
-    # r_birth
-    U = dist_land_data < r_birth
+    # r_cover
+    U = dist_land_data < r_cover
     # Compute subordinated partition of unity varphi_1,...,varphi_{s+1}
     # Compute the bump phi_j(b) on each data point b in U_j. phi_j = 0 outside U_j.
     phi = np.zeros_like(dist_land_data)
-    phi[U] = r_birth - dist_land_data[U]
+    phi[U] = r_cover - dist_land_data[U]
 
     # Compute the partition of unity varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{s+1}(b))
     varphi = phi / np.sum(phi, 0)[None, :]
 
     # To each data point, associate the index of the first open set it belongs to
-    indx = np.argmax(U, 0)
+    ball_indx = np.argmax(U, 0)
 
     # Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
 
@@ -138,7 +138,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
     class_map = np.sqrt(varphi.T)
     for i in range(n_data):
-        class_map[i, :] *= cocycle_matrix[indx[i], :]
+        class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
     
     res = PPCA(class_map, proj_dim, verbose)
     res["cocycle"] = cocycle[:, 0:2]
