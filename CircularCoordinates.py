@@ -50,7 +50,7 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         dist_land_land = getSSM(Y)
     if verbose:
         print("Elapsed time greedy permutation: %.3g seconds"%(time.time() - tic))
-
+    np.fill_diagonal(dist_land_land, 0)
 
 
     # Step 2: Compute H1 with cocycles on the landmarks
@@ -61,7 +61,6 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     if verbose:
         print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
     idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
-    cocycle = rips.cocycles_[1][idx_p1[cocycle_idx[0]]]
     cohomdeath = -np.inf
     cohombirth = np.inf
     cocycle = np.zeros((0, 3))
@@ -115,7 +114,8 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     theta[:, 0] = J
     theta[:, 1] = I
     theta[:, 2] = -delta_0.dot(tau)
-    theta = add_cocycles(cocycle, theta)
+    theta = add_cocycles(cocycle, theta, real=True)
+    
 
     # Step 5: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
@@ -137,8 +137,12 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
 
     # compute all transition functions
     theta_matrix = np.zeros((n_landmarks, n_landmarks))
-    theta_matrix[theta[:, 0], theta[:, 1]] = theta[:, 2]
-    theta_matrix[theta[:, 1], theta[:, 0]] = -theta[:, 2]
+    I = np.array(theta[:, 0], dtype = np.int64)
+    J = np.array(theta[:, 1], dtype = np.int64)
+    theta = theta[:, 2]
+    theta = np.mod(theta + 0.5, 1) - 0.5
+    theta_matrix[I, J] = theta
+    theta_matrix[J, I] = -theta
     class_map = -tau[ball_indx]
     for i in range(n_data):
         class_map[i] += theta_matrix[ball_indx[i], :].dot(varphi[:, i])    
@@ -151,6 +155,9 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["idx_p1"] = idx_p1
     res["rips"] = rips
     res["thetas"] = thetas
+    res["r_cover"] = r_cover
+    res["prime"] = prime
+    res["tau"] = tau
     return res
 
 
@@ -173,7 +180,9 @@ def doTwoCircleTest():
     plt.figure(figsize=(12, 5))
     for i in range(2):
         res = CircularCoords(X, 100, prime = prime, cocycle_idx = [i])
-        I = res["dgm1"][res["idx_p1"][0], :]
+        res["X"] = X
+        import scipy.io as sio
+        I = 2*res["dgm1"][res["idx_p1"][i], :]
         plt.clf()
         plt.subplot(121)
         res["rips"].plot(show=False)
@@ -183,6 +192,8 @@ def doTwoCircleTest():
         plt.axis('equal')
         plt.colorbar()
         plt.savefig("Cocycle%i.svg"%i, bbox_inches = 'tight')
+        res.pop("rips")
+        sio.savemat("JoseMatlabCode/Circ.mat", res)
 
 if __name__ == '__main__':
     doTwoCircleTest()
