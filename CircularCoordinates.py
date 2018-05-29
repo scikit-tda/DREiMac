@@ -11,7 +11,7 @@ from ripser import Rips
 
 
 def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                prime = 41, do_weighted = False, cocycle_idx = [0], verbose = False):
+                prime = 41, maxdim = 1, do_weighted = False, cocycle_idx = [0], verbose = False):
     """
     Perform circular coordinates via persistent cohomology of 
     sparse filtrations (Jose Perea 2018)
@@ -27,6 +27,9 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         Percent coverage
     prime : int
         Field coefficient with which to compute rips on landmarks
+    maxdim : int
+        Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+        but it may be of interest to see other dimensions (e.g. for a torus)
     do_weighted : boolean
         Whether to make a weighted cocycle on the representatives
     cocycle_idx : list
@@ -35,7 +38,7 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         Whether to print detailed information during the computation
     """
     n_data = P.shape[0]
-    rips = Rips(coeff=prime, maxdim=1, do_cocycles=True)
+    rips = Rips(coeff=prime, maxdim=maxdim, do_cocycles=True)
     
     # Step 1: Compute greedy permutation
     tic = time.time()
