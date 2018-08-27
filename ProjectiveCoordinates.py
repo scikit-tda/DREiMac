@@ -145,6 +145,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["dist_land_land"] = dist_land_land
     res["dist_land_data"] = dist_land_data
     res["dgm1"] = dgm1
+    res["idx_p1"] = idx_p1
     res["rips"] = rips
     return res
 
