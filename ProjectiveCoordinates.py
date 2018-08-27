@@ -208,7 +208,7 @@ def getStereoProjCodim1(pX, randomSeed = -1):
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
     return S.T
 
-def plotRP2Stereo(S, f):
+def plotRP2Stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     Plot a 2D Stereographic Projection
 
@@ -226,13 +226,13 @@ def plotRP2Stereo(S, f):
     else:
         plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
     t = np.linspace(0, 2*np.pi, 200)
-    plt.plot(np.cos(t), np.sin(t), 'c')
+    plt.plot(np.cos(t), np.sin(t), c=arrowcolor)
     plt.axis('equal')
     ax = plt.gca()
     
-    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
-    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
-    ax.set_facecolor((0.15, 0.15, 0.15))
+    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+    ax.set_facecolor(facecolor)
 
 def plotRP3Stereo(ax, S, f, draw_sphere = False):
     """
