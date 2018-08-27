@@ -232,7 +232,7 @@ def plotRP2Stereo(S, f):
     
     ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
     ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
-    ax.set_axis_bgcolor((0.15, 0.15, 0.15))
+    ax.set_facecolor((0.15, 0.15, 0.15))
 
 def plotRP3Stereo(ax, S, f, draw_sphere = False):
     """
