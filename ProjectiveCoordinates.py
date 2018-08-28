@@ -50,7 +50,7 @@ def PPCA(class_map, proj_dim, verbose = False):
 
 
 def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                cocycle_idx = [0], proj_dim = 3, verbose = False):
+                maxdim = 1, cocycle_idx = [0], proj_dim = 3, verbose = False):
     """
     Perform multiscale projective coordinates via persistent cohomology of 
     sparse filtrations (Jose Perea 2018)
@@ -64,6 +64,10 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         If true, then X is a distance matrix, not a Euclidean point cloud
     perc : float
         Percent coverage
+    maxdim : int
+        Maximum dimension of homology.  Only dimension 1 (mod 2) is needed for 
+        projective coordinates, but it may be of interest to see other 
+        dimensions on the subsampled point set (e.g. for a Klein bottle)
     cocycle_idx : list
         Add the cocycles together, sorted from most to least persistent
     proj_dim : integer
@@ -72,7 +76,7 @@ def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         Whether to print detailed information during the computation
     """
     n_data = P.shape[0]
-    rips = Rips(coeff=2, maxdim=1, do_cocycles=True)
+    rips = Rips(coeff=2, maxdim=maxdim, do_cocycles=True)
     
     # Step 1: Compute greedy permutation
     tic = time.time()
