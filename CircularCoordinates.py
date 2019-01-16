@@ -37,6 +37,7 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     verbose : boolean
         Whether to print detailed information during the computation
     """
+    assert(maxdim >= 1)
     n_data = P.shape[0]
     rips = Rips(coeff=prime, maxdim=maxdim, do_cocycles=True)
     
@@ -49,7 +50,7 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
         dist_land_land = dist_land_land[:, perm]
     else:    
         res = getGreedyPermEuclidean(P, n_landmarks, verbose)
-        Y, dist_land_data = res['Y'], res['D']
+        perm, Y, dist_land_data = res['perm'], res['Y'], res['D']
         dist_land_land = getSSM(Y)
     if verbose:
         print("Elapsed time greedy permutation: %.3g seconds"%(time.time() - tic))
@@ -161,6 +162,7 @@ def CircularCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
     res["r_cover"] = r_cover
     res["prime"] = prime
     res["tau"] = tau
+    res["perm"] = perm
     return res
 
 
@@ -184,6 +186,7 @@ def doTwoCircleTest():
     for i in range(2):
         res = CircularCoords(X, 100, prime = prime, cocycle_idx = [i])
         res["X"] = X
+        print(res["perm"])
         import scipy.io as sio
         I = 2*res["dgm1"][res["idx_p1"][i], :]
         plt.clf()

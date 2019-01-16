@@ -30,7 +30,7 @@ def makeDelta0(R):
     It is assumed that there is at least one edge incident
     on every vertex
     """
-    NVertices = np.max(R) + 1
+    NVertices = int(np.max(R) + 1)
     NEdges = R.shape[0]
     
     #Two entries per edge
@@ -45,6 +45,7 @@ def makeDelta0(R):
     V[:, 0] = -1
     V[:, 1] = 1
     V = V.flatten()
-    
+    I = np.array(I, dtype=int)
+    J = np.array(J, dtype=int)
     Delta = sparse.coo_matrix((V, (I, J)), shape=(NEdges, NVertices)).tocsr()
     return Delta
