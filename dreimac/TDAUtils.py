@@ -20,7 +20,7 @@ def add_cocycles(c1, c2, p = 2, real = False):
     cret = np.array(cret[cret[:, -1] > 0, :], dtype = dtype)
     return cret
 
-def makeDelta0(R):
+def make_delta0(R):
     """
     Return the delta0 coboundary matrix
     :param R: NEdges x 2 matrix specifying edges, where orientation
