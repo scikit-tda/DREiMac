@@ -14,65 +14,53 @@ import warnings
         Partition of Unity Functions
 #########################################"""
 
-def partunity_linear(dist_land_data, r_cover):
+def partunity_linear(ds, r_cover):
     """
     Parameters
     ----------
-    dist_land_data: ndarray(n_landmarks, n_points)
-        Distance from each landmark to each data point
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
     r_cover: float
         Covering radius
     Returns
     -------
-    phi: ndarray(n_landmarks, n_points)
+    varphi: ndarray(n)
         The bump function
-    U: ndarray(n_landmarks, n_points)
-        Membership indicator function of each point
     """
-    U = dist_land_data < r_cover
-    phi = np.zeros_like(dist_land_data)
-    phi[U] = r_cover - dist_land_data[U]
-    return phi, U
+    return r_cover - ds
 
-def partunity_quadratic(dist_land_data, r_cover):
+def partunity_quadratic(ds, r_cover):
     """
     Parameters
     ----------
-    dist_land_data: ndarray(n_landmarks, n_points)
-        Distance from each landmark to each data point
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
     r_cover: float
         Covering radius
     Returns
     -------
-    phi: ndarray(n_landmarks, n_points)
+    varphi: ndarray(n)
         The bump function
-    U: ndarray(n_landmarks, n_points)
-        Membership indicator function of each point
     """
-    U = dist_land_data < r_cover
-    phi = np.zeros_like(dist_land_data)
-    phi[U] = (r_cover - dist_land_data[U])**2
-    return phi, U
+    return (r_cover - ds)**2
 
-def partunity_exp(dist_land_data, r_cover):
+def partunity_exp(ds, r_cover):
     """
     Parameters
     ----------
-    dist_land_data: ndarray(n_landmarks, n_points)
-        Distance from each landmark to each data point
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
     r_cover: float
         Covering radius
     Returns
     -------
-    phi: ndarray(n_landmarks, n_points)
+    varphi: ndarray(n)
         The bump function
-    U: ndarray(n_landmarks, n_points)
-        Membership indicator function of each point
     """
-    U = dist_land_data < r_cover
-    phi = np.zeros_like(dist_land_data)
-    phi[U] = np.exp(r_cover**2/(dist_land_data[U]**2-r_cover**2))
-    return phi, U
+    return np.exp(r_cover**2/(ds**2-r_cover**2))
 
 
 """#########################################
@@ -196,7 +184,9 @@ class CircularCoords(object):
         
 
         ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-        phi, U = partunity_fn(dist_land_data, r_cover)
+        U = dist_land_data < r_cover
+        phi = np.zeros_like(dist_land_data)
+        phi[U] = partunity_fn(phi[U], r_cover)
         # Compute the partition of unity 
         # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
         denom = np.sum(phi, 0)
