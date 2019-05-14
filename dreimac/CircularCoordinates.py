@@ -216,9 +216,77 @@ class CircularCoords(object):
 
         return thetas
 
+    def onpick(self, evt):
+        if evt.artist == self.dgmplot:
+            ## Step 1: Highlight point on persistence diagram
+            clicked = set(evt.ind.tolist())
+            self.selected = self.selected.symmetric_difference(clicked)
+            idxs = np.array(list(self.selected))
+            if idxs.size > 0:
+                self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
+                ## Step 2: Update circular coordinates on point cloud
+                thetas = self.get_coordinates(cocycle_idx=idxs.tolist())
+                c = plt.get_cmap('magma_r')
+                thetas -= np.min(thetas)
+                thetas /= np.max(thetas)
+                thetas = np.array(np.round(thetas*255), dtype=int)
+                C = c(thetas)
+                self.coords_scatter.set_color(C)
+            else:
+                self.selected_plot.set_offsets(np.zeros((0, 2)))
+                self.coords_scatter.set_color('C0')
+        self.ax_persistence.figure.canvas.draw()
+        self.ax_coords.figure.canvas.draw()
+        return True
 
+    def plot_interactive(self, Y):
+        """
+        Do an interactive plot, with H1 on the left and a 
+        2D dimension reduced version of the point cloud on the right.
+        The right plot will be colored by the circular coordinates
+        of the plot on the left.  Left click on points in the persistence
+        diagram to toggle there inclusion in the circular coordinates
+        Parameters
+        ----------
+        Y: ndarray(N, 2)
+            A 2D point cloud with the same number of points as X
+        """
+        self.Y = Y
+        fig = plt.figure(figsize=(12, 6))
+        ## Step 1: Plot H1
+        dgm_size = 20
+        self.ax_persistence = fig.add_subplot(121)
+        dgm = self.dgms_[1]
+        ax_min, ax_max = np.min(dgm), np.max(dgm)
+        x_r = ax_max - ax_min
+        buffer = x_r / 5
+        x_down = ax_min - buffer / 2
+        x_up = ax_max + buffer
+        y_down, y_up = x_down, x_up
+        yr = y_up - y_down
+        self.ax_persistence.plot([x_down, x_up], [x_down, x_up], "--", c=np.array([0.0, 0.0, 0.0]))
+        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', picker=5, c='C0')
+        self.selected_plot = self.ax_persistence.scatter([], [], 100, c='C1')
+        self.ax_persistence.set_xlim([x_down, x_up])
+        self.ax_persistence.set_ylim([y_down, y_up])
+        self.ax_persistence.set_aspect('equal', 'box')
+        self.ax_persistence.set_title("Persistent H1")
+        self.ax_persistence.set_xlabel("Birth")
+        self.ax_persistence.set_ylabel("Death")
+        fig.canvas.mpl_connect('pick_event', self.onpick)
+        self.selected = set([])
+
+        ## Step 2: Setup axis for coordinates
+        self.ax_coords = fig.add_subplot(122)
+        self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], cmap='magma_r')
+        self.ax_coords.set_title("Dimension Reduced Point Cloud")
+
+        plt.show()
 
 def doTwoCircleTest():
+    """
+    Test interactive plotting with two noisy circles of different sizes
+    """
     from persim import plot_diagrams as plot_dgms
     import scipy.io as sio
     prime = 41
@@ -235,22 +303,7 @@ def doTwoCircleTest():
     X = X + 0.2*np.random.randn(X.shape[0], 2)
     
     c = CircularCoords(X, 100, prime = prime)
-    I1 = c.dgms_[1]
-    idxs = np.argsort(I1[:, 0]-I1[:, 1])
-
-    plt.figure(figsize=(12, 5))
-    for i in range(2):
-        thetas = c.get_coordinates(cocycle_idx = [idxs[i]])
-        I = I1[idxs[i], :]
-        plt.clf()
-        plt.subplot(121)
-        plot_dgms(c.dgms_, show=False)
-        plt.scatter(I[0], I[1], 20, 'r')
-        plt.subplot(122)
-        plt.scatter(X[:, 0], X[:, 1], 100, thetas, cmap = 'magma_r', edgecolor = 'none')
-        plt.axis('equal')
-        plt.colorbar()
-        plt.savefig("Cocycle%i.svg"%i, bbox_inches = 'tight')
+    c.plot_interactive(X)
 
 if __name__ == '__main__':
     doTwoCircleTest()
