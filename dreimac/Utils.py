@@ -1,6 +1,11 @@
 import numpy as np
 from scipy import sparse
 
+
+"""#########################################
+        Cohomology Utility Functions
+#########################################"""
+
 def add_cocycles(c1, c2, p = 2, real = False):
     S = {}
     c = np.concatenate((c1, c2), 0)
@@ -49,3 +54,56 @@ def make_delta0(R):
     J = np.array(J, dtype=int)
     Delta = sparse.coo_matrix((V, (I, J)), shape=(NEdges, NVertices)).tocsr()
     return Delta
+
+
+"""#########################################
+        Partition of Unity Functions
+#########################################"""
+
+def partunity_linear(ds, r_cover):
+    """
+    Parameters
+    ----------
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
+    r_cover: float
+        Covering radius
+    Returns
+    -------
+    varphi: ndarray(n)
+        The bump function
+    """
+    return r_cover - ds
+
+def partunity_quadratic(ds, r_cover):
+    """
+    Parameters
+    ----------
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
+    r_cover: float
+        Covering radius
+    Returns
+    -------
+    varphi: ndarray(n)
+        The bump function
+    """
+    return (r_cover - ds)**2
+
+def partunity_exp(ds, r_cover):
+    """
+    Parameters
+    ----------
+    ds: ndarray(n)
+        Some subset of distances between landmarks and 
+        data points
+    r_cover: float
+        Covering radius
+    Returns
+    -------
+    varphi: ndarray(n)
+        The bump function
+    """
+    return np.exp(r_cover**2/(ds**2-r_cover**2))

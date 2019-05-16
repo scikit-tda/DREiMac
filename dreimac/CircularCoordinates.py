@@ -5,62 +5,9 @@ import scipy
 from scipy.sparse.linalg import lsqr
 import time
 import matplotlib.pyplot as plt
-from TDAUtils import add_cocycles, make_delta0
+from Utils import *
 from ripser import ripser
 import warnings
-
-
-"""#########################################
-        Partition of Unity Functions
-#########################################"""
-
-def partunity_linear(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return r_cover - ds
-
-def partunity_quadratic(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return (r_cover - ds)**2
-
-def partunity_exp(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return np.exp(r_cover**2/(ds**2-r_cover**2))
 
 
 """#########################################
@@ -68,7 +15,7 @@ def partunity_exp(ds, r_cover):
 #########################################"""
 
 class CircularCoords(object):
-    def __init__(self, X, n_landmarks, prime=41, maxdim=1, verbose=False):
+    def __init__(self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False):
         """
         Parameters
         ----------
@@ -76,6 +23,8 @@ class CircularCoords(object):
             A point cloud with N points in d dimensions
         n_landmarks: int
             Number of landmarks to use
+        distance_matrix: boolean
+            If true, treat X as a distance matrix instead of a point cloud
         prime : int
             Field coefficient with which to compute rips on landmarks
         maxdim : int
@@ -89,7 +38,7 @@ class CircularCoords(object):
         if verbose:
             tic = time.time()
             print("Doing TDA...")
-        res = ripser(X, coeff=prime, maxdim=maxdim, n_perm=n_landmarks, do_cocycles=True)
+        res = ripser(X, distance_matrix=distance_matrix, coeff=prime, maxdim=maxdim, n_perm=n_landmarks, do_cocycles=True)
         if verbose:
             print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
         self.X_ = X

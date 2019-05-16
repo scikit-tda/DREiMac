@@ -2,16 +2,19 @@ import numpy as np
 import numpy.linalg as linalg
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt 
-from ripser import Rips
+from ripser import ripser
 import time
 import warnings
 from CSMSSMTools import getSSM, getGreedyPermDM, getGreedyPermEuclidean
-from TDAUtils import add_cocycles
+from Utils import *
+
+"""#########################################
+    Projective Coordinates Utilities
+#########################################"""
 
 def PPCA(class_map, proj_dim, verbose = False):
     """
     Principal Projective Component Analysis (Jose Perea 2017)
-    
     Parameters
     ----------
     class_map : ndarray (N, d)
@@ -21,6 +24,13 @@ def PPCA(class_map, proj_dim, verbose = False):
         The dimension of the projective space onto which to project
     verbose : boolean
         Whether to print information during iterations
+    Returns
+    -------
+    {'variance': ndarray(N-1)
+        The variance captured by each dimension
+     'X': ndarray(N, proj_dim+1)
+        The projective coordinates
+     }
     """
     if verbose:
         print("Doing PPCA on %i points in %i dimensions down to %i dimensions"%\
@@ -48,110 +58,6 @@ def PPCA(class_map, proj_dim, verbose = False):
     #Return the variance and the projective coordinates
     return {'variance':variance, 'X':XRet.T}
 
-
-def ProjCoords(P, n_landmarks, distance_matrix = False, perc = 0.99, \
-                maxdim = 1, cocycle_idx = [0], proj_dim = 3, verbose = False):
-    """
-    Perform multiscale projective coordinates via persistent cohomology of 
-    sparse filtrations (Jose Perea 2018)
-    Parameters
-    ----------
-    P : ndarray (n_data, d)
-        n_data x d array of points
-    n_landmarks : integer
-        Number of landmarks to sample
-    distance_matrix : boolean
-        If true, then X is a distance matrix, not a Euclidean point cloud
-    perc : float
-        Percent coverage
-    maxdim : int
-        Maximum dimension of homology.  Only dimension 1 (mod 2) is needed for 
-        projective coordinates, but it may be of interest to see other 
-        dimensions on the subsampled point set (e.g. for a Klein bottle)
-    cocycle_idx : list
-        Add the cocycles together, sorted from most to least persistent
-    proj_dim : integer
-        Dimension down to which to project the data
-    verbose : boolean
-        Whether to print detailed information during the computation
-    """
-    n_data = P.shape[0]
-    rips = Rips(coeff=2, maxdim=maxdim, do_cocycles=True)
-    
-    # Step 1: Compute greedy permutation
-    tic = time.time()
-    if distance_matrix:
-        res = getGreedyPermDM(P, n_landmarks, verbose)
-        perm, dist_land_data = res['perm'], res['DLandmarks']
-        dist_land_land = P[perm, :]
-        dist_land_land = dist_land_land[:, perm]
-    else:    
-        res = getGreedyPermEuclidean(P, n_landmarks, verbose)
-        Y, dist_land_data = res['Y'], res['D']
-        dist_land_land = getSSM(Y)
-    if verbose:
-        print("Elapsed time greedy permutation: %.3g seconds"%(time.time() - tic))
-
-
-
-    # Step 2: Compute H1 with cocycles on the landmarks
-    tic = time.time()
-    dgms = rips.fit_transform(dist_land_land, distance_matrix=True)
-    dgm1 = dgms[1]
-    dgm1 = dgm1/2.0 #Need so that Cech is included in rips
-    if verbose:
-        print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-    idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
-    cocycle = rips.cocycles_[1][idx_p1[cocycle_idx[0]]]
-    cohomdeath = -np.inf
-    cohombirth = np.inf
-    cocycle = np.zeros((0, 3))
-    for k in range(len(cocycle_idx)):
-        cocycle = add_cocycles(cocycle, rips.cocycles_[1][idx_p1[cocycle_idx[k]]])
-        cohomdeath = max(cohomdeath, dgm1[idx_p1[cocycle_idx[k]], 0])
-        cohombirth = min(cohombirth, dgm1[idx_p1[cocycle_idx[k]], 1])
-
-    # Step 3: Determine radius for balls ( = interpolant btw data coverage and cohomological birth)
-    coverage = np.max(np.min(dist_land_data, 1))
-    r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-    if verbose:
-        print("r_cover = %.3g"%r_cover)
-    
-
-    # Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-
-    # Let U_j be the set of data points whose distance to l_j is less than
-    # r_cover
-    U = dist_land_data < r_cover
-    # Compute subordinated partition of unity varphi_1,...,varphi_{s+1}
-    # Compute the bump phi_j(b) on each data point b in U_j. phi_j = 0 outside U_j.
-    phi = np.zeros_like(dist_land_data)
-    phi[U] = r_cover - dist_land_data[U]
-
-    # Compute the partition of unity varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{s+1}(b))
-    varphi = phi / np.sum(phi, 0)[None, :]
-
-    # To each data point, associate the index of the first open set it belongs to
-    ball_indx = np.argmax(U, 0)
-
-    # Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-
-    # compute all transition functions
-    cocycle_matrix = np.ones((n_landmarks, n_landmarks))
-    cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
-    cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
-    class_map = np.sqrt(varphi.T)
-    for i in range(n_data):
-        class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
-    
-    res = PPCA(class_map, proj_dim, verbose)
-    res["cocycle"] = cocycle[:, 0:2]
-    res["dist_land_land"] = dist_land_land
-    res["dist_land_data"] = dist_land_data
-    res["dgm1"] = dgm1
-    res["idx_p1"] = idx_p1
-    res["rips"] = rips
-    return res
 
 def rotmat(a, b = np.array([])):
     """
@@ -272,7 +178,122 @@ def plotRP3Stereo(ax, S, f, draw_sphere = False):
         z = np.cos(v)
         ax.plot_wireframe(x, y, z, color="k")
 
+
+"""#########################################
+        Main Projective Coordinates Class
+#########################################"""
+
+class ProjectiveCoords(object):
+    def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
+        """
+        Parameters
+        ----------
+        X: ndarray(N, d)
+            A point cloud with N points in d dimensions
+        n_landmarks: int
+            Number of landmarks to use
+        distance_matrix: boolean
+            If true, treat X as a distance matrix instead of a point cloud
+        maxdim : int
+            Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+            but it may be of interest to see other dimensions (e.g. for a torus)
+        partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
+            A partition of unity function
+        """
+        assert(maxdim >= 1)
+        self.verbose = verbose
+        if verbose:
+            tic = time.time()
+            print("Doing TDA...")
+        res = ripser(X, distance_matrix=distance_matrix, coeff=2, maxdim=maxdim, n_perm=n_landmarks, do_cocycles=True)
+        if verbose:
+            print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
+        self.X_ = X
+        self.dgms_ = res['dgms']
+        self.dist_land_data_ = res['dperm2all']
+        self.idx_land_ = res['idx_perm']
+        self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
+        self.cocycles_ = res['cocycles']
+        self.n_landmarks_ = n_landmarks
+
+    def get_coordinates(self, perc = 0.99, cocycle_idx = [0], proj_dim = 3, partunity_fn = partunity_linear):
+        """
+        Perform multiscale projective coordinates via persistent cohomology of 
+        sparse filtrations (Jose Perea 2018)
+        Parameters
+        ----------
+        perc : float
+            Percent coverage
+        cocycle_idx : list
+            Add the cocycles together, sorted from most to least persistent
+        proj_dim : integer
+            Dimension down to which to project the data
+        partunity_fn: (dist_land_data, r_cover) -> phi
+            A function from the distances of each landmark to a bump function
+        
+        Returns
+        -------
+        {'variance': ndarray(N-1)
+            The variance captured by each dimension
+        'X': ndarray(N, proj_dim+1)
+            The projective coordinates
+        }
+        """
+        ## Step 1: Come up with the representative cocycle as a formal sum
+        ## of the chosen cocycles
+        n_landmarks = self.n_landmarks_
+        n_data = self.X_.shape[0]
+        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
+        cohomdeath = -np.inf
+        cohombirth = np.inf
+        cocycle = np.zeros((0, 3))
+        for k in range(len(cocycle_idx)):
+            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=2)
+            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
+            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+
+        ## Step 2: Determine radius for balls
+        dist_land_data = self.dist_land_data_
+        dist_land_land = self.dist_land_land_
+        coverage = np.max(np.min(dist_land_data, 1))
+        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+        self.r_cover_ = r_cover # Store covering radius for reference
+        if self.verbose:
+            print("r_cover = %.3g"%r_cover)
+        
+
+        ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
+        U = dist_land_data < r_cover
+        phi = np.zeros_like(dist_land_data)
+        phi[U] = partunity_fn(phi[U], r_cover)
+        # Compute the partition of unity 
+        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are %i point not covered by a landmark"%nzero)
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+
+        # Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
+
+        # compute all transition functions
+        cocycle_matrix = np.ones((n_landmarks, n_landmarks))
+        cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
+        cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
+        class_map = np.sqrt(varphi.T)
+        for i in range(n_data):
+            class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
+        
+        res = PPCA(class_map, proj_dim, self.verbose)
+        return res
+
+
 def testProjCoordsRP2(NSamples, NLandmarks):
+    from persim import plot_diagrams
     np.random.seed(NSamples)
     X = np.random.randn(NSamples, 3)
     X = X/np.sqrt(np.sum(X**2, 1))[:, None]
@@ -286,13 +307,14 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     D[D > 1.0] = 1.0
     D = np.arccos(D)
     
-    res = ProjCoords(D, NLandmarks, proj_dim=2, distance_matrix=True, verbose=True)
+    pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
+    res = pc.get_coordinates(proj_dim=2)
     variance, X = res['variance'], res['X']
     varcumu = np.cumsum(variance)
     varcumu = varcumu/varcumu[-1]
 
     plt.subplot(231)
-    res["rips"].plot(show=False)
+    plot_diagrams(pc.dgms_, show=False)
     plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
     plt.subplot(234)
     plt.plot(varcumu)
