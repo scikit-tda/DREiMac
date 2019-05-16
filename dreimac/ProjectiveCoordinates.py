@@ -260,7 +260,6 @@ class ProjectiveCoords(object):
         self.r_cover_ = r_cover # Store covering radius for reference
         if self.verbose:
             print("r_cover = %.3g"%r_cover)
-        
 
         ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
         U = dist_land_data < r_cover
@@ -274,12 +273,10 @@ class ProjectiveCoords(object):
             warnings.warn("There are %i point not covered by a landmark"%nzero)
             denom[denom == 0] = 1
         varphi = phi / denom[None, :]
-
         # To each data point, associate the index of the first open set it belongs to
         ball_indx = np.argmax(U, 0)
 
-        # Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-
+        ## Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
         # compute all transition functions
         cocycle_matrix = np.ones((n_landmarks, n_landmarks))
         cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
@@ -287,7 +284,6 @@ class ProjectiveCoords(object):
         class_map = np.sqrt(varphi.T)
         for i in range(n_data):
             class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
-        
         res = PPCA(class_map, proj_dim, self.verbose)
         return res
 
@@ -308,7 +304,9 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     D = np.arccos(D)
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    res = pc.get_coordinates(proj_dim=2)
+    dgm1 = pc.dgms_[1]
+    idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
+    res = pc.get_coordinates(proj_dim=2, cocycle_idx = [idx_p1[0]])
     variance, X = res['variance'], res['X']
     varcumu = np.cumsum(variance)
     varcumu = varcumu/varcumu[-1]
