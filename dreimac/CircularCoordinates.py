@@ -49,6 +49,7 @@ class CircularCoords(object):
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
         self.cocycles_ = res['cocycles']
         self.n_landmarks_ = n_landmarks
+        self.type_ = "circ"
 
     def get_coordinates(self, perc = 0.99, do_weighted = False, cocycle_idx = [0], partunity_fn = partunity_linear):
         """
