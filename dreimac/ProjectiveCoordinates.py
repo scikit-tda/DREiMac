@@ -100,15 +100,25 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def getStereoProjCodim1(pX, randomSeed = -1):
+def getStereoProjCodim1(pX, u = np.array([])):
+    """
+    Do a projective stereographic projection
+    Parameters
+    ----------
+    pX: ndarray(N, d)
+        A collection of N points in d dimensions
+    u: ndarray(d)
+        A unit vector representing the north pole
+        for the stereographic projection
+    Returns
+    -------
+    S: ndarray(N, d-1)
+        The stereographically projected coordinates
+    """
     from sklearn.decomposition import PCA
     X = pX.T
     # Put points all on the same hemisphere
-    if randomSeed >= 0:
-        np.random.seed(randomSeed)
-        u = np.random.randn(3)
-        u = u/np.sqrt(np.sum(u**2))
-    else:
+    if u.size == 0:
         _, U = linalg.eigh(X.dot(X.T))
         u = U[:, 0]
     XX = rotmat(u).dot(X)
@@ -118,10 +128,36 @@ def getStereoProjCodim1(pX, randomSeed = -1):
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
     return S.T
 
+def plotRP2Circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
+    """
+    Plot a circle with arrows showing the identifications for RP2.
+    Set an equal aspect ratio and get rid of the axis ticks, since
+    they are clear from the circle
+    Parameters
+    ----------
+    ax: matplotlib axis
+        Axis onto which to plot the circle+arrows
+    arrowcolor: string or ndarray(3) or ndarray(4)
+        Color for the circle and arrows
+    facecolor: string or ndarray(3) or ndarray(4)
+        Color for background of the plot
+    """
+    t = np.linspace(0, 2*np.pi, 200)
+    ax.plot(np.cos(t), np.sin(t), c=arrowcolor)
+    ax.axis('equal')
+    ax = plt.gca()
+    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+    ax.set_facecolor(facecolor)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    pad = 1.1
+    ax.set_xlim([-pad, pad])
+    ax.set_ylim([-pad, pad])
+
 def plotRP2Stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     Plot a 2D Stereographic Projection
-
     Parameters
     ----------
     S : ndarray (N, 2)
@@ -131,18 +167,12 @@ def plotRP2Stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     if not (S.shape[1] == 2):
         warnings.warn("Plotting stereographic RP2 projection, but points are not 2 dimensional")
+    plotRP2Circle(plt.gca(), arrowcolor, facecolor)
     if f.size > S.shape[0]:
         plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap='afmhot')
     else:
         plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
-    t = np.linspace(0, 2*np.pi, 200)
-    plt.plot(np.cos(t), np.sin(t), c=arrowcolor)
-    plt.axis('equal')
-    ax = plt.gca()
-    
-    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
-    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
-    ax.set_facecolor(facecolor)
+
 
 def plotRP3Stereo(ax, S, f, draw_sphere = False):
     """
@@ -177,6 +207,31 @@ def plotRP3Stereo(ax, S, f, draw_sphere = False):
         y = np.sin(u)*np.sin(v)
         z = np.cos(v)
         ax.plot_wireframe(x, y, z, color="k")
+
+def circleTo3DNorthPole(x):
+    """
+    Convert a point selected on the circle to a 3D
+    unit vector on the upper hemisphere
+    Parameters
+    ----------
+    x: ndarray(2)
+        Selected point in the circle
+    Returns
+    -------
+    x: ndarray(2)
+        Selected point in the circle (possibly clipped to the circle)
+    u: ndarray(3)
+        Unit vector on the upper hemisphere
+    """
+    magSqr = np.sum(x**2)
+    if magSqr > 1:
+        x /= np.sqrt(magSqr)
+        magSqr = 1
+    u = np.zeros(3)
+    u[0:2] = x
+    u[2] = np.sqrt(1-magSqr)
+    return x, u
+
 
 
 """#########################################
@@ -288,6 +343,103 @@ class ProjectiveCoords(object):
         res = PPCA(class_map, proj_dim, self.verbose)
         return res
 
+    def onpick(self, evt):
+        """
+        Toggle a point in the persistence diagram
+        """
+        if evt.artist == self.dgmplot:
+            ## Step 1: Highlight point on persistence diagram
+            clicked = set(evt.ind.tolist())
+            self.selected = self.selected.symmetric_difference(clicked)
+            idxs = np.array(list(self.selected))
+            if idxs.size > 0:
+                self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
+                ## Step 2: Update projective coordinates
+                res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
+                self.coords = res['X']
+                Y = getStereoProjCodim1(self.coords, self.u)
+                self.coords_scatter.set_offsets(Y)
+            else:
+                self.selected_plot.set_offsets(np.zeros((0, 2)))
+                self.coords_scatter.set_offsets(-2*np.ones((self.X_.shape[0], 2)))
+        self.ax_persistence.figure.canvas.draw()
+        self.ax_coords.figure.canvas.draw()
+        return True
+    
+    def onstereo_click(self, evt):
+        """
+        Change the north pole on the projective plane for
+        stereographic projection
+        """
+        if evt.inaxes == self.ax_pickstereo:
+            x = np.array([evt.xdata, evt.ydata])
+            x, self.u = circleTo3DNorthPole(x)
+            self.selected_northpole_plot.set_offsets(x)
+            self.ax_pickstereo.figure.canvas.draw
+            if len(self.selected) > 0 and self.coords.size > 0:
+                # Update circular coordinates if at least
+                # one point in the persistence diagram is selected
+                S = getStereoProjCodim1(self.coords, self.u)
+                self.coords_scatter.set_offsets(S)
+                self.ax_coords.figure.canvas.draw()
+
+    def plot_interactive(self, f):
+        """
+        Do an interactive plot, with H1 on the left and a 
+        2D dimension reduced version of the point cloud on the right.
+        The right plot will be colored by the circular coordinates
+        of the plot on the left.  Left click on points in the persistence
+        diagram to toggle there inclusion in the circular coordinates
+        Parameters
+        ----------
+        f : ndarray (N) or ndarray (N, 3)
+            A function with which to color the points, or a list of colors
+        """
+        self.f = f
+        fig = plt.figure(figsize=(15, 5))
+        ## Step 1: Plot H1
+        dgm_size = 20
+        self.ax_persistence = fig.add_subplot(131)
+        dgm = self.dgms_[1]
+        ax_min, ax_max = np.min(dgm), np.max(dgm)
+        x_r = ax_max - ax_min
+        buffer = x_r / 5
+        x_down = ax_min - buffer / 2
+        x_up = ax_max + buffer
+        y_down, y_up = x_down, x_up
+        yr = y_up - y_down
+        self.ax_persistence.plot([x_down, x_up], [x_down, x_up], "--", c=np.array([0.0, 0.0, 0.0]))
+        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', picker=5, c='C0')
+        self.selected_plot = self.ax_persistence.scatter([], [], 100, c='C1')
+        self.ax_persistence.set_xlim([x_down, x_up])
+        self.ax_persistence.set_ylim([y_down, y_up])
+        self.ax_persistence.set_aspect('equal', 'box')
+        self.ax_persistence.set_title("Persistent H1")
+        self.ax_persistence.set_xlabel("Birth")
+        self.ax_persistence.set_ylabel("Death")
+        fig.canvas.mpl_connect('pick_event', self.onpick)
+        self.selected = set([])
+
+        ## Step 2: Setup axis for picking stereographic north pole
+        self.ax_pickstereo = fig.add_subplot(132)
+        self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
+        plotRP2Circle(self.ax_pickstereo)
+        self.selected_northpole = np.array([0, 0])
+        self.u = np.array([0, 0, 1])
+        self.ax_pickstereo.set_title("Stereographic North Pole")
+        fig.canvas.mpl_connect('button_press_event', self.onstereo_click)
+
+        ## Step 3: Setup axis for coordinates.  Start with axis 
+        ## which is the ordinary north pole
+        self.ax_coords = fig.add_subplot(133)
+        # Setup some dummy points outside of the axis just to get the colors right
+        pix = -2*np.ones(self.X_.shape[0])
+        self.coords_scatter = self.ax_coords.scatter(pix, pix, c=f, cmap='magma_r')
+        self.coords = np.array([[]])
+        plotRP2Circle(self.ax_coords)
+        self.ax_coords.set_title("Projective Coordinates")
+        plt.show()
+
 
 def testProjCoordsRP2(NSamples, NLandmarks):
     from persim import plot_diagrams
@@ -305,39 +457,8 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     D = np.arccos(D)
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    dgm1 = pc.dgms_[1]
-    idx_p1 = np.argsort(dgm1[:, 0] - dgm1[:, 1])
-    res = pc.get_coordinates(proj_dim=2, cocycle_idx = [idx_p1[0]])
-    variance, X = res['variance'], res['X']
-    varcumu = np.cumsum(variance)
-    varcumu = varcumu/varcumu[-1]
+    pc.plot_interactive(phi)
 
-    plt.subplot(231)
-    plot_diagrams(pc.dgms_, show=False)
-    plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
-    plt.subplot(234)
-    plt.plot(varcumu)
-    plt.scatter(np.arange(len(varcumu)), varcumu)
-    plt.xlabel("Dimension")
-    plt.ylabel("Cumulative Variance")
-    plt.title("Cumulative Variance")
-
-    SFinal = getStereoProjCodim1(X)
-    plt.subplot(232)
-    plotRP2Stereo(SOrig, phi)
-    plt.title("Ground Truth $\\phi$")
-    plt.subplot(233)
-    plotRP2Stereo(SFinal, phi)
-    plt.title("Projective Coordinates $\\phi$")
-
-    plt.subplot(235)
-    plotRP2Stereo(SOrig, theta)
-    plt.title("Ground Truth $\\theta$")
-    plt.subplot(236)
-    plotRP2Stereo(SFinal, theta)
-    plt.title("Projective Coordinates $\\theta$")
-
-    plt.show()
 
 def testProjCoordsKleinBottle(res, NLandmarks):
     """
@@ -391,6 +512,7 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     ax = fig.add_subplot(224, projection='3d')
     plotRP3Stereo(ax, SFinal, phi)
     plt.title("$\\phi$")
+    # Put up some dummy points
 
     plt.show()
 

@@ -80,7 +80,7 @@ class ApplicationWindow(pg.QtGui.QMainWindow):
         self.plw = pg.PlotWidget() 
         s1 = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 255, 255, 120))
         pos = np.random.randn(10000, 2)
-        spots = [{'pos': pos[i, :], 'data': 1} for i in range(pos.shape[0])] + [{'pos': [0,0], 'data': 1}]
+        spots = [{'pos': pos[i, :], 'data': 1, 'symbol':'o'} for i in range(pos.shape[0])]
         s1.addPoints(spots)
         self.plw.addItem(s1)
 
