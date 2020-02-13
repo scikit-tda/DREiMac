@@ -44,8 +44,11 @@ def PPCA(class_map, proj_dim, verbose = False):
     XRet = None
     for i in range(n_dim-1):
         # Project onto an "equator"
-        _, U = linalg.eigh(X.dot(X.T))
-        U = np.fliplr(U)
+        try:
+            _, U = linalg.eigh(X.dot(X.T))
+            U = np.fliplr(U)
+        except:
+            U = np.eye(X.shape[0])
         variance[-i-1] = np.mean((np.pi/2-np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X)))))**2)
         Y = (U.T).dot(X)
         y = np.array(Y[-1, :])
@@ -381,7 +384,7 @@ class ProjectiveCoords(object):
                 # one point in the persistence diagram is selected
                 S = getStereoProjCodim1(self.coords, self.u)
                 self.coords_scatter.set_offsets(S)
-                self.ax_coords.figure.canvas.draw()
+            self.ax_coords.figure.canvas.draw()
 
     def plot_interactive(self, f):
         """
@@ -442,40 +445,47 @@ class ProjectiveCoords(object):
 
 
 def testProjCoordsRP2(NSamples, NLandmarks):
+    """
+    Test projective coordinates on the projective plane
+    Parameters
+    ----------
+    NSamples : int
+        Number of random samples on the projective plane
+    NLandmarks : int
+        Number of landmarks to take in the projective coordinates computation
+    """
     from persim import plot_diagrams
     np.random.seed(NSamples)
     X = np.random.randn(NSamples, 3)
     X = X/np.sqrt(np.sum(X**2, 1))[:, None]
-
-    SOrig = getStereoProjCodim1(X)
-    phi = np.sqrt(np.sum(SOrig**2, 1))
-    theta = np.arccos(np.abs(SOrig[:, 0]))
-
     D = X.dot(X.T)
     D = np.abs(D)
     D[D > 1.0] = 1.0
     D = np.arccos(D)
+
+    # Coming up with ground truth theta and phi for RP2 for colors
+    SOrig = getStereoProjCodim1(X)
+    phi = np.sqrt(np.sum(SOrig**2, 1))
+    theta = np.arccos(np.abs(SOrig[:, 0]))
+
+
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
     pc.plot_interactive(phi)
 
 
-def testProjCoordsKleinBottle(res, NLandmarks):
+def testProjCoordsKleinBottle(NSamples, NLandmarks):
     """
     Test projective coordinates on the Klein bottle
-
     Parameters
     ----------
-    res : int
-        Resolution along each axis.  Total number of points will be res*res
+    NSamples : int
+        Number of random samples on the projective plane
     NLandmarks : int
         Number of landmarks to take in the projective coordinates computation
     """
-    theta = np.linspace(0, 2*np.pi, res)
-    theta, phi = np.meshgrid(theta, theta)
-    theta = theta.flatten()
-    phi = phi.flatten()
-    NSamples = theta.size
+    theta = np.random.rand(NSamples)*2*np.pi
+    phi = np.random.rand(NSamples)*2*np.pi
     R = 2
     r = 1
     X = np.zeros((NSamples, 4))
@@ -483,39 +493,9 @@ def testProjCoordsKleinBottle(res, NLandmarks):
     X[:, 1] = (R + r*np.cos(theta))*np.sin(phi)
     X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
     X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
-
-    res = ProjCoords(X, NLandmarks, cocycle_idx = [0, 1], \
-                    proj_dim=3, distance_matrix=False, verbose=True)
-    variance, X = res['variance'], res['X']
-    varcumu = np.cumsum(variance)
-    varcumu = varcumu/varcumu[-1]
-    dgm1 = res["dgm1"]
-
-    fig = plt.figure()
-    plt.subplot(221)
-    res["rips"].plot(show=False)
-
-    plt.title("%i Points, %i Landmarks"%(NSamples, NLandmarks))
-    plt.subplot(222)
-    plt.plot(varcumu)
-    plt.scatter(np.arange(len(varcumu)), varcumu)
-    plt.xlabel("Dimension")
-    plt.ylabel("Cumulative Variance")
-    plt.title("Cumulative Variance")
-
-    SFinal = getStereoProjCodim1(X)
-    
-    #plotRP2Stereo(SFinal, theta)
-    ax = fig.add_subplot(223, projection='3d')
-    plotRP3Stereo(ax, SFinal, theta)
-    plt.title("$\\theta$")
-    ax = fig.add_subplot(224, projection='3d')
-    plotRP3Stereo(ax, SFinal, phi)
-    plt.title("$\\phi$")
-    # Put up some dummy points
-
-    plt.show()
+    pc = ProjectiveCoords(X, NLandmarks, verbose=True)
+    pc.plot_interactive(phi)
 
 if __name__ == '__main__':
     testProjCoordsRP2(10000, 60)
-    #testProjCoordsKleinBottle(100, 100)
+    #testProjCoordsKleinBottle(200, 100)
