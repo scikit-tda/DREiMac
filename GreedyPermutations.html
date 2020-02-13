@@ -1,0 +1,28 @@
+<html>
+<head>
+<script src="a.out.js"></script>
+</head>
+<body>
+    <script>
+
+        Module.onRuntimeInitialized = function() {
+            var X = new Module.VectorVectorFloat();
+            let dim = 2;
+            for (let i = 0; i < 100; i++) {
+                let x  = new Module.VectorFloat();
+                for (let j = 0; j < dim; j++) {
+                    x.push_back(Math.random());
+                }
+                X.push_back(x);
+            }
+            console.log(X);
+        }
+
+
+        // TODO: perm = Module.getGreedyPerm(X, 5)
+        // Access things in perm with perm.get(i) for
+        // some index i
+
+    </script>
+</body>
+</html>
