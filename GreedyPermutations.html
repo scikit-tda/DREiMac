@@ -6,22 +6,11 @@
     <script>
 
         Module.onRuntimeInitialized = function() {
-            var X = new Module.VectorVectorFloat();
-            let dim = 2;
-            for (let i = 0; i < 100; i++) {
-                let x  = new Module.VectorFloat();
-                for (let j = 0; j < dim; j++) {
-                    x.push_back(Math.random());
-                }
-                X.push_back(x);
+            X = Module.testFillVector(15);
+            for (let i = 0; i < X.size(); i++) {
+                console.log(X.get(i));
             }
-            console.log(X);
         }
-
-
-        // TODO: perm = Module.getGreedyPerm(X, 5)
-        // Access things in perm with perm.get(i) for
-        // some index i
 
     </script>
 </body>

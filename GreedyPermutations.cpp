@@ -45,6 +45,16 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 	return indices;
 }
 
+
+std::vector<int> testFillVector(int num)
+{
+	std::vector<int> indices;
+	for (int i = 0; i < num; i++) {
+        indices.push_back(i);
+    }
+	return indices;
+}
+
 EMSCRIPTEN_BINDINGS(stl_wrappers) {
     emscripten::register_vector<float>("VectorFloat");
     emscripten::register_vector<int>("VectorInt");
@@ -53,4 +63,5 @@ EMSCRIPTEN_BINDINGS(stl_wrappers) {
 
 EMSCRIPTEN_BINDINGS(my_module) {
     function("getGreedyPerm", &getGreedyPerm);
+    function("testFillVector", &testFillVector);
 }
