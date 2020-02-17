@@ -41,7 +41,9 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		//Add the index of the max of this list to the indices list
 		indices.push_back(index);
 	}
-
+	for (int i = 0; i < indices.size(); i++) {
+		std::cout << indices[i];
+	}
 	return indices;
 }
 

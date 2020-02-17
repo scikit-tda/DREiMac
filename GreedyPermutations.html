@@ -16,12 +16,19 @@
                 X.push_back(x);
             }
             console.log(X);
+            let perm = new Module.getGreedyPerm(X, 5);
+            for (let i = 0; i < 5; i++) {
+                console.log(perm.get(i));
+            }
+            console.log(perm);
         }
 
 
         // TODO: perm = Module.getGreedyPerm(X, 5)
         // Access things in perm with perm.get(i) for
         // some index i
+
+ 
 
     </script>
 </body>
