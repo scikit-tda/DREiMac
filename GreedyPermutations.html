@@ -5,29 +5,55 @@
 <body>
     <script>
 
-        Module.onRuntimeInitialized = function() {
-            var X = new Module.VectorVectorFloat();
-            let dim = 2;
-            for (let i = 0; i < 100; i++) {
-                let x  = new Module.VectorFloat();
-                for (let j = 0; j < dim; j++) {
-                    x.push_back(Math.random());
-                }
-                X.push_back(x);
-            }
-            let perm = new Module.getGreedyPerm(X, 5);
-            for (let i = 0; i < 5; i++) {
-                console.log(perm.get(i));
-            }
-        }
-
-
-        // TODO: perm = Module.getGreedyPerm(X, 5)
-        // Access things in perm with perm.get(i) for
-        // some index i
-
- 
+        //Module.onRuntimeInitialized = function () {
+        //    var X = new Module.VectorVectorFloat();
+        //    let dim = 2;
+        //    for (let i = 0; i < 100; i++) {
+        //        let x = new Module.VectorFloat();
+        //        for (let j = 0; j < dim; j++) {
+        //            x.push_back(Math.random());
+        //        }
+        //        X.push_back(x);
+        //    }
+        //    let perm = new Module.getGreedyPerm(X, 5);
+        //    for (let i = 0; i < 5; i++) {
+        //        console.log(perm.get(i));
+        //    }
+        //}
 
     </script>
+    <td><input type="text" id="numPerms" size="3"></input></td>
+    <tr><td colspan=2><button type="button" onclick="findGreedyPerm()" id="greedyPerm">Get Greedy Perm</button></td></tr>
+    <td>
+        <canvas id="segcanvas" width="600" height="600" style="border:1px solid #000000;">
+        </canvas>
+    </td>
+
+    <!--Read in those points and fill them into a VectorFloat -->
+    <!--Add those VectorFloats to a Vector -->
+    <!--Read in num from user entered box (num Perms) -->
+    <!--Compute greedyPerm based on set of points and num perms -->
+
+    <script type="text/javascript">
+
+        var points = [];
+
+        function getMousePosition(canvas, event) {
+            let rect = canvas.getBoundingClientRect();
+            let x = event.clientX - rect.left;
+            let y = event.clientY - rect.top;
+
+            var ctx = canvas.getContext("2d");
+            ctx.fillRect(x, y, 5, 5);
+            points.push([x, y]);
+        }
+        let canvasElem = document.querySelector("canvas");
+
+        canvasElem.addEventListener("mousedown", function (e) {
+            getMousePosition(canvasElem, e);
+        });
+
+    </script>
+
 </body>
 </html>
