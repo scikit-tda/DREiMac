@@ -26,17 +26,16 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 
 	while (indices.size() < NPerm) {
 		int K = indices.size();
-		float minDistance = INFINITY;//Set to infinity so our first distance will be less than minDistance
-		std::vector<float> minDistances;//List of mindistances from each column
-		int minIndex;
-		std::vector<int> minIndices;//Stores the indices of the point with the min distance associated with the equivalent place in the minDistances
+		float minDistance;
+        std::vector<float> minDistances;//List of mindistances from each column
 		for (int i = 0; i < points.size(); i++) {
-
-			for (int j = 0; j < K; j++) {
-				//If points[j] has not been visited, calculate the distance
-				//Otherwise we skip over j and move to the next point
-				if (!visited[i]) {
-					std::vector<float> point1 = points[i];
+            //Set to infinity so our first distance will be less than minDistance
+            minDistance = INFINITY;
+            std::vector<float> point1 = points[i];
+            if (!visited[i]) {
+			    for (int j = 0; j < K; j++) {
+				    //If points[j] has not been visited, calculate the distance
+				    //Otherwise we skip over j and move to the next point
 					std::vector<float> point2 = points[indices[j]];
 					float distance = 0.0;
 					for (int m = 0; m < point1.size(); m++) {
@@ -45,19 +44,19 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 					//Compares current distance to minDistance and replaces if smaller, if equal to 0, we compared the same points and we don't want to repeat
 					if (distance < minDistance) {
 						minDistance = distance;
-						minIndex = i;
 					}
-				}
-			}
-			minIndices.push_back(minIndex);
-			minDistances.push_back(minDistance);//adds the mindistance for this set to the list
+			    }
+                minDistances.push_back(minDistance);//adds the mindistance for this set to the list
+            }
+            else {
+                minDistances.push_back(0);
+            }			
 		}
 		//finds the max value of our minDistances
 		float maxMinDistance = *std::max_element(minDistances.begin(), minDistances.end());
 		//Finds the index of the max value
 		std::vector<float>::iterator it = find(minDistances.begin(), minDistances.end(), maxMinDistance);
 		int index = it - minDistances.begin();
-		index = minIndices[index];
 		//Add the index of the max of this list to the indices list
 		indices.push_back(index);
 		//Set the index of our point to true since we have visited it
