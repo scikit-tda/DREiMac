@@ -10,10 +10,28 @@
 using namespace emscripten;
 
 
+void clearVectorVector(std::vector<std::vector<float> >& M) {
+    for (size_t i = 0; i < M.size(); i++) {
+        M[i].clear();
+    }
+    M.clear();
+}
 
-
-std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPerm)
+/**
+ * 
+ * @param{points} Array of points in Euclidean space
+ * @param{NPerm} Number of points to choose in permutation, should be <= #points
+ * @param{distLandLand} An empty vector of vectors, passed by reference, that will
+ *                      be used to store the inter-landmark distances
+ * @param{distLandData} An empty vector of vectors, passed by reference, that will
+ *                      be used to store the landmark to point cloud distances
+ * */
+std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPerm, 
+                               std::vector<std::vector<float> >& distLandLand,
+                               std::vector<std::vector<float> >& distLandData )
 {
+    // Step 0: Clear distLandLand and distLandData if they had stuff in them
+    // from before
 	std::vector<int> indices;
 	//Creates vector of booleans whose values are true if the index has been added to indices or false if it hasn't been added yet
 	//Defaulted to all false values
@@ -73,4 +91,5 @@ EMSCRIPTEN_BINDINGS(stl_wrappers) {
 
 EMSCRIPTEN_BINDINGS(my_module) {
     function("getGreedyPerm", &getGreedyPerm);
+    function("clearVectorVector", &clearVectorVector);
 }

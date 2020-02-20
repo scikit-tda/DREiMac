@@ -22,14 +22,20 @@
 
     <script type="text/javascript">
         let isCompiled = false;
-        let points = [];
-        let permIdx = [];
+        let points = []; // These are our points in Javascript
+        let idxPerm = [];
+        let distLandLand = null;
+        let distLandData = null;
+        let X = null; // These are our points in C++
         let numPermsInput = document.getElementById("numPerms");
         let canvas = document.getElementById("segcanvas");
         let ctx = canvas.getContext("2d");
 
         Module.onRuntimeInitialized = function () {
             isCompiled = true;
+            distLandLand = new Module.VectorVectorFloat();
+            distLandData = new Module.VectorVectorFloat();
+            X = new Module.VectorVectorFloat();
         }
 
         function repaint() {
@@ -45,9 +51,9 @@
             }
             ctx.fillStyle = "#ff0000";
             dW = 10;
-            for (let i = 0; i < permIdx.length; i++) {
-                let x = points[permIdx[i]][0];
-                let y = points[permIdx[i]][1];
+            for (let i = 0; i < idxPerm.length; i++) {
+                let x = points[idxPerm[i]][0];
+                let y = points[idxPerm[i]][1];
                 ctx.fillRect(x, y, dW, dW);
             }
         }
@@ -68,7 +74,9 @@
 
         function findGreedyPerm() {
             if (isCompiled) {
-                let X = new Module.VectorVectorFloat();
+                Module.clearVectorVector(distLandLand);
+                Module.clearVectorVector(distLandData);
+                Module.clearVectorVector(X);
                 for (let i = 0; i < points.length; i++) {
                     let x = new Module.VectorFloat();
                     for (let j = 0; j < points[i].length; j++) {
@@ -78,12 +86,12 @@
                 }
                 let k = parseInt(numPermsInput.value);
                 k = Math.min(k, points.length);
-                let perm = new Module.getGreedyPerm(X, k);
-                permIdx.length = 0;
+                let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
+                idxPerm.length = 0;
                 for (let i = 0; i < k; i++) {
-                    permIdx.push(perm.get(i));
+                    idxPerm.push(perm.get(i));
                 }
-                console.log(permIdx);
+                console.log(idxPerm);
                 repaint();
             }
             else {
