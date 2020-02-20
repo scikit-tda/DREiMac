@@ -30,14 +30,14 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		std::vector<float> minDistances;//List of mindistances from each column
 		int minIndex;
 		std::vector<int> minIndices;//Stores the indices of the point with the min distance associated with the equivalent place in the minDistances
-		for (int i = 0; i < K; i++) {
+		for (int i = 0; i < points.size(); i++) {
 
-			for (int j = 0; j < points.size(); j++) {
+			for (int j = 0; j < K; j++) {
 				//If points[j] has not been visited, calculate the distance
 				//Otherwise we skip over j and move to the next point
-				if (!visited[j]) {
-					std::vector<float> point1 = points[j];
-					std::vector<float> point2 = points[indices[i]];
+				if (!visited[i]) {
+					std::vector<float> point1 = points[i];
+					std::vector<float> point2 = points[indices[j]];
 					float distance = 0.0;
 					for (int m = 0; m < point1.size(); m++) {
 						distance += (point1[m] - point2[m]) * (point1[m] - point2[m]);
@@ -45,7 +45,7 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 					//Compares current distance to minDistance and replaces if smaller, if equal to 0, we compared the same points and we don't want to repeat
 					if (distance < minDistance) {
 						minDistance = distance;
-						minIndex = j;
+						minIndex = i;
 					}
 				}
 			}
