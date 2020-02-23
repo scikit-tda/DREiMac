@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <stdio.h> 
 #include <stdlib.h> 
+#include <math.h> 
 #include <emscripten/bind.h>
 using namespace emscripten;
 
@@ -30,9 +31,8 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
                                std::vector<std::vector<float> >& distLandLand,
                                std::vector<std::vector<float> >& distLandData )
 {
-    // Step 0: Clear distLandLand and distLandData if they had stuff in them
-    // from before
 	std::vector<int> indices;
+	std::vector<bool> added(NPerm, false);
 	//Creates vector of booleans whose values are true if the index has been added to indices or false if it hasn't been added yet
 	//Defaulted to all false values
 	std::vector<bool> visited(points.size(), false);
@@ -40,35 +40,46 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 	indices.push_back(0); //Puts on the first index so our list isn't empty
 	visited[0] = true; //Sets 0 to true since we have "visited" it
 
-	float INFINITY = std::numeric_limits<float>::infinity();
 
 	while (indices.size() < NPerm) {
 		int K = indices.size();
 		float minDistance;
         std::vector<float> minDistances;//List of mindistances from each column
-		for (int i = 0; i < points.size(); i++) {
+		std::vector<float> distancesX;
+		size_t j;
+		for (size_t i = 0; i < points.size(); i++) {
             //Set to infinity so our first distance will be less than minDistance
             minDistance = INFINITY;
             std::vector<float> point1 = points[i];
-            if (!visited[i]) {
-			    for (int j = 0; j < K; j++) {
-				    //If points[j] has not been visited, calculate the distance
-				    //Otherwise we skip over j and move to the next point
+			
+			
+			    for (j = 0; j < K; j++) {
 					std::vector<float> point2 = points[indices[j]];
+					
+					//Calc distance and push, regardless if visited or not
 					float distance = 0.0;
-					for (int m = 0; m < point1.size(); m++) {
+					for (size_t m = 0; m < point1.size(); m++) {
 						distance += (point1[m] - point2[m]) * (point1[m] - point2[m]);
 					}
-					//Compares current distance to minDistance and replaces if smaller, if equal to 0, we compared the same points and we don't want to repeat
-					if (distance < minDistance) {
-						minDistance = distance;
+					distance = sqrt(distance);
+
+					if (!added[j]) {
+						distancesX.push_back(distance);
+					}
+
+					//If not visited, we compare the dsitances and get the min
+					//Otherwise, we just set min to 0
+					if (!visited[i]) {
+						//Compares current distance to minDistance and replaces if smaller, if equal to 0, we compared the same points and we don't want to repeat
+						if (distance < minDistance) {
+							minDistance = distance;
+						}
+					}else {
+						minDistance = 0;
 					}
 			    }
                 minDistances.push_back(minDistance);//adds the mindistance for this set to the list
-            }
-            else {
-                minDistances.push_back(0);
-            }			
+				
 		}
 		//finds the max value of our minDistances
 		float maxMinDistance = *std::max_element(minDistances.begin(), minDistances.end());
@@ -79,7 +90,13 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		indices.push_back(index);
 		//Set the index of our point to true since we have visited it
 		visited[index] = true;
+
+		if (!distancesX.empty()) {
+			distLandData.push_back(distancesX);
+			added[j] = true;
+		}
 	}
+
 	return indices;
 }
 
