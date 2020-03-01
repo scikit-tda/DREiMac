@@ -85,22 +85,23 @@
                 }
                 let k = parseInt(numPermsInput.value);
                 k = Math.min(k, points.length);
+                console.log(k);
                 let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
                 computeDistLandVec(X, perm);
                 //console.log(compareVectorVectorFloats(distLandData, distLandDataCheck));
                 //console.log(compareVectorVectorFloats(distLandLand, distLandLandCheck));
-                console.log("distLandData vals");
-                for (let i = 0; i < distLandData.size(); i++) {
-                    for (let j = 0; j < distLandData.get(0).size(); j++) {
-                        console.log(distLandData.get(i).get(j));
-                    }
-                }
-                console.log("distLandDataCheck vals");
-                for (let i = 0; i < distLandDataCheck.size(); i++) {
-                    for (let j = 0; j < distLandDataCheck.get(0).size(); j++) {
-                        console.log(distLandDataCheck.get(i).get(j));
-                    }
-                }
+                //console.log("distLandData vals");
+                //for (let i = 0; i < distLandData.size(); i++) {
+                //    for (let j = 0; j < distLandData.get(0).size(); j++) {
+                //        console.log(distLandData.get(i).get(j));
+                //    }
+                //}
+                //console.log("distLandDataCheck vals");
+                //for (let i = 0; i < distLandDataCheck.size(); i++) {
+                //    for (let j = 0; j < distLandDataCheck.get(0).size(); j++) {
+                //        console.log(distLandDataCheck.get(i).get(j));
+                //    }
+                //}
 
 
                 idxPerm.length = 0;

@@ -43,71 +43,28 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
                                std::vector<std::vector<float> >& distLandData )
 {
 	std::vector<int> indices;
-	std::vector<bool> added(NPerm, false);
-	//Creates vector of booleans whose values are true if the index has been added to indices or false if it hasn't been added yet
-	//Defaulted to all false values
-	std::vector<bool> visited(points.size(), false);
-
-	indices.push_back(0); //Puts on the first index so our list isn't empty
-	visited[0] = true; //Sets 0 to true since we have "visited" it
-
-
-	while (indices.size() < NPerm) {
-		int K = indices.size();
-		float minDistance;
-        std::vector<float> minDistances;//List of mindistances from each column
-		std::vector<float> distancesX;
-		size_t j;
-		for (size_t i = 0; i < points.size(); i++) {
-            //Set to infinity so our first distance will be less than minDistance
-            minDistance = INFINITY;
-            std::vector<float> point1 = points[i];
-			
-			
-			    for (j = 0; j < K; j++) {
-					std::vector<float> point2 = points[indices[j]];
-					
-					//Calc distance and push, regardless if visited or not
-					float distance = 0.0;
-					for (size_t m = 0; m < point1.size(); m++) {
-						distance += (point1[m] - point2[m]) * (point1[m] - point2[m]);
-					}
-					distance = sqrt(distance);
-
-					if (!added[j]) {
-						distancesX.push_back(distance);
-					}
-
-					//If not visited, we compare the dsitances and get the min
-					//Otherwise, we just set min to 0
-					if (!visited[i]) {
-						//Compares current distance to minDistance and replaces if smaller, if equal to 0, we compared the same points and we don't want to repeat
-						if (distance < minDistance) {
-							minDistance = distance;
-						}
-					}else {
-						minDistance = 0;
-					}
-			    }
-                minDistances.push_back(minDistance);//adds the mindistance for this set to the list
-				
-		}
-		//finds the max value of our minDistances
-		float maxMinDistance = *std::max_element(minDistances.begin(), minDistances.end());
-		//Finds the index of the max value
-		std::vector<float>::iterator it = find(minDistances.begin(), minDistances.end(), maxMinDistance);
-		int index = it - minDistances.begin();
-		//Add the index of the max of this list to the indices list
+	std::vector<float> closest(points.size(), INFINITY);
+	int index = 0;
+	for (size_t i = 0; i < NPerm; i++) {
 		indices.push_back(index);
-		//Set the index of our point to true since we have visited it
-		visited[index] = true;
-
-		if (!distancesX.empty()) {
-			distLandData.push_back(distancesX);
-			added[j] = true;
+		for (size_t j = 0; j < points.size(); j++) {
+			std::vector<float> point1 = points[j];
+			std::vector<float> point2 = points[index];
+			float distance = 0.0;
+			for (size_t k = 0; k < point1.size(); k++) {
+				distance += (point1[k] + point2[k]) * (point1[k] + point2[k]);
+			}
+			distance = sqrt(distance);
+			//distLandData[i][j] = distance;
+			if (distance < closest[j]) {
+				closest[j] = distance;
+			}
 		}
+		float maxClosest = *std::max_element(closest.begin(), closest.end());
+		std::vector<float>::iterator it = find(closest.begin(), closest.end(), maxClosest);
+		index = it - closest.begin();
+		
 	}
-
 	return indices;
 }
 
