@@ -33,8 +33,9 @@ void clearVectorVector(std::vector<std::vector<float> >& M) {
  * 
  * @param{points} Array of points in Euclidean space
  * @param{NPerm} Number of points to choose in permutation, should be <= #points
- * @param{distLandLand} An empty vector of vectors, passed by reference, that will
- *                      be used to store the inter-landmark distances
+ * @param{distLandLand} An empty vector, passed by reference, that will
+ *                      be used to store the lower triangular inter-landmark distances
+ *                      in column-major order
  * @param{distLandData} An empty vector of vectors, passed by reference, that will
  *                      be used to store the landmark to point cloud distances
  * */
@@ -47,12 +48,12 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 	int index = 0;
 	for (size_t i = 0; i < NPerm; i++) {
 		indices.push_back(index);
+        std::vector<float> point2 = points[index];
 		for (size_t j = 0; j < points.size(); j++) {
 			std::vector<float> point1 = points[j];
-			std::vector<float> point2 = points[index];
 			float distance = 0.0;
 			for (size_t k = 0; k < point1.size(); k++) {
-				distance += (point1[k] + point2[k]) * (point1[k] + point2[k]);
+				distance += (point1[k] - point2[k]) * (point1[k] - point2[k]);
 			}
 			distance = sqrt(distance);
 			//distLandData[i][j] = distance;
