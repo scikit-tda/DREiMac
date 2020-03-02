@@ -29,6 +29,10 @@ void clearVectorVector(std::vector<std::vector<float> >& M) {
     M.clear();
 }
 
+void clearVector(std::vector<float>& M) {
+	M.clear();
+}
+
 /**
  * 
  * @param{points} Array of points in Euclidean space
@@ -40,7 +44,7 @@ void clearVectorVector(std::vector<std::vector<float> >& M) {
  *                      be used to store the landmark to point cloud distances
  * */
 std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPerm, 
-                               std::vector<std::vector<float> >& distLandLand,
+                               std::vector<float>& distLandLand,
                                std::vector<std::vector<float> >& distLandData )
 {
 	std::vector<int> indices;
@@ -70,15 +74,23 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		distLandData.push_back(Y);
 	}
 
+	std::vector<std::vector<float> > squareDistLandLand;
+
 	for (size_t i = 0; i < NPerm; i++){
 		std::vector<float> Z;
 		for (size_t j = 0; j < NPerm; j++) {
 			Z.push_back(distLandData[i][indices[j]]);
 		}
-		distLandLand.push_back(Z);
+		squareDistLandLand.push_back(Z);
 	}
 
-
+	for (size_t i = 0; i < squareDistLandLand.size(); i++) {
+		for (size_t j = 0; j < squareDistLandLand.size(); j++) {
+			if (i>j) {
+				distLandLand.push_back(squareDistLandLand[i][j]);
+			}
+		}
+	}
 
 	return indices;
 }
@@ -1266,4 +1278,5 @@ EMSCRIPTEN_BINDINGS(stl_wrappers) {
 EMSCRIPTEN_BINDINGS(my_module) {
     function("getGreedyPerm", &getGreedyPerm);
     function("clearVectorVector", &clearVectorVector);
+	function("clearVector", &clearVector);
 }

@@ -30,7 +30,7 @@
 
         Module.onRuntimeInitialized = function () {
             isCompiled = true;
-            distLandLand = new Module.VectorVectorFloat();
+            distLandLand = new Module.VectorFloat();
             distLandData = new Module.VectorVectorFloat();
             X = new Module.VectorVectorFloat();
             distLandDataCheck = new Module.VectorVectorFloat();
@@ -73,7 +73,7 @@
 
         function findGreedyPerm() {
             if (isCompiled) {
-                Module.clearVectorVector(distLandLand);
+                Module.clearVector(distLandLand);
                 Module.clearVectorVector(distLandData);
                 Module.clearVectorVector(X);
                 for (let i = 0; i < points.length; i++) {
@@ -89,23 +89,14 @@
                 let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
                 computeDistLandVec(X, perm);
                 console.log(compareVectorVectorFloats(distLandData, distLandDataCheck));
-                console.log(compareVectorVectorFloats(distLandLand, distLandLandCheck));
                 console.log("distLandLand vals");
                 for (let i = 0; i < distLandLand.size(); i++) {
-                    for (let j = 0; j < distLandLand.get(0).size(); j++) {
-                        console.log(distLandLand.get(i).get(j));
-                    }
+                    console.log(distLandLand.get(i));
                 }
                 console.log("distLandLandCheck vals");
                 for (let i = 0; i < distLandLandCheck.size(); i++) {
                     for (let j = 0; j < distLandLandCheck.get(0).size(); j++) {
                         console.log(distLandLandCheck.get(i).get(j));
-                    }
-                }
-                console.log("distLandData vals");
-                for (let i = 0; i < distLandData.size(); i++) {
-                    for (let j = 0; j < distLandData.get(0).size(); j++) {
-                        console.log(distLandData.get(i).get(j));
                     }
                 }
 
@@ -140,7 +131,7 @@
 
             return isEqual;
         }
-
+        //Changed distLandLandCheck from raw calc to just pulling from distLandDataCheck
         function computeDistLandVec(X, idxPerm) {
 
             for (let i = 0; i < idxPerm.size(); i++) {
