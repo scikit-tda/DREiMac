@@ -47,15 +47,17 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 	int index = 0;
 	for (size_t i = 0; i < NPerm; i++) {
 		indices.push_back(index);
+		std::vector<float> Y;
 		for (size_t j = 0; j < points.size(); j++) {
 			std::vector<float> point1 = points[j];
 			std::vector<float> point2 = points[index];
 			float distance = 0.0;
 			for (size_t k = 0; k < point1.size(); k++) {
-				distance += (point1[k] + point2[k]) * (point1[k] + point2[k]);
+				distance += (point1[k] - point2[k]) * (point1[k] - point2[k]);
 			}
 			distance = sqrt(distance);
 			//distLandData[i][j] = distance;
+			Y.push_back(distance);
 			if (distance < closest[j]) {
 				closest[j] = distance;
 			}
@@ -63,8 +65,19 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		float maxClosest = *std::max_element(closest.begin(), closest.end());
 		std::vector<float>::iterator it = find(closest.begin(), closest.end(), maxClosest);
 		index = it - closest.begin();
-		
+		distLandData.push_back(Y);
 	}
+
+	for (size_t i = 0; i < NPerm; i++){
+		std::vector<float> Z;
+		for (size_t j = 0; j < NPerm; j++) {
+			Z.push_back(distLandData[i][indices[j]]);
+		}
+		distLandLand.push_back(Z);
+	}
+
+
+
 	return indices;
 }
 

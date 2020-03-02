@@ -88,20 +88,26 @@
                 console.log(k);
                 let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
                 computeDistLandVec(X, perm);
-                //console.log(compareVectorVectorFloats(distLandData, distLandDataCheck));
-                //console.log(compareVectorVectorFloats(distLandLand, distLandLandCheck));
-                //console.log("distLandData vals");
-                //for (let i = 0; i < distLandData.size(); i++) {
-                //    for (let j = 0; j < distLandData.get(0).size(); j++) {
-                //        console.log(distLandData.get(i).get(j));
-                //    }
-                //}
-                //console.log("distLandDataCheck vals");
-                //for (let i = 0; i < distLandDataCheck.size(); i++) {
-                //    for (let j = 0; j < distLandDataCheck.get(0).size(); j++) {
-                //        console.log(distLandDataCheck.get(i).get(j));
-                //    }
-                //}
+                console.log(compareVectorVectorFloats(distLandData, distLandDataCheck));
+                console.log(compareVectorVectorFloats(distLandLand, distLandLandCheck));
+                console.log("distLandLand vals");
+                for (let i = 0; i < distLandLand.size(); i++) {
+                    for (let j = 0; j < distLandLand.get(0).size(); j++) {
+                        console.log(distLandLand.get(i).get(j));
+                    }
+                }
+                console.log("distLandLandCheck vals");
+                for (let i = 0; i < distLandLandCheck.size(); i++) {
+                    for (let j = 0; j < distLandLandCheck.get(0).size(); j++) {
+                        console.log(distLandLandCheck.get(i).get(j));
+                    }
+                }
+                console.log("distLandData vals");
+                for (let i = 0; i < distLandData.size(); i++) {
+                    for (let j = 0; j < distLandData.get(0).size(); j++) {
+                        console.log(distLandData.get(i).get(j));
+                    }
+                }
 
 
                 idxPerm.length = 0;
@@ -136,20 +142,6 @@
         }
 
         function computeDistLandVec(X, idxPerm) {
-            for (let i = 0; i < idxPerm.size(); i++) {
-                let x = new Module.VectorFloat();
-                let point1 = X.get(i);
-                for (let j = 0; j < idxPerm.size(); j++) {
-                    let point2 = X.get(j);
-                    let distance = 0.0;
-                    for (let k = 0; k < point1.size(); k++) {
-                        distance += (point1.get(k) - point2.get(k)) * (point1.get(k) - point2.get(k));
-                    }
-                    distance = Math.sqrt(distance);
-                    x.push_back(distance);
-                }
-                distLandLandCheck.push_back(x);
-            }
 
             for (let i = 0; i < idxPerm.size(); i++) {
                 let x = new Module.VectorFloat();
@@ -164,6 +156,13 @@
                     x.push_back(distance);
                 }
                 distLandDataCheck.push_back(x);
+            }
+            for (let i = 0; i < idxPerm.size(); i++) {
+                let x = new Module.VectorFloat();
+                for (let j = 0; j < idxPerm.size(); j++) {
+                    x.push_back(distLandDataCheck.get(i).get(idxPerm.get(j)));
+                }
+                distLandLandCheck.push_back(x);
             }
         }
 
