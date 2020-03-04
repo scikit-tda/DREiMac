@@ -21,6 +21,18 @@
 
 using namespace emscripten;
 
+void clearVectorVectorVectorInt(std::vector<std::vector<std::vector<int>>>& M) {
+    for (size_t i = 0; i < M.size(); i++) {
+        for (size_t j = 0; j < M[i].size(); j++) {
+            for (size_t k = 0; k < M[i][j].size(); k++) {
+                M[i][j].clear();
+            }
+            M[j].clear();
+        }
+        M[i].clear();
+    }
+    M.clear();
+}
 
 void clearVectorVector(std::vector<std::vector<float> >& M) {
     for (size_t i = 0; i < M.size(); i++) {
@@ -74,23 +86,11 @@ std::vector<int> getGreedyPerm(std::vector<std::vector<float> > points, int NPer
 		distLandData.push_back(Y);
 	}
 
-	std::vector<std::vector<float> > squareDistLandLand;
-
-	for (size_t i = 0; i < NPerm; i++){
-		std::vector<float> Z;
-		for (size_t j = 0; j < NPerm; j++) {
-			Z.push_back(distLandData[i][indices[j]]);
-		}
-		squareDistLandLand.push_back(Z);
-	}
-
-	for (size_t i = 0; i < squareDistLandLand.size(); i++) {
-		for (size_t j = 0; j < squareDistLandLand.size(); j++) {
-			if (i>j) {
-				distLandLand.push_back(squareDistLandLand[i][j]);
-			}
-		}
-	}
+    for (size_t j = 0; j < NPerm; j++) {
+        for (size_t i = j+1; i < NPerm; i++) {
+            distLandLand.push_back(distLandData[i][indices[j]]);
+        }
+    }
 
 	return indices;
 }
@@ -1153,58 +1153,6 @@ ripserResults rips_dm_sparse(int* I, int* J, float* V, int NEdges,
 	return res;
 }
 
-int unpack_results(int** n_intervals, value_t** births_and_deaths, int** cocycle_length, int** cocycles,
-                   ripserResults res, int do_cocycles) {
-
-    int n_dims = res.births_and_deaths_by_dim.size();
-    *n_intervals = (int*) malloc(n_dims * sizeof(int));
-    int n_intervals_total = 0;
-
-    for (int d = 0; d < n_dims; d++) {
-        int n_int_d = res.births_and_deaths_by_dim[d].size() / 2;
-        (*n_intervals)[d] = n_int_d;
-        n_intervals_total += n_int_d;
-    }
-    *births_and_deaths = (value_t*) malloc(n_intervals_total * 2 * sizeof(value_t));
-    *cocycle_length = (int*) calloc(n_intervals_total, sizeof(int));
-
-    int cocycle_length_total = 0;
-    int idx = 0;
-    for (int d = 0; d < n_dims; d++) {
-        std::copy(res.births_and_deaths_by_dim[d].begin(),
-                  res.births_and_deaths_by_dim[d].end(),
-                  &(*births_and_deaths)[2*idx]);
-
-        if (do_cocycles && !res.cocycles_by_dim[d].empty()) {
-            for (int i = 0; i < (*n_intervals)[d]; i++) {
-                int cc_length = res.cocycles_by_dim[d][i].size();
-                (*cocycle_length)[idx] = cc_length;
-                cocycle_length_total += cc_length;
-                idx++;
-            }
-        } else {
-            idx += (*n_intervals)[d];
-        }
-    }
-
-    if (do_cocycles && cocycle_length_total > 0) {
-        *cocycles = (int*) calloc(cocycle_length_total, sizeof(int));
-
-        int pos = 0;
-        for (int d = 0; d < n_dims; d++) {
-            if (!res.cocycles_by_dim[d].empty()) {
-                for (int i = 0; i < (*n_intervals)[d]; i++) {
-                    int cc_length = res.cocycles_by_dim[d][i].size();
-                    std::copy(res.cocycles_by_dim[d][i].begin(),
-                              res.cocycles_by_dim[d][i].end(),
-                              &(*cocycles)[pos]);
-                    pos += cc_length;
-                }
-            }
-        }
-    }
-    return res.num_edges;
-}
 
 
 /*
@@ -1213,28 +1161,26 @@ int unpack_results(int** n_intervals, value_t** births_and_deaths, int** cocycle
     Results are passed through output arguments. The arrays are allocated in this
     function and have to be freed manually by the caller.
 
-    Output arguments:
-    * n_intervals: number of intervals per dimension. (length = dim_max + 1)
-    * births_and_deaths: births and deaths of all dimension in a flat array. (length = 2 * sum(n_intervals))
-    * cocycle_length: lengths of individual cocycles. (length = sum(n_intervals))
-    * cocycles: cocycles stored in a flat array. (length = sum(cocycle_length))
     Input arguments:
     * D: lower triangle of the distance matrix in a flat array.
-    * N: length of D.
     * modulus: Compute homology with coefficients in the prime field Z/pZ. p must be a prime number.
     * dim_max: Compute persistent homology up to this dimension
     * threshold: Compute Rips complexes up to this diameter
-    * do_cocycles: If nonzero, calculate cocycles and write them to cocycle_length and cocycles.
+    * do_cocycles: If nonzero, calculate cocycles and write them to the cocycles vector
+
+    Output arguments:
+    * births_and_deaths: births and deaths of all dimensions
+    * cocycles: cocycles in all dimensions
 
     Returns number of edges.
 */
-int c_rips_dm(int** n_intervals, value_t** births_and_deaths,
-                int** cocycle_length, int** cocycles,
-                value_t* D, int N, int modulus, int dim_max, value_t threshold, int do_cocycles) {
-
-    ripserResults res = rips_dm(D, N, modulus, dim_max, threshold, do_cocycles);
-    return unpack_results(n_intervals, births_and_deaths, cocycle_length, cocycles,
-                            res, do_cocycles);
+void jsRipsDM(std::vector<float>& D, int modulus, int dim_max, float threshold, int do_cocycles, 
+            std::vector<std::vector<float> >& births_and_deaths,
+            std::vector<std::vector<std::vector<int> > >& cocycles) {
+    int N = D.size();
+    ripserResults res = rips_dm(&D[0], N, modulus, dim_max, threshold, do_cocycles);
+    births_and_deaths = res.births_and_deaths_by_dim;
+    cocycles = res.cocycles_by_dim;
 }
 
 /*
@@ -1245,6 +1191,7 @@ int c_rips_dm(int** n_intervals, value_t** births_and_deaths,
     * NEdges: total number of indices and values.
     * N: size of sparse matrix.
 */
+/*
 int c_rips_dm_sparse(int** n_intervals, value_t** births_and_deaths,
                         int** cocycle_length, int** cocycles,
                         int* I, int* J, float* V, int NEdges, int N,
@@ -1255,6 +1202,7 @@ int c_rips_dm_sparse(int** n_intervals, value_t** births_and_deaths,
     return unpack_results(n_intervals, births_and_deaths, cocycle_length, cocycles,
                             res, do_cocycles);
 }
+*/
 
 
 
@@ -1273,10 +1221,13 @@ EMSCRIPTEN_BINDINGS(stl_wrappers) {
     emscripten::register_vector<float>("VectorFloat");
     emscripten::register_vector<int>("VectorInt");
     emscripten::register_vector<std::vector<float>>("VectorVectorFloat");
+    emscripten::register_vector<std::vector<std::vector<int>>>("VectorVectorVectorInt");
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
     function("getGreedyPerm", &getGreedyPerm);
+    function("clearVectorVectorVectorInt", &clearVectorVectorVectorInt);
     function("clearVectorVector", &clearVectorVector);
 	function("clearVector", &clearVector);
+    function("jsRipsDM", &clearVector);
 }
