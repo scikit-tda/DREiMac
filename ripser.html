@@ -2,6 +2,7 @@
 <head>
 <script src="a.out.js"></script>
 <script src="dat.gui.min.js"></script>
+<script src="plotly.min.js"></script>
 <script src="Debugging.js"></script>
 </head>
 <body>
@@ -14,8 +15,18 @@
         </tr>
     </table>
 
-    <canvas id="segcanvas" width="600" height="600" style="border:1px solid #000000;">
-    </canvas>
+    <table>
+        <tr>
+            <td>
+                <canvas id="segcanvas" width="600" height="600" style="border:1px solid #000000;">
+                </canvas>
+            </td>
+            <td>
+                <p id = "persistenceDiagrams"></p>
+            </td>
+        </tr>
+    </table>
+
 
     <script type="text/javascript">
         let isCompiled = false;
@@ -23,6 +34,8 @@
         let idxPerm = [];
         let distLandLand = null;
         let distLandData = null;
+        let dgms = null; // Persistence diagrams
+        let cocycles = null; // Representative cocycles
         let X = null; // These are our points in C++
         let distLandLandCheck = null;
         let distLandDataCheck = null;
@@ -37,6 +50,8 @@
             X = new Module.VectorVectorFloat();
             distLandDataCheck = new Module.VectorVectorFloat();
             distLandLandCheck = new Module.VectorFloat();
+            dgms = new Module.VectorVectorFloat();
+            cocycles = new Module.VectorVectorVectorInt();
         }
 
         function repaint() {
@@ -73,6 +88,32 @@
             getMousePosition(canvasElem, e);
         });
 
+        function computeRips(distLandLand) {
+            Module.clearVectorVector(dgms);
+            Module.clearVectorVectorVectorInt(cocycles);
+            // TODO: Send over infinity as threshold
+            let field = 2;
+            let homdim = 1;
+            let thresh = 1e12;
+            Module.jsRipsDM(distLandLand, field, homdim, thresh, 1, 
+            dgms, cocycles);
+
+            let H1 = dgms.get(1);
+            let births = [];
+            let deaths = [];
+            for (let i = 0; i < H1.size(); i+=2) {
+                births.push(H1.get(i));
+                deaths.push(H1.get(i+1));
+            }
+            let dgmPoints = {x:births, y:deaths, mode:'markers', name:'H1'};
+            let axMin = Math.min(Math.min.apply(null, births), Math.min.apply(null, deaths));
+            let axMax = Math.max(Math.max.apply(null, births), Math.max.apply(null, deaths));
+            let axRange = axMax - axMin;
+            let diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'scatter', name:'diagonal'};
+            let layout = {title:'H1'};
+            Plotly.newPlot('persistenceDiagrams', [dgmPoints, diagonal], layout);
+        }
+
         function findGreedyPerm() {
             if (isCompiled) {
                 Module.clearVector(distLandLand);
@@ -93,6 +134,7 @@
                 for (let i = 0; i < k; i++) {
                     idxPerm.push(perm.get(i));
                 }
+                computeRips(distLandLand);
                 repaint();
             }
             else {

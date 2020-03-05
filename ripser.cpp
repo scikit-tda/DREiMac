@@ -1229,5 +1229,5 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("clearVectorVectorVectorInt", &clearVectorVectorVectorInt);
     function("clearVectorVector", &clearVectorVector);
 	function("clearVector", &clearVector);
-    function("jsRipsDM", &clearVector);
+    function("jsRipsDM", &jsRipsDM);
 }
