@@ -12,6 +12,9 @@
         <td>
         <button type="button" onclick="findGreedyPerm()" id="greedyPerm">Get Greedy Perm</button>
         </td>
+        <td>
+        <button type="button" onclick="computeKleinRips()" id="kleinDgms">Get Klein Diagrams</button>
+        </td>
         </tr>
     </table>
 
@@ -37,6 +40,7 @@
         let dgms = null; // Persistence diagrams
         let cocycles = null; // Representative cocycles
         let X = null; // These are our points in C++
+        let kleinPoints = null;
         let distLandLandCheck = null;
         let distLandDataCheck = null;
         let numPermsInput = document.getElementById("numPerms");
@@ -52,6 +56,7 @@
             distLandLandCheck = new Module.VectorFloat();
             dgms = new Module.VectorVectorFloat();
             cocycles = new Module.VectorVectorVectorInt();
+            kleinPoints = new Module.VectorVectorFloat();
         }
 
         function repaint() {
@@ -93,26 +98,44 @@
             Module.clearVectorVectorVectorInt(cocycles);
             // TODO: Send over infinity as threshold
             let field = 2;
-            let homdim = 1;
+            let homdim = 2;
             let thresh = 1e12;
             Module.jsRipsDM(distLandLand, field, homdim, thresh, 1, 
             dgms, cocycles);
 
-            let H1 = dgms.get(1);
-            let births = [];
-            let deaths = [];
-            for (let i = 0; i < H1.size(); i+=2) {
-                births.push(H1.get(i));
-                deaths.push(H1.get(i+1));
+            for (let j = 1; j < homdim + 1; j++) {
+                let H = dgms.get(j);
+                let births = [];
+                let deaths = [];
+                for (let i = 0; i < H.size(); i += 2) {
+                    births.push(H.get(i));
+                    deaths.push(H.get(i + 1));
+                }
+                let dgmPoints = { x: births, y: deaths, mode: 'markers', name: 'H'+j };
+                let axMin = Math.min(Math.min.apply(null, births), Math.min.apply(null, deaths));
+                let axMax = Math.max(Math.max.apply(null, births), Math.max.apply(null, deaths));
+                let axRange = axMax - axMin;
+                let diagonal = { x: [axMin - axRange / 5, axMax + axRange / 5], y: [axMin - axRange / 5, axMax + axRange / 5], mode: 'scatter', name: 'diagonal' };
+                let layout = { title: 'H'+j };
+                Plotly.newPlot('persistenceDiagrams', [dgmPoints, diagonal], layout);
             }
-            let dgmPoints = {x:births, y:deaths, mode:'markers', name:'H1'};
-            let axMin = Math.min(Math.min.apply(null, births), Math.min.apply(null, deaths));
-            let axMax = Math.max(Math.max.apply(null, births), Math.max.apply(null, deaths));
-            let axRange = axMax - axMin;
-            let diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'scatter', name:'diagonal'};
-            let layout = {title:'H1'};
-            Plotly.newPlot('persistenceDiagrams', [dgmPoints, diagonal], layout);
         }
+
+        
+        function computeKleinRips() {
+            if (isCompiled) {
+                Module.clearVector(distLandLand);
+                Module.clearVectorVector(distLandData);
+                sampleKleinBottle(1.0, 1.0, 0.0001);//Gets our points
+                let k = kleinPoints.size();
+                console.log(k);
+                let kleinPerm = new Module.getGreedyPerm(kleinPoints, k, distLandLand, distLandData);
+                computeRips(distLandLand);
+            } else {
+                alert("Not Compiled Yet");
+            }
+        }
+
 
         function findGreedyPerm() {
             if (isCompiled) {
@@ -128,7 +151,6 @@
                 }
                 let k = parseInt(numPermsInput.value);
                 k = Math.min(k, points.length);
-                console.log(k);
                 let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
                 idxPerm.length = 0;
                 for (let i = 0; i < k; i++) {
@@ -142,6 +164,37 @@
             }
         }
 
+        /**
+         * 
+         * @param R constant to scale x,y
+         * @param P constant to scale z,w
+         * @param eps tiny constant used to avoid self intersection
+         */
+        function sampleKleinBottle(R, P, eps) {
+                Module.clearVectorVector(kleinPoints);
+                let x = 0;
+                let y = 0;
+                let z = 0;
+                let w = 0;
+                
+                for (let theta = 0.0; theta < 4 * Math.PI; theta += 0.5) {
+                    for (let v = 0.0; v < 2 * Math.PI; v += 0.5) {
+                        let point = new Module.VectorFloat();//Creates empty point
+                        //Calcs x,y,z,w
+                        x = R * (Math.cos(theta / 2.0) * Math.cos(v) - Math.sin(theta / 2.0) * Math.sin(2 * v));
+                        y = R * (Math.sin(theta / 2.0) * Math.cos(v) + Math.cos(theta / 2.0) * Math.sin(2 * v));
+                        z = P * Math.cos(theta) * (1.0 + eps * Math.sin(v));
+                        w = P * Math.sin(theta) * (1.0 + eps * Math.sin(v));
+                        //Pushes x,y,z,w into point
+                        point.push_back(x);
+                        point.push_back(y);
+                        point.push_back(z);
+                        point.push_back(w);
+                        //Pushes point back on list
+                        kleinPoints.push_back(point);
+                    }
+                }
+            }
 
     </script>
 
