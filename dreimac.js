@@ -24,15 +24,20 @@ function dreimacContext(pccanvas) {
     this.pccanvas = pccanvas;
     this.ctx2D = pccanvas.getContext("2d");
 
-    Module.onRuntimeInitialized = function () {
-        isCompiled = true;
-        distLandLand = new Module.VectorFloat();
-        distLandData = new Module.VectorVectorFloat();
-        X = new Module.VectorVectorFloat();
-        dgms = new Module.VectorVectorFloat();
-        cocycles = new Module.VectorVectorVectorInt();
+    /**
+     * Initialize all of the C++ objects needed for rips 
+     * computation
+     */
+    this.init = function() {
+        this.isCompiled = true;
+        this.distLandLand = new Module.VectorFloat();
+        this.distLandData = new Module.VectorVectorFloat();
+        this.X = new Module.VectorVectorFloat();
+        this.dgms = new Module.VectorVectorFloat();
+        this.cocycles = new Module.VectorVectorVectorInt();
         console.log("Finished compiling");
     }
+    Module.onRuntimeInitialized = this.init.bind(this);
 
     this.repaint = function() {
         let dW = 5;
