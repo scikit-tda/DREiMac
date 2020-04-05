@@ -1,6 +1,8 @@
 /**
+ * Plot a set of persistence diagrams using plotly
  * 
- * @param {VectorVector} dgms All of the persistence diagrams
+ * @param {VectorVector} dgms All of the persistence diagrams. It
+ *                            is assumed that they start at H0
  * @param {string} elemStr A string ID of the DOM element where
  *                         the plots will be placed
  */

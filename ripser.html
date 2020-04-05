@@ -1,21 +1,22 @@
 <html>
 <head>
-<script src="a.out.js"></script>
-<script src="dat.gui.min.js"></script>
-<script src="plotly.min.js"></script>
-<script src="debugging.js"></script>
-<script src="plotting.js"></script>
-<script src="tadasets.js"></script>
+<!--External Libraries -->
+    <script src="jslibs/dat.gui.min.js"></script>
+    <script src="jslibs/plotly.min.js"></script>
+
+<!-- Our Libraries -->
+    <script src="a.out.js"></script>
+    <script src="debugging.js"></script>
+    <script src="plotting.js"></script>
+    <script src="tadasets.js"></script>
+    <script src="dreimac.js"></script>
 </head>
 <body>
     <table>
         <tr>
         <td><input type="text" id="numPerms" size="3"></input></td>
         <td>
-        <button type="button" onclick="findGreedyPerm()" id="greedyPerm">Get Greedy Perm</button>
-        </td>
-        <td>
-        <button type="button" onclick="computeKleinRips()" id="kleinDgms">Get Klein Diagrams</button>
+        <button type="button" onclick="computeRips()" id="computeRips">Compute Rips</button>
         </td>
         </tr>
     </table>
@@ -23,7 +24,7 @@
     <table>
         <tr>
             <td>
-                <canvas id="segcanvas" width="600" height="600" style="border:1px solid #000000;">
+                <canvas id="pccanvas" width="600" height="600" style="border:1px solid #000000;">
                 </canvas>
             </td>
             <td>
@@ -34,125 +35,12 @@
 
 
     <script type="text/javascript">
-        let isCompiled = false;
-        let points = []; // These are our points in Javascript
-        let idxPerm = [];
-        let distLandLand = null;
-        let distLandData = null;
-        let dgms = null; // Persistence diagrams
-        let cocycles = null; // Representative cocycles
-        let X = null; // These are our points in C++
-        let kleinPoints = null;
-        let distLandLandCheck = null;
-        let distLandDataCheck = null;
-        let numPermsInput = document.getElementById("numPerms");
-        let canvas = document.getElementById("segcanvas");
-        let ctx = canvas.getContext("2d");
+        let canvas = document.getElementById("pccanvas");
+        let dreimac = dreimacContext(canvas);
 
-        Module.onRuntimeInitialized = function () {
-            isCompiled = true;
-            distLandLand = new Module.VectorFloat();
-            distLandData = new Module.VectorVectorFloat();
-            X = new Module.VectorVectorFloat();
-            distLandDataCheck = new Module.VectorVectorFloat();
-            distLandLandCheck = new Module.VectorFloat();
-            dgms = new Module.VectorVectorFloat();
-            cocycles = new Module.VectorVectorVectorInt();
-            kleinPoints = new Module.VectorVectorFloat();
-            console.log("Finished compiling");
+        function computeRips() {
+            dreimac.computeRips();
         }
-
-        function repaint() {
-            let dW = 5;
-            let W = canvas.width;
-            let H = canvas.height;
-            ctx.clearRect(0, 0, W, H);
-            ctx.fillStyle = "#000000";
-            for (let i = 0; i < points.length; i++) {
-                let x = points[i][0];
-                let y = points[i][1];
-                ctx.fillRect(x, y, dW, dW);
-            }
-            ctx.fillStyle = "#ff0000";
-            dW = 10;
-            for (let i = 0; i < idxPerm.length; i++) {
-                let x = points[idxPerm[i]][0];
-                let y = points[idxPerm[i]][1];
-                ctx.fillRect(x, y, dW, dW);
-            }
-        }
-
-        function getMousePosition(canvas, event) {
-            let rect = canvas.getBoundingClientRect();
-            let x = event.clientX - rect.left;
-            let y = event.clientY - rect.top;
-            points.push([x, y]);
-            repaint();
-        }
-
-        let canvasElem = document.querySelector("canvas");
-
-        canvasElem.addEventListener("mousedown", function (e) {
-            getMousePosition(canvasElem, e);
-        });
-
-        function computeRips(distLandLand) {
-            Module.clearVectorVector(dgms);
-            Module.clearVectorVectorVectorInt(cocycles);
-            // TODO: Send over infinity as threshold
-            let field = 2;
-            let homdim = 2;
-            let thresh = 1e12;
-            Module.jsRipsDM(distLandLand, field, homdim, thresh, 1, 
-            dgms, cocycles);
-            plotDGMS(dgms, 'dgmsCanvas');
-        }
-
-        
-        function computeKleinRips() {
-            if (isCompiled) {
-                Module.clearVector(distLandLand);
-                Module.clearVectorVector(distLandData);
-                sampleKleinBottle(kleinPoints, 1.0, 1.0, 0.0001);//Gets our points
-                let k = kleinPoints.size();
-                console.log(k);
-                let kleinPerm = new Module.getGreedyPerm(kleinPoints, k, distLandLand, distLandData);
-                computeRips(distLandLand);
-            } else {
-                alert("Not Compiled Yet");
-            }
-        }
-
-
-        function findGreedyPerm() {
-            if (isCompiled) {
-                Module.clearVector(distLandLand);
-                Module.clearVectorVector(distLandData);
-                Module.clearVectorVector(X);
-                for (let i = 0; i < points.length; i++) {
-                    let x = new Module.VectorFloat();
-                    for (let j = 0; j < points[i].length; j++) {
-                        x.push_back(points[i][j]);
-                    }
-                    X.push_back(x);
-                }
-                let k = parseInt(numPermsInput.value);
-                k = Math.min(k, points.length);
-                let perm = new Module.getGreedyPerm(X, k, distLandLand, distLandData);
-                idxPerm.length = 0;
-                for (let i = 0; i < k; i++) {
-                    idxPerm.push(perm.get(i));
-                }
-                computeRips(distLandLand);
-                repaint();
-            }
-            else {
-                alert("Not Compiled Yet");
-            }
-        }
-
-        
-
     </script>
 
 </body>
