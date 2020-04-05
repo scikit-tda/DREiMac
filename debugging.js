@@ -1,4 +1,11 @@
-//Will be used to check that the brute force computed distaLandData are the same as the internally computed ones
+/**
+ * Compare two VectorVector objects
+ * Ex) Check that the brute force computed distLandData are 
+ * the same as the internally computed ones
+ * 
+ * @param {VectorVectorFloat} a First 2D array
+ * @param {VectorVectorFloat} b Second 2D array
+ */
 function compareVectorVectorFloats(a, b) {
     let isEqual = true;
     if (a.size() == b.size() && a.get(0).size() == b.get(0).size()) {
@@ -12,12 +19,19 @@ function compareVectorVectorFloats(a, b) {
     } else {
         isEqual = false;
     }
-
-
     return isEqual;
 }
 
-//Will be used to check that the brute force computed distLandLand are the same as the internally computed ones
+
+/**
+ * Compare two vector objects
+ * 
+ * Ex) Check that the brute force computed distLandLand 
+ * are the same as the internally computed ones
+ * 
+ * @param {VectorFloat} a 
+ * @param {VectorFloat} b 
+ */
 function compareVectorFloats(a, b) {
     let isEqual = true;
     if (a.size() == b.size()) {

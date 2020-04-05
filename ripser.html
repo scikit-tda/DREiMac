@@ -3,7 +3,9 @@
 <script src="a.out.js"></script>
 <script src="dat.gui.min.js"></script>
 <script src="plotly.min.js"></script>
-<script src="Debugging.js"></script>
+<script src="debugging.js"></script>
+<script src="plotting.js"></script>
+<script src="tadasets.js"></script>
 </head>
 <body>
     <table>
@@ -25,7 +27,7 @@
                 </canvas>
             </td>
             <td>
-                <p id = "persistenceDiagrams"></p>
+                <p id = "dgmsCanvas"></p>
             </td>
         </tr>
     </table>
@@ -103,45 +105,7 @@
             let thresh = 1e12;
             Module.jsRipsDM(distLandLand, field, homdim, thresh, 1, 
             dgms, cocycles);
-            plotDGMS(dgms);
-        }
-
-        function plotDGMS(dgms) {
-            let allPlots = [];
-            let axMin = null;
-            let axMax = null;
-            for (let k = 0; k < dgms.size(); k++) {
-                let Hk = dgms.get(k);
-                if (Hk === undefined) {
-                    continue;
-                }
-                let births = [];
-                let deaths = [];
-                for (let i = 0; i < Hk.size(); i+=2) {
-                    births.push(Hk.get(i));
-                    deaths.push(Hk.get(i+1));
-                }
-                let dgmPoints = {x:births, y:deaths, mode:'markers', name:'H'+k};
-                allPlots.push(dgmPoints);
-                // TODO: Add another persistence diagram for each dimension
-                let axMink = Math.min(Math.min.apply(null, births), Math.min.apply(null, deaths));
-                let axMaxk = Math.max(Math.max.apply(null, births), Math.max.apply(null, deaths.filter(function(x){
-                    return x < Infinity;
-                })));
-                if (axMin === null) {
-                    axMin = axMink;
-                    axMax = axMaxk;
-                }
-                else {
-                    axMin = Math.min(axMin, axMink);
-                    axMax = Math.max(axMax, axMaxk);
-                }
-            }
-            let axRange = axMax - axMin;
-            let diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'lines', name:'diagonal'};
-            allPlots.push(diagonal);
-            let layout = {title:'Persistence Diagrams'};
-            Plotly.newPlot('persistenceDiagrams', allPlots, layout);
+            plotDGMS(dgms, 'dgmsCanvas');
         }
 
         
@@ -149,7 +113,7 @@
             if (isCompiled) {
                 Module.clearVector(distLandLand);
                 Module.clearVectorVector(distLandData);
-                sampleKleinBottle(1.0, 1.0, 0.0001);//Gets our points
+                sampleKleinBottle(kleinPoints, 1.0, 1.0, 0.0001);//Gets our points
                 let k = kleinPoints.size();
                 console.log(k);
                 let kleinPerm = new Module.getGreedyPerm(kleinPoints, k, distLandLand, distLandData);
@@ -187,37 +151,7 @@
             }
         }
 
-        /**
-         * 
-         * @param R constant to scale x,y
-         * @param P constant to scale z,w
-         * @param eps tiny constant used to avoid self intersection
-         */
-        function sampleKleinBottle(R, P, eps) {
-                Module.clearVectorVector(kleinPoints);
-                let x = 0;
-                let y = 0;
-                let z = 0;
-                let w = 0;
-                
-                for (let theta = 0.0; theta < 4 * Math.PI; theta += 0.5) {
-                    for (let v = 0.0; v < 2 * Math.PI; v += 0.5) {
-                        let point = new Module.VectorFloat();//Creates empty point
-                        //Calcs x,y,z,w
-                        x = R * (Math.cos(theta / 2.0) * Math.cos(v) - Math.sin(theta / 2.0) * Math.sin(2 * v));
-                        y = R * (Math.sin(theta / 2.0) * Math.cos(v) + Math.cos(theta / 2.0) * Math.sin(2 * v));
-                        z = P * Math.cos(theta) * (1.0 + eps * Math.sin(v));
-                        w = P * Math.sin(theta) * (1.0 + eps * Math.sin(v));
-                        //Pushes x,y,z,w into point
-                        point.push_back(x);
-                        point.push_back(y);
-                        point.push_back(z);
-                        point.push_back(w);
-                        //Pushes point back on list
-                        kleinPoints.push_back(point);
-                    }
-                }
-            }
+        
 
     </script>
 
