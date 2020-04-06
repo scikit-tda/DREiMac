@@ -26,8 +26,7 @@ class TDA {
     }
 
     /**
-     * Initialize all of the C++ objects needed for rips 
-     * computation
+     * This is called when Emscripten is finished compiling
      */
     init() {
         this.isCompiled = true;
