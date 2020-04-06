@@ -13,15 +13,17 @@
     <script src="ripser.js"></script>
 </head>
 <body>
-
-    <canvas id="pccanvas" width="600" height="600" style="border:1px solid #000000;">
+    <div id = "feedbackText"></div>
+    <canvas id="canvas2D" width="600" height="600" style="border:1px solid #000000;">
     </canvas>
+    
     <div id = "dgmsCanvas"></div>
 
 
     <script type="text/javascript">
-        let pccanvas = document.getElementById("pccanvas");
-        let tda = new TDA(pccanvas);
+        let canvas2D = document.getElementById("canvas2D");
+        let feedbackCanvas = document.getElementById("feedbackText");
+        let tda = new TDA(canvas2D, feedbackCanvas);
         let rips = new Ripser(tda, 2, 1, false, "dgmsCanvas").setupMenu();
     </script>
 

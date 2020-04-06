@@ -139,14 +139,16 @@ class Ripser {
      * Draw the landmarks on the 2D canvas
      */
     drawLandmarks2DCanvas() {
-        this.tda.repaint2DCanvas();
-        // Draw the landmark slightly bigger and in red
-        this.tda.ctx2D.fillStyle = "#ff0000";
-        let dW = 10;
-        for (let i = 0; i < this.idxPerm.length; i++) {
-            let x = this.tda.points[this.idxPerm[i]][0];
-            let y = this.tda.points[this.idxPerm[i]][1];
-            this.tda.ctx2D.fillRect(x, y, dW, dW);
+        if (this.tda.canvas2D.style.display != "none") {
+            this.tda.repaint2DCanvas();
+            // Draw the landmark slightly bigger and in red
+            this.tda.ctx2D.fillStyle = "#ff0000";
+            let dW = 10;
+            for (let i = 0; i < this.idxPerm.length; i++) {
+                let x = this.tda.points[this.idxPerm[i]][0];
+                let y = this.tda.points[this.idxPerm[i]][1];
+                this.tda.ctx2D.fillRect(x, y, dW, dW);
+            }
         }
     }
 
