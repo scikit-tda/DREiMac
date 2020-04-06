@@ -40,6 +40,9 @@ function plotDGMS(dgms, elemStr) {
     let axRange = axMax - axMin;
     let diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'lines', name:'diagonal'};
     allPlots.push(diagonal);
-    let layout = {title:'Persistence Diagrams'};
+    let layout = {title:'Persistence Diagrams',
+                  autosize: false,
+                  width: 600,
+                  height: 600};
     Plotly.newPlot(elemStr, allPlots, layout);
 }

@@ -5,8 +5,6 @@
  */
 
 class TDA {
-    // TODO: Add dat.gui menu handles
-
     /** 
      * @param {DOM Element} pccanvas Handle to the HTML where the 2D point cloud
      *                               will be drawn
@@ -21,8 +19,8 @@ class TDA {
         this.pccanvas = pccanvas;
         this.ctx2D = pccanvas.getContext("2d");
         this.pccanvas.addEventListener("mousedown", this.clickPoint2DCanvas.bind(this));
-
-        this.numPermsInput = document.getElementById("numPerms");
+        
+        this.gui = new dat.GUI();
     }
 
     /**

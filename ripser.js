@@ -7,10 +7,13 @@ class Ripser {
      * @param {int} field Prime number for field coefficients for homology (default 2)
      * @param {int} homdim Maximum dimension of homology to compute (default 1)
      * @param {boolean} do_cocycles Whether to compute representative cocycles (default false)
+     * @param {string} canvasName A string ID of the DOM element where the plots will be 
+     *                            drawn.  If undefined, results won't be drawn automatically
      */
-    constructor(tda, field, homdim, do_cocycles) {
+    constructor(tda, field, homdim, do_cocycles, canvasName) {
         this.tda = tda;
         this.field = field;
+        this.canvasName = canvasName;
         if (field === undefined) {
             this.field = 2;
         }
@@ -31,6 +34,30 @@ class Ripser {
             
         this.dgms = null; // VectorVectorFloat holding persistence diagrams
         this.cocycles = null; // VectorVectorVectorInt holding representative cocycles
+        this.nperm = 1;
+        return this;
+    }
+
+    /**
+     * Setup a menu for doing a rips computation.
+     * This is optional; this class can be used without a menu
+     */
+    setupMenu() {
+        const gui = this.tda.gui;
+        let ripsOpts = gui.addFolder('Rips Options');
+        ripsOpts.add(this, 'field').min(2).step(1);
+        ripsOpts.add(this, 'homdim').min(0).step(1);
+        ripsOpts.add(this, 'nperm').min(1).step(1);
+        ripsOpts.add(this, 'computeRips');
+    }
+
+
+    computeRips() {
+        this.computeRipsPC(this.tda.points, this.nperm);
+        this.drawLandmarks2DCanvas();
+        if (!(this.canvasName === undefined)) {
+            plotDGMS(this.dgms, this.canvasName);
+        }
     }
 
     /**
@@ -50,10 +77,10 @@ class Ripser {
      /**
       * Compute rips on a Euclidean point cloud
       * @param {array} points An array of arrays of coordinates
-      * @param {int} k The number of points to take in the greedy permutation
+      * @param {int} nperm The number of points to take in the greedy permutation
       * @param {double} thresh The threshold at which to stop rips
       */
-    computeRipsPC(points, k, thresh) {
+    computeRipsPC(points, nperm, thresh) {
         if (this.tda.isCompiled) {
             this.init();
             // Step 1: Clear the vectors that will hold the output
@@ -70,15 +97,16 @@ class Ripser {
                 }
                 this.X.push_back(x);
             }
-            if (k === undefined) {
+            if (nperm === undefined) {
                 // If the number of points in the permutation was not
                 // specified, simply make it the number of points in the point cloud
-                k = points.length;
+                nperm = points.length;
             }
-            k = Math.min(k, points.length);
-            let perm = new Module.getGreedyPerm(this.X, k, this.distLandLand, this.distLandData);
+            nperm = Math.min(nperm, points.length);
+            this.nperm = nperm;
+            let perm = new Module.getGreedyPerm(this.X, nperm, this.distLandLand, this.distLandData);
             this.idxPerm.length = 0;
-            for (let i = 0; i < k; i++) {
+            for (let i = 0; i < nperm; i++) {
                 this.idxPerm.push(perm.get(i));
             }
 

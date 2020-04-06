@@ -13,39 +13,16 @@
     <script src="ripser.js"></script>
 </head>
 <body>
-    <table>
-        <tr>
-        <td><input type="text" id="numPerms" size="3"></input></td>
-        <td>
-        <button type="button" onclick="computeRips()" id="computeRips">Compute Rips</button>
-        </td>
-        </tr>
-    </table>
 
-    <table>
-        <tr>
-            <td>
-                <canvas id="pccanvas" width="600" height="600" style="border:1px solid #000000;">
-                </canvas>
-            </td>
-            <td>
-                <p id = "dgmsCanvas"></p>
-            </td>
-        </tr>
-    </table>
+    <canvas id="pccanvas" width="600" height="600" style="border:1px solid #000000;">
+    </canvas>
+    <div id = "dgmsCanvas"></div>
 
 
     <script type="text/javascript">
-        let permsInput = document.getElementById("numPerms");
         let pccanvas = document.getElementById("pccanvas");
         let tda = new TDA(pccanvas);
-        let rips = new Ripser(tda);
-
-        function computeRips() {
-            rips.computeRipsPC(tda.points, parseInt(permsInput.value));
-            rips.drawLandmarks2DCanvas();
-            plotDGMS(rips.dgms, "dgmsCanvas");
-        }
+        let rips = new Ripser(tda, 2, 1, false, "dgmsCanvas").setupMenu();
     </script>
 
 </body>
