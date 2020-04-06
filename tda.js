@@ -28,6 +28,25 @@ class TDA {
     }
 
     /**
+     * Toggle the type of selected data
+     * @param {string} name Name of the data type
+     */
+    setDataTypeChecked(name){
+        for (let otherName in this.dataType){
+            this.dataType[otherName] = false;
+        }
+        this.dataType[name] = true;
+        if (name == 'canvas2D') {
+            this.canvas2D.style.display = "block";
+            this.feedbackCanvas.innerHTML = "Please draw a 2D point cloud by left clicking";
+        }
+        else {
+            this.canvas2D.style.display = "none";
+            this.feedbackCanvas.innerHTML = "Please Select " + this.dataTypeDisp[name];
+        }
+    }
+
+    /**
      * Setup a menu for choosing different point clouds
      */
     setupMenu() {
@@ -41,29 +60,16 @@ class TDA {
         let dataMenu = gui.addFolder("Dataset");
         this.dataMenu = dataMenu;
         this.dataTypeMenu = {};
-        function setChecked(handle, name){
-            for (let otherName in handle.dataType){
-                handle.dataType[otherName] = false;
-            }
-            handle.dataType[name] = true;
-            if (name == 'canvas2D') {
-                handle.canvas2D.style.display = "block";
-                handle.feedbackCanvas.innerHTML = "Please draw a 2D point cloud by left clicking";
-            }
-            else {
-                handle.canvas2D.style.display = "none";
-                handle.feedbackCanvas.innerHTML = "Please Select " + handle.dataTypeDisp[name];
-            }
-        }
+
 
         for (let name in this.dataType) {
             this.dataTypeMenu[name] = dataMenu.add(this.dataType, name)
                                         .name(dataTypeDisp[name])
                                         .listen().onChange( function() {
-                                                                setChecked(this, name);
+                                                               this.setDataTypeChecked(name);
                                                             }.bind(this))
         }
-        setChecked(this, 'canvas2D');
+        this.setDataTypeChecked('canvas2D');
         this.syntheticMenu = dataMenu.addFolder("Synthetic Point Clouds");
         this.setupKleinMenu();
     }
@@ -75,7 +81,8 @@ class TDA {
     sampleKlein() {
         const ko = this.kleinOptions;
         this.points = sampleKleinBottle(ko.R, ko.P, ko.eps);
-        this.feedbackCanvas.innerHTML = "Sampled Klein Bottle with " + this.points.length + " points";
+        this.setDataTypeChecked("synthetic");
+        this.feedbackCanvas.innerHTML = "Sampled Klein Bottle with " + this.points.length + " points.  Now compute rips";
     }
 
     /**

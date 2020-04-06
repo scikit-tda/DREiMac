@@ -18,7 +18,6 @@ function sampleKleinBottle(R, P, eps) {
     let points = [];
     for (let theta = 0.0; theta < 4 * Math.PI; theta += 0.5) {
         for (let v = 0.0; v < 2 * Math.PI; v += 0.5) {
-            let point = new Module.VectorFloat();//Creates empty point
             //Calcs x,y,z,w
             x = R * (Math.cos(theta / 2.0) * Math.cos(v) - Math.sin(theta / 2.0) * Math.sin(2 * v));
             y = R * (Math.sin(theta / 2.0) * Math.cos(v) + Math.cos(theta / 2.0) * Math.sin(2 * v));
