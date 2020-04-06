@@ -9,7 +9,8 @@
     <script src="debugging.js"></script>
     <script src="plotting.js"></script>
     <script src="tadasets.js"></script>
-    <script src="dreimac.js"></script>
+    <script src="tda.js"></script>
+    <script src="ripser.js"></script>
 </head>
 <body>
     <table>
@@ -35,11 +36,15 @@
 
 
     <script type="text/javascript">
-        let canvas = document.getElementById("pccanvas");
-        let dreimac = dreimacContext(canvas);
+        let permsInput = document.getElementById("numPerms");
+        let pccanvas = document.getElementById("pccanvas");
+        let tda = new TDA(pccanvas);
+        let rips = new Ripser(tda);
 
         function computeRips() {
-            dreimac.computeRips();
+            rips.computeRipsPC(tda.points, parseInt(permsInput.value));
+            rips.drawLandmarks2DCanvas();
+            plotDGMS(rips.dgms, "dgmsCanvas");
         }
     </script>
 
