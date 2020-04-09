@@ -21,7 +21,7 @@ class TDA {
 
         // Variables for a 2D canvas
         this.canvas2D = canvas2D;
-        this.ctx2D = canvas2D.getContext("2d");
+        this.canvas2D.ctx2D = canvas2D.getContext("2d");
         this.canvas2D.addEventListener("mousedown", this.clickPoint2DCanvas.bind(this));
         
         this.setupMenu();
@@ -124,13 +124,13 @@ class TDA {
         let dW = 5;
         let W = this.canvas2D.width;
         let H = this.canvas2D.height;
-        this.ctx2D.clearRect(0, 0, W, H);
+        this.canvas2D.ctx2D.clearRect(0, 0, W, H);
         // Draw all of the points in black
-        this.ctx2D.fillStyle = "#000000";
+        this.canvas2D.ctx2D.fillStyle = "#000000";
         for (let i = 0; i < this.points.length; i++) {
             let x = this.points[i][0];
             let y = this.points[i][1];
-            this.ctx2D.fillRect(x, y, dW, dW);
+            this.canvas2D.ctx2D.fillRect(x, y, dW, dW);
         }
     }
 }

@@ -7,13 +7,14 @@ class Ripser {
      * @param {int} field Prime number for field coefficients for homology (default 2)
      * @param {int} homdim Maximum dimension of homology to compute (default 1)
      * @param {boolean} do_cocycles Whether to compute representative cocycles (default false)
-     * @param {string} canvasName A string ID of the DOM element where the plots will be 
-     *                            drawn.  If undefined, results won't be drawn automatically
+     * @param {string} dgmsCanvasName A string ID of the DOM element where the persistence 
+     *                                diagrams will be drawn.  If undefined, results won't be 
+     *                                drawn automatically
      */
-    constructor(tda, field, homdim, do_cocycles, canvasName) {
+    constructor(tda, field, homdim, do_cocycles, dgmsCanvasName) {
         this.tda = tda;
         this.field = field;
-        this.canvasName = canvasName;
+        this.dgmsCanvasName = dgmsCanvasName;
         if (field === undefined) {
             this.field = 2;
         }
@@ -34,7 +35,7 @@ class Ripser {
             
         this.dgms = null; // VectorVectorFloat holding persistence diagrams
         this.cocycles = null; // VectorVectorVectorInt holding representative cocycles
-        this.nperm = 1;
+        this.nlandmarks = 100;
         return this;
     }
 
@@ -47,16 +48,17 @@ class Ripser {
         let ripsOpts = gui.addFolder('Rips Options');
         ripsOpts.add(this, 'field').min(2).step(1);
         ripsOpts.add(this, 'homdim').min(0).step(1);
-        ripsOpts.add(this, 'nperm').min(1).step(1);
+        // Update landmarks if there aren't enough with .listen()
+        ripsOpts.add(this, 'nlandmarks').min(1).step(1).listen(); 
         ripsOpts.add(this, 'computeRips');
     }
 
 
     computeRips() {
-        this.computeRipsPC(this.tda.points, this.nperm);
+        this.computeRipsPC(this.tda.points, this.nlandmarks);
         this.drawLandmarks2DCanvas();
-        if (!(this.canvasName === undefined)) {
-            plotDGMS(this.dgms, this.canvasName);
+        if (!(this.dgmsCanvasName === undefined)) {
+            plotDGMS(this.dgms, this.dgmsCanvasName);
         }
     }
 
@@ -77,10 +79,10 @@ class Ripser {
      /**
       * Compute rips on a Euclidean point cloud
       * @param {array} points An array of arrays of coordinates
-      * @param {int} nperm The number of points to take in the greedy permutation
+      * @param {int} nlandmarks The number of points to take in the greedy permutation
       * @param {double} thresh The threshold at which to stop rips
       */
-    computeRipsPC(points, nperm, thresh) {
+    computeRipsPC(points, nlandmarks, thresh) {
         if (this.tda.isCompiled) {
             this.init();
             // Step 1: Clear the vectors that will hold the output
@@ -97,16 +99,16 @@ class Ripser {
                 }
                 this.X.push_back(x);
             }
-            if (nperm === undefined) {
+            if (nlandmarks === undefined) {
                 // If the number of points in the permutation was not
                 // specified, simply make it the number of points in the point cloud
-                nperm = points.length;
+                nlandmarks = points.length;
             }
-            nperm = Math.min(nperm, points.length);
-            this.nperm = nperm;
-            let perm = new Module.getGreedyPerm(this.X, nperm, this.distLandLand, this.distLandData);
+            nlandmarks = Math.min(nlandmarks, points.length);
+            this.nlandmarks = nlandmarks;
+            let perm = new Module.getGreedyPerm(this.X, nlandmarks, this.distLandLand, this.distLandData);
             this.idxPerm.length = 0;
-            for (let i = 0; i < nperm; i++) {
+            for (let i = 0; i < nlandmarks; i++) {
                 this.idxPerm.push(perm.get(i));
             }
 
@@ -142,12 +144,12 @@ class Ripser {
         if (this.tda.canvas2D.style.display != "none") {
             this.tda.repaint2DCanvas();
             // Draw the landmark slightly bigger and in red
-            this.tda.ctx2D.fillStyle = "#ff0000";
+            this.tda.canvas2D.ctx2D.fillStyle = "#ff0000";
             let dW = 10;
             for (let i = 0; i < this.idxPerm.length; i++) {
                 let x = this.tda.points[this.idxPerm[i]][0];
                 let y = this.tda.points[this.idxPerm[i]][1];
-                this.tda.ctx2D.fillRect(x, y, dW, dW);
+                this.tda.canvas2D.ctx2D.fillRect(x, y, dW, dW);
             }
         }
     }

@@ -30,8 +30,6 @@ class CircularCoords(object):
         maxdim : int
             Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
             but it may be of interest to see other dimensions (e.g. for a torus)
-        partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
-            A partition of unity function
         """
         assert(maxdim >= 1)
         self.verbose = verbose

@@ -5,12 +5,20 @@
  *                            is assumed that they start at H0
  * @param {string} elemStr A string ID of the DOM element where
  *                         the plots will be placed
+ * @param {list} toPlot    A list of diagrams to plot.  By default, plot
+ *                         all available
  */
-function plotDGMS(dgms, elemStr) {
+function plotDGMS(dgms, elemStr, toPlot) {
+    if (toPlot === undefined) {
+        toPlot = [];
+        for (let k = 0; k < dgms.size(); k++) {
+            toPlot.push(k);
+        }
+    }
     let allPlots = [];
     let axMin = null;
     let axMax = null;
-    for (let k = 0; k < dgms.size(); k++) {
+    for (let k of toPlot) {
         let Hk = dgms.get(k);
         if (Hk === undefined) {
             continue;
