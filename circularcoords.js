@@ -98,22 +98,37 @@ class CircularCoords {
             alert("Point cloud not loaded in yet");
             return;
         }
+
         // Step 1: Come up with the representative cocycle as a formal sum
         // of the chosen cocycles
-        
-        /*
-        n_landmarks = self.n_landmarks_
-        n_data = self.X_.shape[0]
-        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
-        cohomdeath = -np.inf
-        cohombirth = np.inf
-        cocycle = np.zeros((0, 3))
-        prime = self.prime_
-        for k in range(len(cocycle_idx)):
-            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=prime)
+        let nlandmarks = this.rips.nlandmarks;
+        let dgm1 = [];
+        let H1 = this.rips.dgms.get(1);
+        for (let i = 0; i < H1.size(); i+=2) {
+            // The /2 factor is so that Cech is included in rips
+            dgm1.push([Hk.get(i)/2.0, Hk.get(i+1)/2.0]);
+        }
+        cohomdeath = null;
+        cohombirth = null;
+        let cocycle = [];
+        let prime = this.rips.field;
+        for (idx of cocycle_idx) {
+            cocycle = addCochains(cocycle, this.rips.getCocycle(1, idx), prime);
+            if (cohomdeath === null) {
+                cohomdeath = dgm1[idx][0];
+                cohombirth = dgm1[idx][1];
+            }
+            else {
+                cohomdeath = Math.max(cohomdeath, dgm1[idx][0]);
+                cohombirth = Math.min(cohombirth, dgm1[idx][1]);
+            }
+
             cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
             cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+        }
 
+
+        /*
         ## Step 2: Determine radius for balls
         dist_land_data = self.dist_land_data_
         dist_land_land = self.dist_land_land_
@@ -131,14 +146,14 @@ class CircularCoords {
         #Lift to integer cocycle
         val = np.array(cocycle[:, 2])
         val[val > (prime-1)/2] -= prime
-        Y = np.zeros((n_landmarks, n_landmarks))
+        Y = np.zeros((nlandmarks, nlandmarks))
         Y[cocycle[:, 0], cocycle[:, 1]] = val
         Y = Y + Y.T
         #Select edges that are under the threshold
-        [I, J] = np.meshgrid(np.arange(n_landmarks), np.arange(n_landmarks))
-        I = I[np.triu_indices(n_landmarks, 1)]
-        J = J[np.triu_indices(n_landmarks, 1)]
-        Y = Y[np.triu_indices(n_landmarks, 1)]
+        [I, J] = np.meshgrid(np.arange(nlandmarks), np.arange(nlandmarks))
+        I = I[np.triu_indices(nlandmarks, 1)]
+        J = J[np.triu_indices(nlandmarks, 1)]
+        Y = Y[np.triu_indices(nlandmarks, 1)]
         idx = np.arange(len(I))
         idx = idx[dist_land_land[I, J] < 2*r_cover]
         I = I[idx]
@@ -172,7 +187,7 @@ class CircularCoords {
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(phi[U], r_cover)
         # Compute the partition of unity 
-        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{nlandmarks}(b))
         denom = np.sum(phi, 0)
         nzero = np.sum(denom == 0)
         if nzero > 0:
@@ -186,7 +201,7 @@ class CircularCoords {
         ## Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
         
         # compute all transition functions
-        theta_matrix = np.zeros((n_landmarks, n_landmarks))
+        theta_matrix = np.zeros((nlandmarks, nlandmarks))
         I = np.array(theta[:, 0], dtype = np.int64)
         J = np.array(theta[:, 1], dtype = np.int64)
         theta = theta[:, 2]

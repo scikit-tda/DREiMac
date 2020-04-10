@@ -34,7 +34,7 @@ class Ripser {
         this.distLandData = null; // VectorVectorFloat holding landmark to point cloud distances
             
         this.dgms = null; // VectorVectorFloat holding persistence diagrams
-        this.cocycles = null; // VectorVectorVectorInt holding representative cocycles
+        this.cocycles = null; // VectorVectorVector holding representative cocycles
         this.nlandmarks = 100;
         return this;
     }
@@ -72,8 +72,28 @@ class Ripser {
             this.distLandData = new Module.VectorVectorFloat();
             this.X = new Module.VectorVectorFloat();
             this.dgms = new Module.VectorVectorFloat();
-            this.cocycles = new Module.VectorVectorVectorInt();
+            this.cocycles = new Module.VectorVectorVectorFloat();
         }
+    }
+
+    /**
+     * Return the cocycle at a particular index
+     * @param {int} dim Dimension of homology
+     * @param {int} index Index of persistence point
+     * 
+     * @returns {array 2d} The nonzero elements of the cocycle
+     */
+    getCocycle(dim, index) {
+        let ret = [];
+        let cocycle = this.cocycles.get(dim).get(index);
+        for (let i = 0; i < cocycle.size(); i += dim+2) {
+            let elem = [];
+            for (let k = 0; k < dim+2; k++) {
+                elem.push(cocycle.get(i+k));
+            }
+            ret.push(elem);
+        }
+        return ret;
     }
 
      /**
@@ -114,7 +134,7 @@ class Ripser {
 
             // Step 3: Run ripser
             Module.clearVectorVector(this.dgms);
-            Module.clearVectorVectorVectorInt(this.cocycles);
+            Module.clearVectorVectorVector(this.cocycles);
             // Automatically determine the threshold to be greater
             // than the max inter-landmark distance if the threshold
             // was not specified

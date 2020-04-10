@@ -21,7 +21,7 @@
 
 using namespace emscripten;
 
-void clearVectorVectorVectorInt(std::vector<std::vector<std::vector<int>>>& M) {
+void clearVectorVectorVector(std::vector<std::vector<std::vector<float>>>& M) {
     for (size_t i = 0; i < M.size(); i++) {
         for (size_t j = 0; j < M[i].size(); j++) {
             for (size_t k = 0; k < M[i][j].size(); k++) {
@@ -1176,11 +1176,21 @@ ripserResults rips_dm_sparse(int* I, int* J, float* V, int NEdges,
 */
 void jsRipsDM(std::vector<float>& D, int modulus, int dim_max, float threshold, int do_cocycles, 
             std::vector<std::vector<float> >& births_and_deaths,
-            std::vector<std::vector<std::vector<int> > >& cocycles) {
+            std::vector<std::vector<std::vector<float> > >& cocycles) {
     int N = D.size();
     ripserResults res = rips_dm(&D[0], N, modulus, dim_max, threshold, do_cocycles);
     births_and_deaths = res.births_and_deaths_by_dim;
-    cocycles = res.cocycles_by_dim;
+    for (size_t i = 0; i < res.cocycles_by_dim.size(); i++) {
+        std::vector<std::vector<float >> dim;
+        for (size_t j = 0; j < res.cocycles_by_dim[i].size(); j++) {
+            std::vector<float> cocycle;
+            for (size_t k = 0; k < res.cocycles_by_dim[i][j].size(); k++) {
+                cocycle.push_back((float)res.cocycles_by_dim[i][j][k]);
+            }
+            dim.push_back(cocycle);
+        }
+        cocycles.push_back(dim);
+    }
 }
 
 /*
@@ -1221,12 +1231,12 @@ EMSCRIPTEN_BINDINGS(stl_wrappers) {
     emscripten::register_vector<float>("VectorFloat");
     emscripten::register_vector<int>("VectorInt");
     emscripten::register_vector<std::vector<float>>("VectorVectorFloat");
-    emscripten::register_vector<std::vector<std::vector<int>>>("VectorVectorVectorInt");
+    emscripten::register_vector<std::vector<std::vector<float>>>("VectorVectorVectorFloat");
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
     function("getGreedyPerm", &getGreedyPerm);
-    function("clearVectorVectorVectorInt", &clearVectorVectorVectorInt);
+    function("clearVectorVectorVector", &clearVectorVectorVector);
     function("clearVectorVector", &clearVectorVector);
 	function("clearVector", &clearVector);
     function("jsRipsDM", &jsRipsDM);

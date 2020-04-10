@@ -78,7 +78,7 @@ function addCochains(c1, c2, p) {
             cret.push(elem);
         }
     }
-    return cret
+    return cret;
 }
 
 /*

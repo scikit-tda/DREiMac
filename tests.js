@@ -23,6 +23,12 @@ function cochainsEqual(c1, c2) {
     }
 }
 
+tda = new TDA();
+
+describe('ripser', function() {
+
+});
+
 describe('dreimacutils', function() {
   describe('#addCochains1()', function() {
     it('Adding 1-cochains under a field', function() {

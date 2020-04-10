@@ -12,18 +12,19 @@ class TDA {
      *                               feedback text will be drawn
      */
     constructor(canvas2D, feedbackCanvas) {
+        this.points = []; // Javascript copy of Euclidean points
         this.isCompiled = false;
         Module.onRuntimeInitialized = this.init.bind(this);
-
-        this.feedbackCanvas = feedbackCanvas;
-
-        this.points = []; // Javascript copy of Euclidean points
+        
 
         // Variables for a 2D canvas
-        this.canvas2D = canvas2D;
-        this.canvas2D.ctx2D = canvas2D.getContext("2d");
-        this.canvas2D.addEventListener("mousedown", this.clickPoint2DCanvas.bind(this));
-        
+        if (!(canvas2D === undefined)) {
+            this.canvas2D = canvas2D;
+            this.canvas2D.ctx2D = canvas2D.getContext("2d");
+            this.canvas2D.addEventListener("mousedown", this.clickPoint2DCanvas.bind(this));
+        }
+
+        this.feedbackCanvas = feedbackCanvas;
         this.setupMenu();
     }
 
@@ -50,6 +51,10 @@ class TDA {
      * Setup a menu for choosing different point clouds
      */
     setupMenu() {
+        if (window.dat === undefined) {
+            // Dat.gui hasn't been included, so skip this
+            return;
+        }
         this.gui = new dat.GUI();
         const gui = this.gui;
         this.dataType = {'canvas2D':true,
