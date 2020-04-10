@@ -52,7 +52,7 @@ function addCochains(c1, c2, p) {
     c = c.concat(c2);
     for (elem of c) {
         let indices = elem.slice(0, -1);
-        let v = parseFloat(elem.slice(-1));
+        let v = parseFloat(elem[elem.length-1]);
         if (indices[1] < indices[0]) {
             indices.sort();
             v = -v;
@@ -73,8 +73,10 @@ function addCochains(c1, c2, p) {
         while (v < 0) {
             v += p;
         }
-        elem.push(v);
-        cret.push(elem);
+        if (v != 0) {
+            elem.push(v);
+            cret.push(elem);
+        }
     }
     return cret
 }
