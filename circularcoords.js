@@ -90,8 +90,18 @@ class CircularCoords {
       * sparse filtrations (Jose Perea 2018)
      */
     updateCoordinates() {
-        /**## Step 1: Come up with the representative cocycle as a formal sum
-        ## of the chosen cocycles
+        if (this.cocyle_idx.length == 0) {
+            alert("Must choose at least one representative cocycle");
+            return;
+        }
+        if (this.X === undefined) {
+            alert("Point cloud not loaded in yet");
+            return;
+        }
+        // Step 1: Come up with the representative cocycle as a formal sum
+        // of the chosen cocycles
+        
+        /*
         n_landmarks = self.n_landmarks_
         n_data = self.X_.shape[0]
         dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
