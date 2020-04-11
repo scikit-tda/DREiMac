@@ -78,7 +78,7 @@ class Ripser {
             worker.onerror = function(event) {
                 console.log("ERROR");
                 that.tda.feedbackCanvas = "<h3><font color=red>" + event.data + "</font></h3>";
-                this.tda.progressBar.setLoadingFailed();
+                that.tda.progressBar.setLoadingFailed();
             }
             worker.onmessage = function(event) {
                 if (event.data.message == "finished") {
