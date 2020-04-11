@@ -98,7 +98,7 @@ class TDA {
         this.dataType[name] = true;
         if (name == 'canvas2D') {
             this.canvas2D.style.display = "block";
-            this.feedbackCanvas.innerHTML = "Please draw a 2D point cloud by left clicking";
+            this.feedbackCanvas.innerHTML = "Please draw a 2D point cloud by left clicking. Then compute rips with your chosen parameters";
             this.points = [];
         }
         else {
