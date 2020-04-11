@@ -11,7 +11,7 @@
 function plotDGMS(dgms, elemStr, toPlot) {
     if (toPlot === undefined) {
         toPlot = [];
-        for (let k = 0; k < dgms.size(); k++) {
+        for (let k = 0; k < dgms.length; k++) {
             toPlot.push(k);
         }
     }
@@ -19,16 +19,8 @@ function plotDGMS(dgms, elemStr, toPlot) {
     let axMin = null;
     let axMax = null;
     for (let k of toPlot) {
-        let Hk = dgms.get(k);
-        if (Hk === undefined) {
-            continue;
-        }
-        let births = [];
-        let deaths = [];
-        for (let i = 0; i < Hk.size(); i+=2) {
-            births.push(Hk.get(i));
-            deaths.push(Hk.get(i+1));
-        }
+        let births = dgms[k].births;
+        let deaths = dgms[k].deaths;
         let dgmPoints = {x:births, y:deaths, mode:'markers', name:'H'+k};
         allPlots.push(dgmPoints);
         // TODO: Add another persistence diagram for each dimension

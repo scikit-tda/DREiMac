@@ -29,6 +29,7 @@ class CircularCoords {
         this.tda = tda;
         this.rips = new Ripser(tda, prime, maxdim, true);
         this.rips.nlandmarks = nlandmarks;
+        this.ripsPromise = null;
         this.dgmsCanvasName = dgmsCanvasName;
         this.canvas2D = canvas2D;
 
@@ -69,7 +70,7 @@ class CircularCoords {
      */
     addEuclideanPointCloud() {
         this.X = this.tda.points;
-        this.rips.computeRipsPC(X, this.rips.nlandmarks);
+        this.ripsPromise = this.rips.computeRipsPC(X, this.rips.nlandmarks);
     }
 
     /**
@@ -81,7 +82,7 @@ class CircularCoords {
             alert("Point cloud not loaded in yet");
         }
         else {
-            this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
+            this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
         }
     }
 
@@ -98,122 +99,122 @@ class CircularCoords {
             alert("Point cloud not loaded in yet");
             return;
         }
-
-        // Step 1: Come up with the representative cocycle as a formal sum
-        // of the chosen cocycles
-        let nlandmarks = this.rips.nlandmarks;
-        let dgm1 = [];
-        let H1 = this.rips.dgms.get(1);
-        for (let i = 0; i < H1.size(); i+=2) {
-            // The /2 factor is so that Cech is included in rips
-            dgm1.push([Hk.get(i)/2.0, Hk.get(i+1)/2.0]);
-        }
-        cohomdeath = null;
-        cohombirth = null;
-        let cocycle = [];
-        let prime = this.rips.field;
-        for (idx of cocycle_idx) {
-            cocycle = addCochains(cocycle, this.rips.getCocycle(1, idx), prime);
-            if (cohomdeath === null) {
-                cohomdeath = dgm1[idx][0];
-                cohombirth = dgm1[idx][1];
-            }
-            else {
-                cohomdeath = Math.max(cohomdeath, dgm1[idx][0]);
-                cohombirth = Math.min(cohombirth, dgm1[idx][1]);
-            }
-
-            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
-            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+        if (this.ripsPromise === null) {
+            alert("Rips computation has not been initiated yet");
+            return;
         }
 
+        let that = this;
+        this.ripsPromise.then(function() {
+            // Step 1: Come up with the representative cocycle as a formal sum
+            // of the chosen cocycles
+            let nlandmarks = that.rips.nlandmarks;
+            let dgm1 = that.rips.dgms[1];
+            cohomdeath = null;
+            cohombirth = null;
+            let cocycle = [];
+            let prime = that.rips.field;
+            for (idx of cocycle_idx) {
+                cocycle = addCochains(cocycle, that.rips.cocycles1[idx], prime);
+                if (cohomdeath === null) {
+                    cohomdeath = dgm1.births[idx];
+                    cohombirth = dgm1.deaths[idx];
+                }
+                else {
+                    cohomdeath = Math.max(cohomdeath, dgm1.births[idx]);
+                    cohombirth = Math.min(cohombirth, dgm1.deaths[idx]);
+                }
+            }
 
-        /*
-        ## Step 2: Determine radius for balls
-        dist_land_data = self.dist_land_data_
-        dist_land_land = self.dist_land_land_
-        coverage = np.max(np.min(dist_land_data, 1))
-        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-        self.r_cover_ = r_cover # Store covering radius for reference
-        if self.verbose:
-            print("r_cover = %.3g"%r_cover)
-        
 
-        ## Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
-        ## and use it to find a projection of the cocycle
-        ## onto the image of delta0
+            /*
+            ## Step 2: Determine radius for balls
+            dist_land_data = self.dist_land_data_
+            dist_land_land = self.dist_land_land_
+            coverage = np.max(np.min(dist_land_data, 1))
+            r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+            self.r_cover_ = r_cover # Store covering radius for reference
+            if self.verbose:
+                print("r_cover = %.3g"%r_cover)
+            
 
-        #Lift to integer cocycle
-        val = np.array(cocycle[:, 2])
-        val[val > (prime-1)/2] -= prime
-        Y = np.zeros((nlandmarks, nlandmarks))
-        Y[cocycle[:, 0], cocycle[:, 1]] = val
-        Y = Y + Y.T
-        #Select edges that are under the threshold
-        [I, J] = np.meshgrid(np.arange(nlandmarks), np.arange(nlandmarks))
-        I = I[np.triu_indices(nlandmarks, 1)]
-        J = J[np.triu_indices(nlandmarks, 1)]
-        Y = Y[np.triu_indices(nlandmarks, 1)]
-        idx = np.arange(len(I))
-        idx = idx[dist_land_land[I, J] < 2*r_cover]
-        I = I[idx]
-        J = J[idx]
-        Y = Y[idx]
+            ## Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
+            ## and use it to find a projection of the cocycle
+            ## onto the image of delta0
 
-        NEdges = len(I)
-        R = np.zeros((NEdges, 2))
-        R[:, 0] = J
-        R[:, 1] = I
-        #Make a flat array of NEdges weights parallel to the rows of R
-        if do_weighted:
-            W = dist_land_land[I, J]
-        else:
-            W = np.ones(NEdges)
-        delta0 = make_delta0(R)
-        wSqrt = np.sqrt(W).flatten()
-        WSqrt = scipy.sparse.spdiags(wSqrt, 0, len(W), len(W))
-        A = WSqrt*delta0
-        b = WSqrt.dot(Y)
-        tau = lsqr(A, b)[0]
-        theta = np.zeros((NEdges, 3))
-        theta[:, 0] = J
-        theta[:, 1] = I
-        theta[:, 2] = -delta0.dot(tau)
-        theta = add_cocycles(cocycle, theta, real=True)
-        
+            #Lift to integer cocycle
+            val = np.array(cocycle[:, 2])
+            val[val > (prime-1)/2] -= prime
+            Y = np.zeros((nlandmarks, nlandmarks))
+            Y[cocycle[:, 0], cocycle[:, 1]] = val
+            Y = Y + Y.T
+            #Select edges that are under the threshold
+            [I, J] = np.meshgrid(np.arange(nlandmarks), np.arange(nlandmarks))
+            I = I[np.triu_indices(nlandmarks, 1)]
+            J = J[np.triu_indices(nlandmarks, 1)]
+            Y = Y[np.triu_indices(nlandmarks, 1)]
+            idx = np.arange(len(I))
+            idx = idx[dist_land_land[I, J] < 2*r_cover]
+            I = I[idx]
+            J = J[idx]
+            Y = Y[idx]
 
-        ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-        U = dist_land_data < r_cover
-        phi = np.zeros_like(dist_land_data)
-        phi[U] = partunity_fn(phi[U], r_cover)
-        # Compute the partition of unity 
-        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{nlandmarks}(b))
-        denom = np.sum(phi, 0)
-        nzero = np.sum(denom == 0)
-        if nzero > 0:
-            warnings.warn("There are %i point not covered by a landmark"%nzero)
-            denom[denom == 0] = 1
-        varphi = phi / denom[None, :]
+            NEdges = len(I)
+            R = np.zeros((NEdges, 2))
+            R[:, 0] = J
+            R[:, 1] = I
+            #Make a flat array of NEdges weights parallel to the rows of R
+            if do_weighted:
+                W = dist_land_land[I, J]
+            else:
+                W = np.ones(NEdges)
+            delta0 = make_delta0(R)
+            wSqrt = np.sqrt(W).flatten()
+            WSqrt = scipy.sparse.spdiags(wSqrt, 0, len(W), len(W))
+            A = WSqrt*delta0
+            b = WSqrt.dot(Y)
+            tau = lsqr(A, b)[0]
+            theta = np.zeros((NEdges, 3))
+            theta[:, 0] = J
+            theta[:, 1] = I
+            theta[:, 2] = -delta0.dot(tau)
+            theta = add_cocycles(cocycle, theta, real=True)
+            
 
-        # To each data point, associate the index of the first open set it belongs to
-        ball_indx = np.argmax(U, 0)
+            ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
+            U = dist_land_data < r_cover
+            phi = np.zeros_like(dist_land_data)
+            phi[U] = partunity_fn(phi[U], r_cover)
+            # Compute the partition of unity 
+            # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{nlandmarks}(b))
+            denom = np.sum(phi, 0)
+            nzero = np.sum(denom == 0)
+            if nzero > 0:
+                warnings.warn("There are %i point not covered by a landmark"%nzero)
+                denom[denom == 0] = 1
+            varphi = phi / denom[None, :]
 
-        ## Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-        
-        # compute all transition functions
-        theta_matrix = np.zeros((nlandmarks, nlandmarks))
-        I = np.array(theta[:, 0], dtype = np.int64)
-        J = np.array(theta[:, 1], dtype = np.int64)
-        theta = theta[:, 2]
-        theta = np.mod(theta + 0.5, 1) - 0.5
-        theta_matrix[I, J] = theta
-        theta_matrix[J, I] = -theta
-        class_map = -tau[ball_indx]
-        for i in range(n_data):
-            class_map[i] += theta_matrix[ball_indx[i], :].dot(varphi[:, i])    
-        thetas = np.mod(2*np.pi*class_map, 2*np.pi)
+            # To each data point, associate the index of the first open set it belongs to
+            ball_indx = np.argmax(U, 0)
 
-        return thetas**/
+            ## Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
+            
+            # compute all transition functions
+            theta_matrix = np.zeros((nlandmarks, nlandmarks))
+            I = np.array(theta[:, 0], dtype = np.int64)
+            J = np.array(theta[:, 1], dtype = np.int64)
+            theta = theta[:, 2]
+            theta = np.mod(theta + 0.5, 1) - 0.5
+            theta_matrix[I, J] = theta
+            theta_matrix[J, I] = -theta
+            class_map = -tau[ball_indx]
+            for i in range(n_data):
+                class_map[i] += theta_matrix[ball_indx[i], :].dot(varphi[:, i])    
+            thetas = np.mod(2*np.pi*class_map, 2*np.pi)
+
+            return thetas**/
+        })
+
     }
 
 

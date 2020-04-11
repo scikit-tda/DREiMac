@@ -1,9 +1,68 @@
 /**
- * A class that holds the state of a TDA instance, including info about
- * Emscripten compiled modules, menu handles, and canvas handles
- * for drawing
+ * A class to show loading progress
  */
+class ProgressBar {
+    constructor() {
+        //A function to show a progress bar
+        this.loading = false;
+        this.loadString = "Loading";
+        this.loadColor = "#AAAA00";
+        this.ndots = 0;
+        this.waitingDisp = document.getElementById("pagestatus");
+    }
 
+    /**
+     * Start the progress bar
+     * @param {String} loadString What kind of work is being done
+     *                            (e.g. "Loading", "Computing")
+     */
+    startLoading(loadString) {
+        this.loadString = loadString;
+        this.loading = true;
+        this.changeLoad();
+    }
+
+    /**
+     * A function to keep the indicated progress dots moving along
+     */
+    changeLoad() {
+        if (!this.loading) {
+            return;
+        }
+        var s = "<h3><font color = \"" + this.loadColor + "\">" + this.loadString;
+        for (var i = 0; i < this.ndots; i++) {
+            s += ".";
+        }
+        s += "</font></h3>";
+        this.waitingDisp.innerHTML = s;
+        if (this.loading) {
+            this.ndots = (this.ndots + 1)%12;
+            setTimeout(this.changeLoad.bind(this), 200);
+        }
+    };
+    
+    /**
+     * Finish loading
+     */
+    changeToReady() {
+        this.loading = false;
+        this.waitingDisp.innerHTML = "<h3><font color = \"#00AA00\">Ready</font></h3>";
+    };
+    
+    /**
+     * Set loading to failed
+     */
+    setLoadingFailed() {
+        this.loading = false;
+        this.waitingDisp.innerHTML = "<h3><font color = \"red\">"  + this.loadString + " Failed :(</font></h3>";
+    };
+}
+
+
+/**
+ * A class that holds the state of a TDA instance, including info 
+ * about menu handles and canvas handles for drawing
+ */
 class TDA {
     /** 
      * @param {DOM Element} canvas2D Handle to the HTML where the 2D point cloud
@@ -14,7 +73,6 @@ class TDA {
     constructor(canvas2D, feedbackCanvas) {
         this.points = []; // Javascript copy of Euclidean points
         this.isCompiled = false;
-        Module.onRuntimeInitialized = this.init.bind(this);
         
 
         // Variables for a 2D canvas
@@ -25,6 +83,7 @@ class TDA {
         }
 
         this.feedbackCanvas = feedbackCanvas;
+        this.progressBar = new ProgressBar();
         this.setupMenu();
     }
 
@@ -101,14 +160,6 @@ class TDA {
         kleinMenu.add(this.kleinOptions, 'P').min(0);
         kleinMenu.add(this.kleinOptions, 'eps').min(0);
         kleinMenu.add(this, 'sampleKlein').name("Generate");
-    }
-
-    /**
-     * This is called when Emscripten is finished compiling
-     */
-    init() {
-        this.isCompiled = true;
-        console.log("Finished compiling");
     }
 
     /**

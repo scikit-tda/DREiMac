@@ -1,7 +1,7 @@
 class Ripser {
     /**
-     * Initialize a Ripser object and setup place holders for all 
-     * Emscripten variables to hold distances, diagrams, and cocycles
+     * Initialize a Ripser object and setup place holders for 
+     * permutation indices, persistence diagrams, cocycles, and distances
      * 
      * @param {TDA} tda A handle to the TDA object
      * @param {int} field Prime number for field coefficients for homology (default 2)
@@ -26,16 +26,10 @@ class Ripser {
         if (do_cocycles === undefined) {
             this.do_cocycles = false;
         }
-
-        this.X = null; // C++ copy of euclidean points
         this.idxPerm = [];  // Indices chosen in greedy permutation
-    
-        this.distLandLand = null; // VectorFloat holding inter-landmark distances
-        this.distLandData = null; // VectorVectorFloat holding landmark to point cloud distances
-            
-        this.dgms = null; // VectorVectorFloat holding persistence diagrams
-        this.cocycles = null; // VectorVectorVector holding representative cocycles
-        this.nlandmarks = 100;
+        this.dgms = {'births':[], 'deaths':[]}; // Persistence diagrams
+        this.cocycles1 = []; // Representative cocycles for 1D cohomology
+        this.nlandmarks = 100; // Number of landmarks
         return this;
     }
 
@@ -55,45 +49,16 @@ class Ripser {
 
 
     computeRips() {
-        this.computeRipsPC(this.tda.points, this.nlandmarks);
-        this.drawLandmarks2DCanvas();
-        if (!(this.dgmsCanvasName === undefined)) {
-            plotDGMS(this.dgms, this.dgmsCanvasName);
-        }
-    }
-
-    /**
-     * Initialize all of the C++ objects needed for rips 
-     * computation
-     */
-    init() {
-        if (this.distLandData === null) {
-            this.distLandLand = new Module.VectorFloat();
-            this.distLandData = new Module.VectorVectorFloat();
-            this.X = new Module.VectorVectorFloat();
-            this.dgms = new Module.VectorVectorFloat();
-            this.cocycles = new Module.VectorVectorVectorFloat();
-        }
-    }
-
-    /**
-     * Return the cocycle at a particular index
-     * @param {int} dim Dimension of homology
-     * @param {int} index Index of persistence point
-     * 
-     * @returns {array 2d} The nonzero elements of the cocycle
-     */
-    getCocycle(dim, index) {
-        let ret = [];
-        let cocycle = this.cocycles.get(dim).get(index);
-        for (let i = 0; i < cocycle.size(); i += dim+2) {
-            let elem = [];
-            for (let k = 0; k < dim+2; k++) {
-                elem.push(cocycle.get(i+k));
+        let that = this;
+        this.computeRipsPC(this.tda.points, this.nlandmarks).then(
+            function() {
+                that.drawLandmarks2DCanvas();
+                if (!(that.dgmsCanvasName === undefined)) {
+                    plotDGMS(that.dgms, that.dgmsCanvasName);
+                }
             }
-            ret.push(elem);
-        }
-        return ret;
+        );
+
     }
 
      /**
@@ -103,58 +68,32 @@ class Ripser {
       * @param {double} thresh The threshold at which to stop rips
       */
     computeRipsPC(points, nlandmarks, thresh) {
-        if (this.tda.isCompiled) {
-            this.init();
-            // Step 1: Clear the vectors that will hold the output
-            Module.clearVector(this.distLandLand);
-            Module.clearVectorVector(this.distLandData);
-            Module.clearVectorVector(this.X);
-
-            // Step 2: Perform the greedy permutation on a Euclidean
-            // point cloud
-            for (let i = 0; i < points.length; i++) {
-                let x = new Module.VectorFloat();
-                for (let j = 0; j < points[i].length; j++) {
-                    x.push_back(points[i][j]);
+        let that = this;
+        return new Promise(function(resolve, reject) {
+            that.tda.progressBar.startLoading("Computing");
+            let worker = new Worker("ripserworker.js");
+            worker.postMessage({
+                points:points, nlandmarks:nlandmarks, thresh:thresh,
+                homdim:that.homdim, field:that.field,
+                do_cocycles:that.do_cocycles
+            });
+            worker.onmessage = function(event) {
+                if (event.data.message == "finished") {
+                    that.tda.progressBar.changeToReady();
+                    that.tda.feedbackCanvas.innerHTML = "";
+                    // Return back nlandmarks, idxPerm
+                    that.idxPerm = event.data.idxPerm;
+                    that.nlandmarks = event.data.nlandmarks;
+                    that.dgms = event.data.dgms;
+                    that.cocycles1 = event.data.cocycles1;
+                    console.log(that.cocycles1);
+                    resolve();
                 }
-                this.X.push_back(x);
-            }
-            if (nlandmarks === undefined) {
-                // If the number of points in the permutation was not
-                // specified, simply make it the number of points in the point cloud
-                nlandmarks = points.length;
-            }
-            nlandmarks = Math.min(nlandmarks, points.length);
-            this.nlandmarks = nlandmarks;
-            let perm = new Module.getGreedyPerm(this.X, nlandmarks, this.distLandLand, this.distLandData);
-            this.idxPerm.length = 0;
-            for (let i = 0; i < nlandmarks; i++) {
-                this.idxPerm.push(perm.get(i));
-            }
-
-            // Step 3: Run ripser
-            Module.clearVectorVector(this.dgms);
-            Module.clearVectorVectorVector(this.cocycles);
-            // Automatically determine the threshold to be greater
-            // than the max inter-landmark distance if the threshold
-            // was not specified
-            if (thresh === undefined) {
-                // Make thresh twice the max distance
-                thresh = 0.0;
-                for (let i = 0; i < this.distLandLand.size(); i++) {
-                    let dist = this.distLandLand.get(i);
-                    if (dist > thresh) {
-                        thresh = dist;
-                    }
+                else {
+                    that.tda.feedbackCanvas.innerHTML = "<h3>" + event.data.message + "</h3>";
                 }
-                thresh = 1.1*thresh;
             }
-            Module.jsRipsDM(this.distLandLand, this.field, this.homdim, thresh, this.do_cocycles, 
-            this.dgms, this.cocycles);
-        }
-        else {
-            alert("Not Compiled Yet");
-        }
+        });
     }
 
     /**
