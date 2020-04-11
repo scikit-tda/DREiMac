@@ -99,6 +99,7 @@ class TDA {
         if (name == 'canvas2D') {
             this.canvas2D.style.display = "block";
             this.feedbackCanvas.innerHTML = "Please draw a 2D point cloud by left clicking";
+            this.points = [];
         }
         else {
             this.canvas2D.style.display = "none";
@@ -136,6 +137,7 @@ class TDA {
         this.setDataTypeChecked('canvas2D');
         this.syntheticMenu = dataMenu.addFolder("Synthetic Point Clouds");
         this.setupKleinMenu();
+        this.setupFlatTorusMenu();
     }
 
     /**
@@ -160,6 +162,30 @@ class TDA {
         kleinMenu.add(this.kleinOptions, 'P').min(0);
         kleinMenu.add(this.kleinOptions, 'eps').min(0);
         kleinMenu.add(this, 'sampleKlein').name("Generate");
+    }
+
+    /**
+     * Sample a flat torus based on menu parameters, and set 
+     * the point cloud to be equal to the samples
+     */
+    sampleFlatTorus() {
+        const fto = this.flatTorusOptions;
+        this.points = sampleFlatTorus(fto.R1, fto.R2, fto.N);
+        this.setDataTypeChecked("synthetic");
+        this.feedbackCanvas.innerHTML = "Sampled Flat Torus with " + this.points.length + " points.  Now compute rips";
+    }
+
+    /**
+     * Make a menu for choosing klein bottle parameters
+     */
+    setupFlatTorusMenu() {
+        const syntheticMenu = this.syntheticMenu;
+        let flatTorusMenu = syntheticMenu.addFolder("Flat Torus");
+        this.flatTorusOptions = {'R1':1, 'R2':1, 'N':200};
+        flatTorusMenu.add(this.flatTorusOptions, 'R1').min(0);
+        flatTorusMenu.add(this.flatTorusOptions, 'R2').min(0);
+        flatTorusMenu.add(this.flatTorusOptions, 'N').min(1).name("Points");
+        flatTorusMenu.add(this, 'sampleFlatTorus').name("Generate");
     }
 
     /**

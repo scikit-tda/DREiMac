@@ -86,7 +86,6 @@ class Ripser {
                     that.nlandmarks = event.data.nlandmarks;
                     that.dgms = event.data.dgms;
                     that.cocycles1 = event.data.cocycles1;
-                    console.log(that.cocycles1);
                     resolve();
                 }
                 else {
