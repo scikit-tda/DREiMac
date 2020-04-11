@@ -71,7 +71,7 @@ class Ripser {
         let that = this;
         return new Promise(function(resolve, reject) {
             that.tda.progressBar.startLoading("Computing");
-            let worker = new Worker("ripserworker.js");
+            let worker = new Worker("ripser-worker.js");
             worker.postMessage({
                 points:points, nlandmarks:nlandmarks, thresh:thresh,
                 homdim:that.homdim, field:that.field,
