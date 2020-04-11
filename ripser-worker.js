@@ -93,12 +93,29 @@ onmessage = function(event) {
             }
         }
 
-
-
         // Step 5: Copy over distances
         postMessage({"message":"Copying over distances"});
-        // TODO: Finish this
+        ret.distLandLand = new Float32Array(distLandLand.size());
+        for (let i = 0; i < distLandLand.size(); i++) {
+            ret[i] = distLandLand.get(i);
+        }
+        ret.distLandData = []
+        for (let i = 0; i < distLandData.size(); i++) {
+            let row_in = distLandData.get(i);
+            let row_out = new Float32Array(row_in.size());
+            for (let j = 0; j < row_in.size(); j++) {
+                row_out[j] = row_in.get(j);
+            }
+            ret.distLandData.push(row_out);
+        }
 
+        // Step 6: Free memory
+        postMessage({"message":"Freeing memory"});
+        Module.clearVector(distLandLand);
+        Module.clearVectorVector(distLandData);
+        Module.clearVectorVector(X);
+        Module.clearVectorVector(dgms);
+        Module.clearVectorVectorVector(cocycles);
     
         postMessage(ret);
     }

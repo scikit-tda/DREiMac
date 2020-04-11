@@ -29,6 +29,8 @@ class Ripser {
         this.idxPerm = [];  // Indices chosen in greedy permutation
         this.dgms = {'births':[], 'deaths':[]}; // Persistence diagrams
         this.cocycles1 = []; // Representative cocycles for 1D cohomology
+        this.distLandLand = []; // Lower triangular part of inter-landmark distances
+        this.distLandData = [[]]; // Rectangular matrix of distances of landmarks to data
         this.nlandmarks = 100; // Number of landmarks
         return this;
     }
@@ -70,13 +72,14 @@ class Ripser {
     computeRipsPC(points, nlandmarks, thresh) {
         let that = this;
         return new Promise(function(resolve, reject) {
+            that.tda.progressBar.changeToReady();
             that.tda.progressBar.startLoading("Computing");
             let worker = new Worker("ripser-worker.js");
-            worker.postMessage({
-                points:points, nlandmarks:nlandmarks, thresh:thresh,
-                homdim:that.homdim, field:that.field,
-                do_cocycles:that.do_cocycles
-            });
+            worker.onerror = function(event) {
+                console.log("ERROR");
+                that.tda.feedbackCanvas = "<h3><font color=red>" + event.data + "</font></h3>";
+                this.tda.progressBar.setLoadingFailed();
+            }
             worker.onmessage = function(event) {
                 if (event.data.message == "finished") {
                     that.tda.progressBar.changeToReady();
@@ -92,6 +95,11 @@ class Ripser {
                     that.tda.feedbackCanvas.innerHTML = "<h3>" + event.data.message + "</h3>";
                 }
             }
+            worker.postMessage({
+                points:points, nlandmarks:nlandmarks, thresh:thresh,
+                homdim:that.homdim, field:that.field,
+                do_cocycles:that.do_cocycles
+            });
         });
     }
 
