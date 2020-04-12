@@ -52,13 +52,14 @@ class CircularCoords {
         let ripsOpts = ccOpts.addFolder('Rips Options');
         ripsOpts.add(this.rips, 'field').min(2).step(1);
         ripsOpts.add(this.rips, 'homdim').min(1).step(1);
-        // Update landmarks if there aren't enough with .listen()
-        ripsOpts.add(this.rips, 'nlandmarks').min(1).step(1).listen(); 
+        ripsOpts.landmarksListener = ripsOpts.add(this.rips, 'nlandmarks').min(1).step(1); 
         ripsOpts.add(this, 'recomputeRips');
+        this.ripsOpts = ripsOpts;
 
         ccOpts.add(this, 'perc').min(0).max(1).step(0.01);
         ccOpts.add(this, 'doWeighted');
         ccOpts.add(this, 'updateCoordinates');
+        this.ccOpts = ccOpts;
 
     }
 
@@ -106,10 +107,15 @@ class CircularCoords {
 
         let that = this;
         this.ripsPromise.then(function() {
+            let nlandmarks = that.rips.nlandmarks;
+            this.ripsOpts.landmarksListener.updateDisplay();
+
+            let dgm1 = that.rips.dgms[1];
+            let dist_land_land = that.rips.dist_land_land;
+            let dist_land_data = that.rips.dist_land_data;
+
             // Step 1: Come up with the representative cocycle as a formal sum
             // of the chosen cocycles
-            let nlandmarks = that.rips.nlandmarks;
-            let dgm1 = that.rips.dgms[1];
             cohomdeath = null;
             cohombirth = null;
             let cocycle = [];
@@ -125,26 +131,41 @@ class CircularCoords {
                     cohombirth = Math.min(cohombirth, dgm1.deaths[idx]);
                 }
             }
+            
+            // Step 2: Determine radius for balls
+            // coverage = np.max(np.min(dist_land_data, 1))
+            let coverage = 0.0;
+            for (let i = 0; i < dist_land_data.length; i++) {
+                let row = dist_land_data[i];
+                if (row.length > 0) {
+                    let min = row[0];
+                    for (let i = 1; i < row.length; i++) {
+                        if (row[i] < min) {
+                            min = row[i];
+                        }
+                    }
+                    if (min > coverage) {
+                        coverage = min;
+                    }
+                }
+            }
+            let r_cover = (1-perc)*Math.max(cohomdeath, coverage) + perc*cohombirth;
+            that.r_cover = r_cover // Store covering radius for reference
+            
+            
+            // Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
+            // and use it to find a projection of the cocycle
+            // onto the image of delta0
 
+            // Lift to integer cocycle
+            for (let i = 0; i < cocycle.length; i++) {
+                let vidx = cocycle[i].length-1;
+                if (cocycle[i][vidx] > (prime-1)/2) {
+                    cocycle[i][vidx] -= prime;
+                }
+            }
 
             /*
-            ## Step 2: Determine radius for balls
-            dist_land_data = self.dist_land_data_
-            dist_land_land = self.dist_land_land_
-            coverage = np.max(np.min(dist_land_data, 1))
-            r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-            self.r_cover_ = r_cover # Store covering radius for reference
-            if self.verbose:
-                print("r_cover = %.3g"%r_cover)
-            
-
-            ## Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
-            ## and use it to find a projection of the cocycle
-            ## onto the image of delta0
-
-            #Lift to integer cocycle
-            val = np.array(cocycle[:, 2])
-            val[val > (prime-1)/2] -= prime
             Y = np.zeros((nlandmarks, nlandmarks))
             Y[cocycle[:, 0], cocycle[:, 1]] = val
             Y = Y + Y.T
@@ -180,7 +201,7 @@ class CircularCoords {
             theta[:, 2] = -delta0.dot(tau)
             theta = add_cocycles(cocycle, theta, real=True)
             
-
+            /*
             ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
             U = dist_land_data < r_cover
             phi = np.zeros_like(dist_land_data)
@@ -213,7 +234,7 @@ class CircularCoords {
             thetas = np.mod(2*np.pi*class_map, 2*np.pi)
 
             return thetas**/
-        })
+        });
 
     }
 

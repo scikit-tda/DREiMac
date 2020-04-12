@@ -44,9 +44,9 @@ class Ripser {
         let ripsOpts = gui.addFolder('Rips Options');
         ripsOpts.add(this, 'field').min(2).step(1);
         ripsOpts.add(this, 'homdim').min(0).step(1);
-        // Update landmarks if there aren't enough with .listen()
-        ripsOpts.add(this, 'nlandmarks').min(1).step(1).listen(); 
+        ripsOpts.landmarksListener = ripsOpts.add(this, 'nlandmarks').min(1).step(1);
         ripsOpts.add(this, 'computeRips');
+        this.ripsOpts = ripsOpts;
     }
 
 
@@ -54,6 +54,9 @@ class Ripser {
         let that = this;
         this.computeRipsPC(this.tda.points, this.nlandmarks).then(
             function() {
+                // If the number of landmarks chosen was greater than
+                // the number of points, then clamp it down on the display
+                that.ripsOpts.landmarksListener.updateDisplay();
                 that.drawLandmarks2DCanvas();
                 if (!(that.dgmsCanvasName === undefined)) {
                     plotDGMS(that.dgms, that.dgmsCanvasName);
