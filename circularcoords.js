@@ -132,6 +132,7 @@ class CircularCoords {
                     }
                 }
             }
+
             //////////////////////////////////////
 
 
@@ -148,12 +149,12 @@ class CircularCoords {
             for (let idx of cocycle_idx) {
                 cocycle = addCochains(cocycle, that.rips.cocycles1[idx], prime);
                 if (cohomdeath === null) {
-                    cohomdeath = dgm1.births[idx];
-                    cohombirth = dgm1.deaths[idx];
+                    cohomdeath = dgm1.births[idx]/2;
+                    cohombirth = dgm1.deaths[idx]/2;
                 }
                 else {
-                    cohomdeath = Math.max(cohomdeath, dgm1.births[idx]);
-                    cohombirth = Math.min(cohombirth, dgm1.deaths[idx]);
+                    cohomdeath = Math.max(cohomdeath, dgm1.births[idx]/2);
+                    cohombirth = Math.min(cohombirth, dgm1.deaths[idx]/2);
                 }
             }
             
