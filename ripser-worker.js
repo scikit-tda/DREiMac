@@ -37,6 +37,8 @@ onmessage = function(event) {
         for (let i = 0; i < nlandmarks; i++) {
             idxPerm.push(perm.get(i));
         }
+        let ret = {"message":"finished", "nlandmarks":nlandmarks, "idxPerm":idxPerm};
+        ret.distLandLand = new Float32Array(distLandLand.size());
     
         // Step 3: Run ripser
         postMessage({"message":"Running ripser"});
@@ -48,6 +50,7 @@ onmessage = function(event) {
             thresh = 0.0;
             for (let i = 0; i < distLandLand.size(); i++) {
                 let dist = distLandLand.get(i);
+                ret.distLandLand[i] = dist;
                 if (dist > thresh) {
                     thresh = dist;
                 }
@@ -57,8 +60,6 @@ onmessage = function(event) {
         postMessage({"message":"Running ripser, thresh = " + thresh});
         Module.jsRipsDM(distLandLand, data.field, data.homdim, thresh, data.do_cocycles, 
         dgms, cocycles);
-
-        let ret = {"message":"finished", "nlandmarks":nlandmarks, "idxPerm":idxPerm};
         
         // Step 4: Copy over diagrams and cocycles
         postMessage({"message":"Copying over diagrams and cocycles"});
@@ -95,10 +96,6 @@ onmessage = function(event) {
 
         // Step 5: Copy over distances
         postMessage({"message":"Copying over distances"});
-        ret.distLandLand = new Float32Array(distLandLand.size());
-        for (let i = 0; i < distLandLand.size(); i++) {
-            ret[i] = distLandLand.get(i);
-        }
         ret.distLandData = []
         for (let i = 0; i < distLandData.size(); i++) {
             let row_in = distLandData.get(i);

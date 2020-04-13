@@ -112,6 +112,7 @@ class CircularCoords {
         this.ripsPromise.then(function() {
             let partUnityFn = eval(that.partUnityFn);
             let nlandmarks = that.rips.nlandmarks;
+            let perc = that.perc;
             that.ripsOpts.landmarksListener.updateDisplay();
 
             let dgm1 = that.rips.dgms[1];
@@ -124,7 +125,7 @@ class CircularCoords {
                 cocycle_idx = [0];
                 let max = dgm1.deaths[0] - dgm1.births[0];
                 for (let i = 1; i < dgm1.births.length; i++) {
-                    let pers = dgm1.death[i] - dgm1.birth[i];
+                    let pers = dgm1.deaths[i] - dgm1.births[i];
                     if (pers > max) {
                         max = pers;
                         cocycle_idx[0] = i;
@@ -144,7 +145,7 @@ class CircularCoords {
             let cohombirth = null;
             let cocycle = [];
             let prime = that.rips.field;
-            for (idx of cocycle_idx) {
+            for (let idx of cocycle_idx) {
                 cocycle = addCochains(cocycle, that.rips.cocycles1[idx], prime);
                 if (cohomdeath === null) {
                     cohomdeath = dgm1.births[idx];
@@ -208,7 +209,7 @@ class CircularCoords {
                         Y.push(0);
                     }
                     if (doWeighted) {
-                        wSqrt.append(Math.sqrt(distLandLand[k]));
+                        wSqrt.push(Math.sqrt(distLandLand[k]));
                     }
                 }
                 i++;
@@ -218,7 +219,7 @@ class CircularCoords {
                 }
             }
             // Setup and solve linear system
-            let delta0 = makeDelta0(R, nlandmarks); // Sparse coboundary matrix
+            let delta0 = makeDelta0(R, nlandmarks); // Coboundary matrix
             let A = delta0;
             let b = Y;
             if (doWeighted) {
@@ -229,15 +230,22 @@ class CircularCoords {
                 }
                 // Multiply the rows of a by the square root of the weights
                 for (let i = 0; i < A[1].length; i++) {
-                    A[2][i] *= wSqrt(A[1][i]);
+                    A[2][i] *= wSqrt[A[1][i]];
                 }
             }
             // Solve the sparse system of linear equations
-            let tau = numeric.ccsTSolve(A, b);
-            let tauGrad = numeric.ccsDot(delta0, tau);
-            theta = [];
+            A = numeric.ccsFull(A);
+            let AT = numeric.transpose(A);
+            let ATA = numeric.dot(AT, A);
+            let ATb = numeric.dot(AT, b);
+            let tau = numeric.solve(ATA, ATb);
+            // TODO: Figure out why sparse isn't working here
+            delta0 = numeric.ccsFull(delta0); 
+            let tauGrad = numeric.dot(delta0, tau);
+
+            let theta = [];
             for (let i = 0; i < R.length; i++) {
-                theta.append([R[i][0], R[i][1], -tauGrad[i]]);
+                theta.push([R[i][0], R[i][1], -tauGrad[i]]);
             }
             theta = addCochains(cocycle, theta);
 
@@ -273,8 +281,8 @@ class CircularCoords {
                     // open set it belongs to
                     ballIndx[j] = idxs[0];
                     for (let k = 0; k < idxs.length; k++) {
-                        let i = idxs[i];
-                        varphi[i][j] = phis[i]/total;
+                        let i = idxs[k];
+                        varphi[i][j] = phis[k]/total;
                     }
                 }
 
@@ -285,24 +293,26 @@ class CircularCoords {
 
 
             // Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-            
             // compute all transition functions
             varphi = numeric.transpose(varphi);
-            thetaMatrix = [];
+            let thetaMatrix = [];
             for (let i = 0; i < nlandmarks; i++) {
                 thetaMatrix[i] = new Float32Array(nlandmarks);
             }
             for (let k = 0; k < theta.length; k++) {
                 let i = theta[k][0];
                 let j = theta[k][1];
-                let thetak = (theta + 0.5) % 1 - 0.5;
+                let thetak = (theta[k][2] + 0.5) % 1 - 0.5;
                 thetaMatrix[i][j] = thetak;
                 thetaMatrix[j][i] = -thetak;
             }
             let thetas = new Float32Array(npoints);
             for (let j = 0; j < npoints; j++) {
-                thetas[j] = numeric.dot(theta_matrix[ballIndx[j]], varphi[j]);
+                thetas[j] = numeric.dot(thetaMatrix[ballIndx[j]], varphi[j]);
                 thetas[j] -= tau[ballIndx[j]];
+                while (thetas[j] < 0) {
+                    thetas[j] += 1;
+                }
                 thetas[j] = thetas[j] % 1;
             }
             that.thetas = thetas;

@@ -136,8 +136,38 @@ class TDA {
         }
         this.setDataTypeChecked('canvas2D');
         this.syntheticMenu = dataMenu.addFolder("Synthetic Point Clouds");
+        this.setupCircleMenu();
         this.setupKleinMenu();
         this.setupFlatTorusMenu();
+    }
+
+
+
+    /**
+     * Sample a flat torus based on menu parameters, and set 
+     * the point cloud to be equal to the samples
+     */
+    sampleCircle() {
+        const co = this.circleOptions;
+        this.setDataTypeChecked("canvas2D");
+        this.points = sampleCircle(co.R, co.cx, co.cy, co.noise, co.N);
+        this.repaint2DCanvas();
+        this.feedbackCanvas.innerHTML = "Sampled circle with " + this.points.length + " points.  Now compute rips";
+    }
+
+    /**
+     * Make a menu for choosing klein bottle parameters
+     */
+    setupCircleMenu() {
+        const syntheticMenu = this.syntheticMenu;
+        let circleMenu = syntheticMenu.addFolder("Circle");
+        this.circleOptions = {'R':100, 'cx':200, 'cy':200, 'noise':20, 'N':500};
+        circleMenu.add(this.circleOptions, 'R').min(0);
+        circleMenu.add(this.circleOptions, 'cx');
+        circleMenu.add(this.circleOptions, 'cy');
+        circleMenu.add(this.circleOptions, 'noise').min(0);
+        circleMenu.add(this.circleOptions, 'N').min(1).name("Points");
+        circleMenu.add(this, 'sampleCircle').name("Generate");
     }
 
     /**
@@ -187,6 +217,7 @@ class TDA {
         flatTorusMenu.add(this.flatTorusOptions, 'N').min(1).name("Points");
         flatTorusMenu.add(this, 'sampleFlatTorus').name("Generate");
     }
+
 
     /**
      * Add a point to the 2D canvas

@@ -77,7 +77,7 @@ class Ripser {
         return new Promise(function(resolve, reject) {
             that.tda.progressBar.changeToReady();
             that.tda.progressBar.startLoading("Computing");
-            let worker = new Worker("ripser-worker.js");
+            let worker = new Worker("ripser-worke2.js");
             worker.onerror = function(event) {
                 console.log("ERROR");
                 that.tda.feedbackCanvas = "<h3><font color=red>" + event.data + "</font></h3>";
@@ -92,6 +92,8 @@ class Ripser {
                     that.nlandmarks = event.data.nlandmarks;
                     that.dgms = event.data.dgms;
                     that.cocycles1 = event.data.cocycles1;
+                    that.distLandLand = event.data.distLandLand;
+                    that.distLandData = event.data.distLandData;
                     resolve();
                 }
                 else {

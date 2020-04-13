@@ -1,3 +1,16 @@
+function sampleCircle(R, cx, cy, noise, N) {
+    let points = [];
+    for (let i = 0; i < N; i++) {
+        let theta = i*2*Math.PI/N;
+        let x = R*Math.cos(theta) + cx;
+        let y = R*Math.sin(theta) + cy;
+        x += Math.random()*noise;
+        y += Math.random()*noise;
+        points.push([x, y]);
+    }
+    return points;
+}
+
 /**
  * Sample a parameterized Klein bottle in R^4
  * 
