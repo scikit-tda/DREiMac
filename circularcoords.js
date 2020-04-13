@@ -219,7 +219,7 @@ class CircularCoords {
                 }
             }
             // Setup and solve linear system
-            let delta0 = makeDelta0(R, nlandmarks); // Coboundary matrix
+            let delta0 = makeDelta0(R, nlandmarks); // Sparse coboundary matrix
             let A = delta0;
             let b = Y;
             if (doWeighted) {
