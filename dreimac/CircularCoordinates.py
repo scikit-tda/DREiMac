@@ -114,6 +114,7 @@ class CircularCoords(object):
         R = np.zeros((NEdges, 2))
         R[:, 0] = J
         R[:, 1] = I
+        np.savetxt("R.txt", R, delimiter=',')
         #Make a flat array of NEdges weights parallel to the rows of R
         if do_weighted:
             W = dist_land_land[I, J]
@@ -135,7 +136,7 @@ class CircularCoords(object):
         ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
-        phi[U] = partunity_fn(phi[U], r_cover)
+        phi[U] = partunity_fn(dist_land_data[U], r_cover)
         # Compute the partition of unity 
         # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
         denom = np.sum(phi, 0)

@@ -33,23 +33,12 @@ function string_to_indices(s) {
 }
 
 /**
- * Perform the formal sum of two cochains over some field
  * 
- * @param {array} c1 A list of [idx1, idx2, value] for the 1st cochain
- * @param {array} c2 A list of [idx1, idx2, value] for the 2nd cochain
- * @param {int} p Prime for the field
- * 
- * @returns {array} The formal sum of the two cochains, expressed in
- *                  the same format
+ * @param {array} c A list of [idx1, idx2, value] for the cochain
+ * @returns {dictionary} A dictionary of index strings to cochain values
  */
-function addCochains(c1, c2, p) {
-    if (p === undefined) {
-        p = 2;
-    }
-    S = {};
-    c = [];
-    c = c.concat(c1);
-    c = c.concat(c2);
+function getCochainDict(c) {
+    let S = {};
     for (elem of c) {
         let indices = elem.slice(0, -1);
         let v = parseFloat(elem[elem.length-1]);
@@ -65,6 +54,27 @@ function addCochains(c1, c2, p) {
             S[key] += v;
         }
     }
+    return S;
+}
+
+/**
+ * Perform the formal sum of two cochains over some field
+ * 
+ * @param {array} c1 A list of [idx1, idx2, value] for the 1st cochain
+ * @param {array} c2 A list of [idx1, idx2, value] for the 2nd cochain
+ * @param {int} p Prime for the field
+ * 
+ * @returns {array} The formal sum of the two cochains, expressed in
+ *                  the same format
+ */
+function addCochains(c1, c2, p) {
+    if (p === undefined) {
+        p = 2;
+    }
+    let c = [];
+    c = c.concat(c1);
+    c = c.concat(c2);
+    let S = getCochainDict(c);
     let cret = [];
     for (let key of Object.keys(S)) {
         let elem = string_to_indices(key);
@@ -81,86 +91,68 @@ function addCochains(c1, c2, p) {
     return cret;
 }
 
-/*
-def make_delta0(R):
-    """
-    Return the delta0 coboundary matrix
-    :param R: NEdges x 2 matrix specifying edges, where orientation
-    is taken from the first column to the second column
+/**
+ * Return the delta0 coboundary matrix
+ * 
+ * @param {array} R NEdges x 2 matrix specifying edges, where
+    orientation is taken from the first column to the second column
     R specifies the "natural orientation" of the edges, with the
     understanding that the ranking will be specified later
     It is assumed that there is at least one edge incident
     on every vertex
-    """
-    NVertices = int(np.max(R) + 1)
-    NEdges = R.shape[0]
-    
-    #Two entries per edge
-    I = np.zeros((NEdges, 2))
-    I[:, 0] = np.arange(NEdges)
-    I[:, 1] = np.arange(NEdges)
-    I = I.flatten()
-    
-    J = R[:, 0:2].flatten()
-    
-    V = np.zeros((NEdges, 2))
-    V[:, 0] = -1
-    V[:, 1] = 1
-    V = V.flatten()
-    I = np.array(I, dtype=int)
-    J = np.array(J, dtype=int)
-    Delta = sparse.coo_matrix((V, (I, J)), shape=(NEdges, NVertices)).tocsr()
-    return Delta
+ * @param {int} NVertices The number of vertices
+ * @returns {numeric sparse} An NEdges x NVertices sparse matrix
+ *                          holding the coboundary matrix
+ */
+function makeDelta0(R, NVertices) {
+    let NEdges = R.length;
+    Delta0 = [];
+    for (let i = 0; i < NEdges; i++) {
+        Delta0[i] = Array(NVertices);
+    }
+    for (let i = 0; i < NEdges; i++) {
+        Delta0[i][R[i][0]] = -1;
+        Delta0[i][R[i][1]] = 1;
+    }
+    return numeric.ccsSparse(Delta0);
+}
+
+
 
 
 //#########################################
 //        Partition of Unity Functions
 //#########################################
 
-def partunity_linear(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return r_cover - ds
+/**
+ * Linear partition of unity
+ * 
+ * @param {float} d A distance between a landmark and a data point
+ * @param {float} rCover Covering radius
+ * @returns {float} The bump function
+ */
+function partUnityLinear(d, rCover) {
+    return rCover - d;
+}
 
-def partunity_quadratic(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return (r_cover - ds)**2
+/**
+ * Quadratic partition of unity
+ * 
+ * @param {float} d A distance between a landmark and a data point
+ * @param {float} rCover Covering radius
+ * @returns {float} The bump function
+ */
+function partUnityQuadratic(d, rCover) {
+    return (rCover - d)*(rCover-d);
+}
 
-def partunity_exp(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return np.exp(r_cover**2/(ds**2-r_cover**2))*/
+/**
+ * Exponential partition of unity
+ * 
+ * @param {float} d A distance between a landmark and a data point
+ * @param {float} rCover Covering radius
+ * @returns {float} The bump function
+ */
+function partUnityExp(d, rCover) {
+    return Math.exp(rCover*rCover/((rCover - d)*(rCover-d)));
+}

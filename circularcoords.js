@@ -34,9 +34,10 @@ class CircularCoords {
         this.canvas2D = canvas2D;
 
         // Circular coordinate options
-        this.doWeighted = false;
+        this.doWeighted = true;
         this.cocyle_idx = [];
         this.perc = 0.99;
+        this.partUnityFn = 'partUnityLinear';
 
         this.setupMenu();
     }
@@ -58,7 +59,9 @@ class CircularCoords {
 
         ccOpts.add(this, 'perc').min(0).max(1).step(0.01);
         ccOpts.add(this, 'doWeighted');
-        ccOpts.add(this, 'updateCoordinates');
+        ccOpts.add(this, 'partUnityFn', ['partUnityLinear', 'partUnityQuadratic', 'partUnityExp']);
+        ccOpts.add(this, 'updateCoords');
+
         this.ccOpts = ccOpts;
 
     }
@@ -71,7 +74,8 @@ class CircularCoords {
      */
     addEuclideanPointCloud() {
         this.X = this.tda.points;
-        this.ripsPromise = this.rips.computeRipsPC(X, this.rips.nlandmarks);
+        this.thetas = new Float32Array(this.X.length);
+        this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
     }
 
     /**
@@ -91,14 +95,13 @@ class CircularCoords {
       * Perform circular coordinates via persistent cohomology of 
       * sparse filtrations (Jose Perea 2018)
      */
-    updateCoordinates() {
-        if (this.cocyle_idx.length == 0) {
+    updateCoords() {
+        /*if (this.cocyle_idx.length == 0) {
             alert("Must choose at least one representative cocycle");
             return;
-        }
+        }*/
         if (this.X === undefined) {
-            alert("Point cloud not loaded in yet");
-            return;
+            this.addEuclideanPointCloud();
         }
         if (this.ripsPromise === null) {
             alert("Rips computation has not been initiated yet");
@@ -107,17 +110,38 @@ class CircularCoords {
 
         let that = this;
         this.ripsPromise.then(function() {
+            let partUnityFn = eval(that.partUnityFn);
             let nlandmarks = that.rips.nlandmarks;
-            this.ripsOpts.landmarksListener.updateDisplay();
+            that.ripsOpts.landmarksListener.updateDisplay();
 
             let dgm1 = that.rips.dgms[1];
-            let dist_land_land = that.rips.dist_land_land;
-            let dist_land_data = that.rips.dist_land_data;
+
+            //////////////////////////////////////
+            // Step 0: Make the cocycle index the index of
+            // the largest persistence point (TODO: Update this to GUI element)
+            let cocycle_idx = [];
+            if (dgm1.births.length > 0) {
+                cocycle_idx = [0];
+                let max = dgm1.deaths[0] - dgm1.births[0];
+                for (let i = 1; i < dgm1.births.length; i++) {
+                    let pers = dgm1.death[i] - dgm1.birth[i];
+                    if (pers > max) {
+                        max = pers;
+                        cocycle_idx[0] = i;
+                    }
+                }
+            }
+            //////////////////////////////////////
+
+
+            let distLandLand = that.rips.distLandLand;
+            let distLandData = that.rips.distLandData;
+            let doWeighted = that.doWeighted;
 
             // Step 1: Come up with the representative cocycle as a formal sum
             // of the chosen cocycles
-            cohomdeath = null;
-            cohombirth = null;
+            let cohomdeath = null;
+            let cohombirth = null;
             let cocycle = [];
             let prime = that.rips.field;
             for (idx of cocycle_idx) {
@@ -133,10 +157,10 @@ class CircularCoords {
             }
             
             // Step 2: Determine radius for balls
-            // coverage = np.max(np.min(dist_land_data, 1))
+            // coverage = np.max(np.min(distLandData, 1))
             let coverage = 0.0;
-            for (let i = 0; i < dist_land_data.length; i++) {
-                let row = dist_land_data[i];
+            for (let i = 0; i < distLandData.length; i++) {
+                let row = distLandData[i];
                 if (row.length > 0) {
                     let min = row[0];
                     for (let i = 1; i < row.length; i++) {
@@ -149,11 +173,11 @@ class CircularCoords {
                     }
                 }
             }
-            let r_cover = (1-perc)*Math.max(cohomdeath, coverage) + perc*cohombirth;
-            that.r_cover = r_cover // Store covering radius for reference
+            let rCover = (1-perc)*Math.max(cohomdeath, coverage) + perc*cohombirth;
+            that.rCover = rCover // Store covering radius for reference
             
             
-            // Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
+            // Step 3: Setup coboundary matrix, delta_0, for Cech_{rCover }
             // and use it to find a projection of the cocycle
             // onto the image of delta0
 
@@ -164,78 +188,147 @@ class CircularCoords {
                     cocycle[i][vidx] -= prime;
                 }
             }
+            // Turn cocycle into a dictionary for easier lookup
+            let cocycleDict = getCochainDict(cocycle);
+            // Select edges that are under the threshold
+            let R = [];
+            let Y = [];
+            let wSqrt = []; // Square root of distances
+            let j = 0;
+            let i = 1;
+            // Loop through lower triangle
+            for (let k = 0; i < distLandLand.length; k++) {
+                if (distLandLand[k] < 2*rCover) {
+                    R.push([j, i]);
+                    let idx = j + "_" + i;
+                    if (idx in cocycleDict) {
+                        Y.push(cocycleDict[idx]);
+                    }
+                    else {
+                        Y.push(0);
+                    }
+                    if (doWeighted) {
+                        wSqrt.append(Math.sqrt(distLandLand[k]));
+                    }
+                }
+                i++;
+                if (i == nlandmarks) {
+                    j++;
+                    i = j+1;
+                }
+            }
+            // Setup and solve linear system
+            let delta0 = makeDelta0(R, nlandmarks); // Sparse coboundary matrix
+            let A = delta0;
+            let b = Y;
+            if (doWeighted) {
+                A = numeric.clone(delta0);
+                // Point-multiply y by the square root of the weights
+                for (let i = 0; i < b.length; i++) {
+                    b[i] *= wSqrt[i];
+                }
+                // Multiply the rows of a by the square root of the weights
+                for (let i = 0; i < A[1].length; i++) {
+                    A[2][i] *= wSqrt(A[1][i]);
+                }
+            }
+            // Solve the sparse system of linear equations
+            let tau = numeric.ccsTSolve(A, b);
+            let tauGrad = numeric.ccsDot(delta0, tau);
+            theta = [];
+            for (let i = 0; i < R.length; i++) {
+                theta.append([R[i][0], R[i][1], -tauGrad[i]]);
+            }
+            theta = addCochains(cocycle, theta);
 
-            /*
-            Y = np.zeros((nlandmarks, nlandmarks))
-            Y[cocycle[:, 0], cocycle[:, 1]] = val
-            Y = Y + Y.T
-            #Select edges that are under the threshold
-            [I, J] = np.meshgrid(np.arange(nlandmarks), np.arange(nlandmarks))
-            I = I[np.triu_indices(nlandmarks, 1)]
-            J = J[np.triu_indices(nlandmarks, 1)]
-            Y = Y[np.triu_indices(nlandmarks, 1)]
-            idx = np.arange(len(I))
-            idx = idx[dist_land_land[I, J] < 2*r_cover]
-            I = I[idx]
-            J = J[idx]
-            Y = Y[idx]
 
-            NEdges = len(I)
-            R = np.zeros((NEdges, 2))
-            R[:, 0] = J
-            R[:, 1] = I
-            #Make a flat array of NEdges weights parallel to the rows of R
-            if do_weighted:
-                W = dist_land_land[I, J]
-            else:
-                W = np.ones(NEdges)
-            delta0 = make_delta0(R)
-            wSqrt = np.sqrt(W).flatten()
-            WSqrt = scipy.sparse.spdiags(wSqrt, 0, len(W), len(W))
-            A = WSqrt*delta0
-            b = WSqrt.dot(Y)
-            tau = lsqr(A, b)[0]
-            theta = np.zeros((NEdges, 3))
-            theta[:, 0] = J
-            theta[:, 1] = I
-            theta[:, 2] = -delta0.dot(tau)
-            theta = add_cocycles(cocycle, theta, real=True)
+            // Step 4: Create the open covering U = {U_1,..., U_{s+1}} and 
+            // partition of unity
+            let npoints = distLandData[0].length;
+            let varphi = [];
+            let ballIndx = [];
+            // Allocate space for varphi
+            for (let i = 0; i < distLandData.length; i++) {
+                varphi[i] = new Float32Array(distLandData[i].length);
+            }
+            let notCovered = 0;
+            for (let j = 0; j < npoints; j++) {
+                let idxs = [];
+                let phis = [];
+                let total = 0.0;
+                for (let i = 0; i < nlandmarks; i++) {
+                    if (distLandData[i][j] < rCover) {
+                        let phi = partUnityFn(distLandData[i][j], rCover);
+                        idxs.push(i);
+                        phis.push(phi);
+                        total += phi;
+                    }
+                }
+                if (idxs.length == 0) {
+                    notCovered++;
+                    ballIndx[j] = 0;
+                }
+                else {
+                    // To each data point, associate the index of the first 
+                    // open set it belongs to
+                    ballIndx[j] = idxs[0];
+                    for (let k = 0; k < idxs.length; k++) {
+                        let i = idxs[i];
+                        varphi[i][j] = phis[i]/total;
+                    }
+                }
+
+            }
+            if (notCovered > 0) {
+                console.log("WARNING: There are " + notCovered + "points not covered by a landmark");
+            }
+
+
+            // Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
             
-            /*
-            ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-            U = dist_land_data < r_cover
-            phi = np.zeros_like(dist_land_data)
-            phi[U] = partunity_fn(phi[U], r_cover)
-            # Compute the partition of unity 
-            # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{nlandmarks}(b))
-            denom = np.sum(phi, 0)
-            nzero = np.sum(denom == 0)
-            if nzero > 0:
-                warnings.warn("There are %i point not covered by a landmark"%nzero)
-                denom[denom == 0] = 1
-            varphi = phi / denom[None, :]
-
-            # To each data point, associate the index of the first open set it belongs to
-            ball_indx = np.argmax(U, 0)
-
-            ## Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-            
-            # compute all transition functions
-            theta_matrix = np.zeros((nlandmarks, nlandmarks))
-            I = np.array(theta[:, 0], dtype = np.int64)
-            J = np.array(theta[:, 1], dtype = np.int64)
-            theta = theta[:, 2]
-            theta = np.mod(theta + 0.5, 1) - 0.5
-            theta_matrix[I, J] = theta
-            theta_matrix[J, I] = -theta
-            class_map = -tau[ball_indx]
-            for i in range(n_data):
-                class_map[i] += theta_matrix[ball_indx[i], :].dot(varphi[:, i])    
-            thetas = np.mod(2*np.pi*class_map, 2*np.pi)
-
-            return thetas**/
+            // compute all transition functions
+            varphi = numeric.transpose(varphi);
+            thetaMatrix = [];
+            for (let i = 0; i < nlandmarks; i++) {
+                thetaMatrix[i] = new Float32Array(nlandmarks);
+            }
+            for (let k = 0; k < theta.length; k++) {
+                let i = theta[k][0];
+                let j = theta[k][1];
+                let thetak = (theta + 0.5) % 1 - 0.5;
+                thetaMatrix[i][j] = thetak;
+                thetaMatrix[j][i] = -thetak;
+            }
+            let thetas = new Float32Array(npoints);
+            for (let j = 0; j < npoints; j++) {
+                thetas[j] = numeric.dot(theta_matrix[ballIndx[j]], varphi[j]);
+                thetas[j] -= tau[ballIndx[j]];
+                thetas[j] = thetas[j] % 1;
+            }
+            that.thetas = thetas;
+            that.repaint2DCanvas();
         });
 
+    }
+
+    /**
+     * Draw points colored by their circular coordinates
+     */
+    repaint2DCanvas() {
+        let dW = 5;
+        let W = this.tda.canvas2D.width;
+        let H = this.tda.canvas2D.height;
+        this.tda.canvas2D.ctx2D.clearRect(0, 0, W, H);
+        // Draw all of the points in black
+        for (let i = 0; i < this.tda.points.length; i++) {
+            let r = Math.round(255*this.thetas[i]);
+            let g = r;
+            let b = r;
+            this.tda.canvas2D.ctx2D.fillStyle = "rgb("+r+","+g+","+b+")";
+            let x = this.tda.points[i][0];
+            let y = this.tda.points[i][1];
+            this.canvas2D.ctx2D.fillRect(x, y, dW, dW);
+        }
     }
 
 
