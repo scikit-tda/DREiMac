@@ -77,7 +77,7 @@ class Ripser {
         return new Promise(function(resolve, reject) {
             that.tda.progressBar.changeToReady();
             that.tda.progressBar.startLoading("Computing");
-            let worker = new Worker("ripser-worker2.js");
+            let worker = new Worker("ripser-worker.js");
             worker.onerror = function(event) {
                 console.log("ERROR");
                 that.tda.feedbackCanvas = "<h3><font color=red>" + event.data + "</font></h3>";
