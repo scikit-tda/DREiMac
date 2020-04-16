@@ -35,7 +35,7 @@ class CircularCoords {
 
         // Circular coordinate options
         this.doWeighted = true;
-        this.cocyle_idx = [];
+        this.cocycle_idx = [];
         this.perc = 0.99;
         this.partUnityFn = 'partUnityLinear';
 
@@ -92,6 +92,7 @@ class CircularCoords {
         this.thetas = new Float32Array(this.X.length);
         let that = this;
         this.ripsPromise.then(function() {
+            togglePlotDGMS(that.rips.dgms, that.dgmsCanvasName, [1]);
             let partUnityFn = eval(that.partUnityFn);
             let nlandmarks = that.rips.nlandmarks;
             let perc = that.perc;
@@ -114,7 +115,6 @@ class CircularCoords {
                     }
                 }
             }
-
             //////////////////////////////////////
 
 
