@@ -67,28 +67,12 @@ class CircularCoords {
     }
 
     /**
-     * Load in a point cloud and compute rips with the 
-     * current parameters
-     * 
-     * @param {list} X A list of lists of coordinates in a Euclidean point cloud
-     */
-    addEuclideanPointCloud() {
-        this.X = this.tda.points;
-        this.thetas = new Float32Array(this.X.length);
-        this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
-    }
-
-    /**
      * If the user has chosen different parameters for
      * rips, then recompute
      */
     recomputeRips() {
-        if (this.X === undefined) {
-            alert("Point cloud not loaded in yet");
-        }
-        else {
-            this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
-        }
+        this.X = this.tda.points;
+        this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
     }
 
     /**
@@ -100,14 +84,12 @@ class CircularCoords {
             alert("Must choose at least one representative cocycle");
             return;
         }*/
-        if (this.X === undefined) {
-            this.addEuclideanPointCloud();
-        }
         if (this.ripsPromise === null) {
-            alert("Rips computation has not been initiated yet");
-            return;
+            this.X = this.tda.points;
+            this.ripsPromise = this.rips.computeRipsPC(this.X, this.rips.nlandmarks);
         }
 
+        this.thetas = new Float32Array(this.X.length);
         let that = this;
         this.ripsPromise.then(function() {
             let partUnityFn = eval(that.partUnityFn);
