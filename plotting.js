@@ -99,14 +99,27 @@ function togglePlotDGMS(dgms, elemStr, toPlot){
     Plotly.newPlot(elemStr, allPlots, layout);
     let myPlot = document.getElementById(elemStr);
     let idxs = [];
+    let xCoords = [];
+    let yCoords = [];
     myPlot.on('plotly_click', function(data){
         for(var i=0; i < data.points.length; i++){
             ptIdx = data.points[i].pointNumber;
+            let x = data.points[i].x;
+            let y = data.points[i].y
+            
             if(idxs.includes(ptIdx)){
-                idxs.splice(idxs.indexOf(ptIdx),1);
+                let pointLocation = idxs.indexOf(ptIdx);
+                idxs.splice(pointLocation,1);
+                xCoords.splice(pointLocation,1);
+                yCoords.splice(pointLocation,1);
             }else{
                 idxs.push(ptIdx);
+                xCoords.push(x);
+                yCoords.push(y);
             }
         }
+        let toggledPts = {x:xCoords, y:yCoords, mode:'markers', name:'Toggled'};
+        allPlots.push(toggledPts);
+        Plotly.newPlot(elemStr, allPlots , layout);
     });
 }
