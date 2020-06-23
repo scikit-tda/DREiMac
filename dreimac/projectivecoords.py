@@ -5,14 +5,13 @@ import matplotlib.pyplot as plt
 from ripser import ripser
 import time
 import warnings
-from CSMSSMTools import getSSM, getGreedyPermDM, getGreedyPermEuclidean
-from Utils import *
+from geomtools import *
 
 """#########################################
     Projective Coordinates Utilities
 #########################################"""
 
-def PPCA(class_map, proj_dim, verbose = False):
+def ppca(class_map, proj_dim, verbose = False):
     """
     Principal Projective Component Analysis (Jose Perea 2017)
     Parameters
@@ -33,7 +32,7 @@ def PPCA(class_map, proj_dim, verbose = False):
      }
     """
     if verbose:
-        print("Doing PPCA on %i points in %i dimensions down to %i dimensions"%\
+        print("Doing ppca on %i points in %i dimensions down to %i dimensions"%\
                 (class_map.shape[0], class_map.shape[1], proj_dim))
     X = class_map.T
     variance = np.zeros(X.shape[0]-1)
@@ -57,7 +56,7 @@ def PPCA(class_map, proj_dim, verbose = False):
         if i == n_dim-proj_dim-2:
             XRet = np.array(X)
     if verbose:
-        print("Elapsed time PPCA: %.3g"%(time.time()-tic))
+        print("Elapsed time ppca: %.3g"%(time.time()-tic))
     #Return the variance and the projective coordinates
     return {'variance':variance, 'X':XRet.T}
 
@@ -103,7 +102,7 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def getStereoProjCodim1(pX, u = np.array([])):
+def get_stereo_proj_codim1(pX, u = np.array([])):
     """
     Do a projective stereographic projection
     Parameters
@@ -131,7 +130,7 @@ def getStereoProjCodim1(pX, u = np.array([])):
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
     return S.T
 
-def plotRP2Circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
+def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     Plot a circle with arrows showing the identifications for RP2.
     Set an equal aspect ratio and get rid of the axis ticks, since
@@ -158,7 +157,7 @@ def plotRP2Circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     ax.set_xlim([-pad, pad])
     ax.set_ylim([-pad, pad])
 
-def plotRP2Stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
+def plot_rp2_stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     Plot a 2D Stereographic Projection
     Parameters
@@ -170,14 +169,14 @@ def plotRP2Stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
     """
     if not (S.shape[1] == 2):
         warnings.warn("Plotting stereographic RP2 projection, but points are not 2 dimensional")
-    plotRP2Circle(plt.gca(), arrowcolor, facecolor)
+    plot_rp2_circle(plt.gca(), arrowcolor, facecolor)
     if f.size > S.shape[0]:
         plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap='afmhot')
     else:
         plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
 
 
-def plotRP3Stereo(ax, S, f, draw_sphere = False):
+def plot_rp3_stereo(ax, S, f, draw_sphere = False):
     """
     Plot a 3D Stereographic Projection
 
@@ -211,7 +210,7 @@ def plotRP3Stereo(ax, S, f, draw_sphere = False):
         z = np.cos(v)
         ax.plot_wireframe(x, y, z, color="k")
 
-def circleTo3DNorthPole(x):
+def circle_to_3dnorthpole(x):
     """
     Convert a point selected on the circle to a 3D
     unit vector on the upper hemisphere
@@ -343,7 +342,7 @@ class ProjectiveCoords(object):
         class_map = np.sqrt(varphi.T)
         for i in range(n_data):
             class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
-        res = PPCA(class_map, proj_dim, self.verbose)
+        res = ppca(class_map, proj_dim, self.verbose)
         return res
 
     def onpick(self, evt):
@@ -360,7 +359,7 @@ class ProjectiveCoords(object):
                 ## Step 2: Update projective coordinates
                 res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
                 self.coords = res['X']
-                Y = getStereoProjCodim1(self.coords, self.u)
+                Y = get_stereo_proj_codim1(self.coords, self.u)
                 self.coords_scatter.set_offsets(Y)
             else:
                 self.selected_plot.set_offsets(np.zeros((0, 2)))
@@ -376,13 +375,13 @@ class ProjectiveCoords(object):
         """
         if evt.inaxes == self.ax_pickstereo:
             x = np.array([evt.xdata, evt.ydata])
-            x, self.u = circleTo3DNorthPole(x)
+            x, self.u = circle_to_3dnorthpole(x)
             self.selected_northpole_plot.set_offsets(x)
             self.ax_pickstereo.figure.canvas.draw
             if len(self.selected) > 0 and self.coords.size > 0:
                 # Update circular coordinates if at least
                 # one point in the persistence diagram is selected
-                S = getStereoProjCodim1(self.coords, self.u)
+                S = get_stereo_proj_codim1(self.coords, self.u)
                 self.coords_scatter.set_offsets(S)
             self.ax_coords.figure.canvas.draw()
 
@@ -426,7 +425,7 @@ class ProjectiveCoords(object):
         ## Step 2: Setup axis for picking stereographic north pole
         self.ax_pickstereo = fig.add_subplot(132)
         self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
-        plotRP2Circle(self.ax_pickstereo)
+        plot_rp2_circle(self.ax_pickstereo)
         self.selected_northpole = np.array([0, 0])
         self.u = np.array([0, 0, 1])
         self.ax_pickstereo.set_title("Stereographic North Pole")
@@ -439,7 +438,7 @@ class ProjectiveCoords(object):
         pix = -2*np.ones(self.X_.shape[0])
         self.coords_scatter = self.ax_coords.scatter(pix, pix, c=f, cmap='magma_r')
         self.coords = np.array([[]])
-        plotRP2Circle(self.ax_coords)
+        plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
         plt.show()
 
@@ -464,7 +463,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     D = np.arccos(D)
 
     # Coming up with ground truth theta and phi for RP2 for colors
-    SOrig = getStereoProjCodim1(X)
+    SOrig = get_stereo_proj_codim1(X)
     phi = np.sqrt(np.sum(SOrig**2, 1))
     theta = np.arccos(np.abs(SOrig[:, 0]))
 

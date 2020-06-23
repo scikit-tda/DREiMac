@@ -5,7 +5,7 @@ import scipy
 from scipy.sparse.linalg import lsqr
 import time
 import matplotlib.pyplot as plt
-from Utils import *
+from geomtools import *
 from ripser import ripser
 import warnings
 
@@ -46,7 +46,6 @@ class CircularCoords(object):
         self.idx_land_ = res['idx_perm']
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
         self.cocycles_ = res['cocycles']
-        print(self.cocycles_)
         self.n_landmarks_ = n_landmarks
         self.type_ = "circ"
 
@@ -233,7 +232,7 @@ class CircularCoords(object):
 
         plt.show()
 
-def doTwoCircleTest():
+def do_two_circle_test():
     """
     Test interactive plotting with two noisy circles of different sizes
     """
@@ -256,4 +255,4 @@ def doTwoCircleTest():
     c.plot_interactive(X)
 
 if __name__ == '__main__':
-    doTwoCircleTest()
+    do_two_circle_test()
