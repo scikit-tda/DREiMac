@@ -323,8 +323,6 @@ class ProjectiveCoords(object):
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
-        # Compute the partition of unity 
-        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
         denom = np.sum(phi, 0)
         nzero = np.sum(denom == 0)
         if nzero > 0:
