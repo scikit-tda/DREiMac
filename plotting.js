@@ -101,6 +101,7 @@ function togglePlotDGMS(dgms, elemStr, toPlot){
     let idxs = [];
     let xCoords = [];
     let yCoords = [];
+    let dataSets = allPlots.length;
     myPlot.on('plotly_click', function(data){
         for(var i=0; i < data.points.length; i++){
             ptIdx = data.points[i].pointNumber;
@@ -117,9 +118,19 @@ function togglePlotDGMS(dgms, elemStr, toPlot){
                 xCoords.push(x);
                 yCoords.push(y);
             }
+            console.log(idxs);
+            console.log(xCoords);
+            console.log(yCoords);
         }
         let toggledPts = {x:xCoords, y:yCoords, mode:'markers', name:'Toggled'};
+        if(allPlots.length > dataSets){
+            allPlots.pop;
+        }
         allPlots.push(toggledPts);
-        Plotly.newPlot(elemStr, allPlots , layout);
+        var update = {
+            opacity: 0.4,
+            'marker.color': 'green'
+        };
+        Plotly.restyle(elemStr, update, 'toggledPts');
     });
 }
