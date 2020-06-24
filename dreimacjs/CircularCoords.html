@@ -1,0 +1,40 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-control" content="no-cache">
+<!--External Libraries -->
+    <script src="jslibs/dat.gui.min.js"></script>
+    <script src="jslibs/plotly.min.js"></script>
+    <script src="jslibs/numeric-1.2.6.min.js"></script>
+
+<!-- Our Libraries -->
+    <script src="debugging.js"></script>
+    <script src="plotting.js"></script>
+    <script src="tadasets.js"></script>
+    <script src="tda.js"></script>
+    <script src="ripser.js"></script>
+    <script src="dreimacutils.js"></script>
+    <script src="circularcoords.js"></script>
+</head>
+<body>
+    <div id = "pagestatus"></div>
+    <div id = "feedbackText"></div>
+    <canvas id="canvas2D" width="600" height="600" style="border:1px solid #000000;">
+    </canvas>
+    
+    <div id = "dgmsCanvas"></div>
+
+
+    <script type="text/javascript">
+        let canvas2D = document.getElementById("canvas2D");
+        let feedbackCanvas = document.getElementById("feedbackText");
+        let tda = new TDA(canvas2D, feedbackCanvas);
+        let ccords = new CircularCoords(tda, canvas2D, "dgmsCanvas");
+
+        /*R = [[0, 1], [2, 3], [0, 3], [2, 1]];
+        Delta0 = makeDelta0(R, 4);
+        console.log(Delta0);*/
+    </script>
+
+</body>
+</html>

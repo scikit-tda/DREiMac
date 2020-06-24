@@ -5,7 +5,7 @@ import scipy
 from scipy.sparse.linalg import lsqr
 import time
 import matplotlib.pyplot as plt
-from Utils import *
+from geomtools import *
 from ripser import ripser
 import warnings
 
@@ -30,8 +30,6 @@ class CircularCoords(object):
         maxdim : int
             Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
             but it may be of interest to see other dimensions (e.g. for a torus)
-        partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
-            A partition of unity function
         """
         assert(maxdim >= 1)
         self.verbose = verbose
@@ -48,6 +46,7 @@ class CircularCoords(object):
         self.idx_land_ = res['idx_perm']
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
         self.cocycles_ = res['cocycles']
+        reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
         self.n_landmarks_ = n_landmarks
         self.type_ = "circ"
 
@@ -115,6 +114,7 @@ class CircularCoords(object):
         R = np.zeros((NEdges, 2))
         R[:, 0] = J
         R[:, 1] = I
+        np.savetxt("R.txt", R, delimiter=',')
         #Make a flat array of NEdges weights parallel to the rows of R
         if do_weighted:
             W = dist_land_land[I, J]
@@ -136,7 +136,7 @@ class CircularCoords(object):
         ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
-        phi[U] = partunity_fn(phi[U], r_cover)
+        phi[U] = partunity_fn(dist_land_data[U], r_cover)
         # Compute the partition of unity 
         # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
         denom = np.sum(phi, 0)
@@ -233,7 +233,7 @@ class CircularCoords(object):
 
         plt.show()
 
-def doTwoCircleTest():
+def do_two_circle_test():
     """
     Test interactive plotting with two noisy circles of different sizes
     """
@@ -256,4 +256,4 @@ def doTwoCircleTest():
     c.plot_interactive(X)
 
 if __name__ == '__main__':
-    doTwoCircleTest()
+    do_two_circle_test()
