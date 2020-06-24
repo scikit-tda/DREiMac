@@ -188,6 +188,26 @@ def make_delta0(R):
     Delta = sparse.coo_matrix((V, (I, J)), shape=(NEdges, NVertices)).tocsr()
     return Delta
 
+def reindex_cocycles(cocycles, idx_land, N):
+    """
+    Convert the indices of a set of cocycles to be relative
+    to a list of indices in a greedy permutation
+    Parameters
+    ----------
+    cocycles: list of list of ndarray
+        The cocycles
+    idx_land: ndarray(M, dtype=int)
+        Indices of the landmarks in the greedy permutation, with
+        respect to all points
+    N: int
+        Number of total points
+    """
+    idx_map = -1*np.ones(N, dtype=int)
+    idx_map[idx_land] = np.arange(idx_land.size)
+    for ck in cocycles:
+        for c in ck:
+            c[:, 0:-1] = idx_map[c[:, 0:-1]]
+
 
 """#########################################
         Partition of Unity Functions
