@@ -2,6 +2,7 @@ import numpy as np
 import numpy.linalg as linalg
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt 
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from ripser import ripser
 import time
 import warnings
@@ -130,7 +131,7 @@ def get_stereo_proj_codim1(pX, u = np.array([])):
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
     return S.T
 
-def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
+def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15), do_arrows = True):
     """
     Plot a circle with arrows showing the identifications for RP2.
     Set an equal aspect ratio and get rid of the axis ticks, since
@@ -143,13 +144,16 @@ def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
         Color for the circle and arrows
     facecolor: string or ndarray(3) or ndarray(4)
         Color for background of the plot
+    do_arrows: boolean
+        Whether to draw the arrows
     """
     t = np.linspace(0, 2*np.pi, 200)
     ax.plot(np.cos(t), np.sin(t), c=arrowcolor)
     ax.axis('equal')
     ax = plt.gca()
-    ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
-    ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+    if do_arrows:
+        ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+        ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
     ax.set_facecolor(facecolor)
     ax.set_xticks([])
     ax.set_yticks([])
@@ -344,6 +348,21 @@ class ProjectiveCoords(object):
         res = ppca(class_map, proj_dim, self.verbose)
         return res
 
+    def update_display_coords(self):
+        if len(self.selected) > 0 and self.coords.size > 0:
+            # Update projective coordinates if at least
+            # one point in the persistence diagram is selected
+            S0 = get_stereo_proj_codim1(self.coords, self.u)
+            S = -2*np.ones_like(S0)
+            S[self.idx_disp, :] = S0[self.idx_disp, :]
+            if self.coords_scatter:
+                # Updated scatterplot
+                self.coords_scatter.set_offsets(S)
+            else:
+                for i, ab in enumerate(self.images_scatter):
+                    ab.xybox = S[i, :]
+        self.ax_coords.figure.canvas.draw()
+
     def onpick(self, evt):
         """
         Toggle a point in the persistence diagram
@@ -358,11 +377,18 @@ class ProjectiveCoords(object):
                 ## Step 2: Update projective coordinates
                 res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
                 self.coords = res['X']
-                Y = get_stereo_proj_codim1(self.coords, self.u)
-                self.coords_scatter.set_offsets(Y)
+                # If the number of points exceeds the maximum to plot, select
+                # a subset with a greedy permutation
+                if self.X_.shape[0] > self.max_disp:
+                    self.idx_disp = get_greedy_perm_euclidean(self.coords, self.max_disp)['perm']
+                self.update_display_coords()
             else:
                 self.selected_plot.set_offsets(np.zeros((0, 2)))
-                self.coords_scatter.set_offsets(-2*np.ones((self.X_.shape[0], 2)))
+                if self.coords_scatter:
+                    self.coords_scatter.set_offsets(-2*np.ones((self.X_.shape[0], 2)))
+                else:
+                    for ab in self.images_scatter:
+                        ab.xybox = (-1, -1)
         self.ax_persistence.figure.canvas.draw()
         self.ax_coords.figure.canvas.draw()
         return True
@@ -377,26 +403,32 @@ class ProjectiveCoords(object):
             x, self.u = circle_to_3dnorthpole(x)
             self.selected_northpole_plot.set_offsets(x)
             self.ax_pickstereo.figure.canvas.draw
-            if len(self.selected) > 0 and self.coords.size > 0:
-                # Update circular coordinates if at least
-                # one point in the persistence diagram is selected
-                S = get_stereo_proj_codim1(self.coords, self.u)
-                self.coords_scatter.set_offsets(S)
-            self.ax_coords.figure.canvas.draw()
+            self.update_display_coords()
 
-    def plot_interactive(self, f):
+    def plot_interactive(self, f, zoom=1, max_disp = 1000):
         """
         Do an interactive plot, with H1 on the left and a 
         2D dimension reduced version of the point cloud on the right.
-        The right plot will be colored by the circular coordinates
-        of the plot on the left.  Left click on points in the persistence
-        diagram to toggle there inclusion in the circular coordinates
+        The right plot will be colored by the specified scalar function, or
+        a set of specified images will be placed on top of them.  
+        Left click on points in the persistence  diagram to toggle their
+        inclusion in the circular coordinates
         Parameters
         ----------
-        f : ndarray (N) or ndarray (N, 3)
-            A function with which to color the points, or a list of colors
+        f : Display information for the points
+            On of three options:
+            1) A scalar function with which to color the points, represented
+               as a 1D array
+            2) A list of colors with which to color the points, specified as
+               an Nx3 array
+            3) A list of images to place at each location
+        zoom: int
+            If using patches, the factor by which to zoom in on them
+        max_disp: int
+            The maximum number of points to display
         """
         self.f = f
+        self.max_disp = max_disp
         fig = plt.figure(figsize=(15, 5))
         ## Step 1: Plot H1
         dgm_size = 20
@@ -424,7 +456,7 @@ class ProjectiveCoords(object):
         ## Step 2: Setup axis for picking stereographic north pole
         self.ax_pickstereo = fig.add_subplot(132)
         self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
-        plot_rp2_circle(self.ax_pickstereo)
+        plot_rp2_circle(self.ax_pickstereo, do_arrows=False)
         self.selected_northpole = np.array([0, 0])
         self.u = np.array([0, 0, 1])
         self.ax_pickstereo.set_title("Stereographic North Pole")
@@ -433,10 +465,23 @@ class ProjectiveCoords(object):
         ## Step 3: Setup axis for coordinates.  Start with axis 
         ## which is the ordinary north pole
         self.ax_coords = fig.add_subplot(133)
+        # Figure out which points to display.  Start off with a random subset
+        self.idx_disp = np.arange(self.X_.shape[0])
+        if self.X_.shape[0] > max_disp:
+            self.idx_disp = np.random.permutation(self.X_.shape[0])[0:max_disp]
         # Setup some dummy points outside of the axis just to get the colors right
         pix = -2*np.ones(self.X_.shape[0])
-        self.coords_scatter = self.ax_coords.scatter(pix, pix, c=f, cmap='magma_r')
-        self.coords = np.array([[]])
+        self.coords_scatter = None
+        self.images_scatter = []
+        if type(f) is list:
+            for patch in f:
+                im = OffsetImage(patch, zoom=1, cmap = 'gray')
+                ab = AnnotationBbox(im, (0.5, 0.5), xycoords='data', frameon=False)
+                self.ax_coords.add_artist(ab)
+                self.images_scatter.append(ab)
+        else:
+            self.coords_scatter = self.ax_coords.scatter(pix, pix, c=f, cmap='magma_r')
+            self.coords = np.array([[]])
         plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
         plt.show()
@@ -465,11 +510,9 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     SOrig = get_stereo_proj_codim1(X)
     phi = np.sqrt(np.sum(SOrig**2, 1))
     theta = np.arccos(np.abs(SOrig[:, 0]))
-
-
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    pc.plot_interactive(phi)
+    pc.plot_interactive(phi, max_disp=NSamples)
 
 
 def testProjCoordsKleinBottle(NSamples, NLandmarks):
@@ -494,6 +537,50 @@ def testProjCoordsKleinBottle(NSamples, NLandmarks):
     pc = ProjectiveCoords(X, NLandmarks, verbose=True)
     pc.plot_interactive(phi)
 
+
+def getLinePatches(dim, NAngles, NOffsets, sigma):
+    """
+    Sample a set of line segments, as witnessed by square patches
+    Parameters
+    ----------
+    dim: int
+        Patches will be dim x dim
+    NAngles: int
+        Number of angles to sweep between 0 and pi
+    NOffsets: int
+        Number of offsets to sweep from the origin to the edge of the patch
+    sigma: float
+        The blur parameter.  Higher sigma is more blur
+    """
+    N = NAngles*NOffsets
+    P = np.zeros((N, dim*dim))
+    thetas = np.linspace(0, np.pi, NAngles+1)[0:NAngles]
+    #ps = np.linspace(-0.5*np.sqrt(2), 0.5*np.sqrt(2), NOffsets)
+    ps = np.linspace(-1, 1, NOffsets)
+    idx = 0
+    [Y, X] = np.meshgrid(np.linspace(-0.5, 0.5, dim), np.linspace(-0.5, 0.5, dim))
+    for i in range(NAngles):
+        c = np.cos(thetas[i])
+        s = np.sin(thetas[i])
+        for j in range(NOffsets):
+            patch = X*c + Y*s + ps[j]
+            patch = np.exp(-patch**2/sigma**2)
+            P[idx, :] = patch.flatten()
+            idx += 1
+    return P
+
+def testProjCoordsLinePatches():
+    """
+    Test projective coordinates on a set of line segment patches
+    """
+    dim = 10
+    P = getLinePatches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
+    patches = [np.reshape(P[i, :], (dim, dim)) for i in range(P.shape[0])]
+    pc = ProjectiveCoords(P, n_landmarks=100)
+    pc.plot_interactive(patches, max_disp=200)
+
+
 if __name__ == '__main__':
-    testProjCoordsRP2(10000, 60)
-    #testProjCoordsKleinBottle(200, 100)
+    #testProjCoordsRP2(10000, 60)
+    #testProjCoordsKleinBottle(10000, 300)
+    testProjCoordsLinePatches()
