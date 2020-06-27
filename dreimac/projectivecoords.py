@@ -481,7 +481,7 @@ class ProjectiveCoords(object):
             for i in range(self.idx_disp.size):
                 # Setup a bunch of empty images
                 im = OffsetImage(np.array([[minpatch, maxpatch]]), zoom=zoom, cmap = 'gray')
-                ab = AnnotationBbox(im, (0.5, 0.5), xycoords='data', frameon=False)
+                ab = AnnotationBbox(im, (0, 0), xycoords='data', frameon=False)
                 self.ax_coords.add_artist(ab)
                 self.patch_boxes.append((im, ab))
         else:
@@ -525,7 +525,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     theta = np.arccos(np.abs(SOrig[:, 0]))
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    pc.plot_interactive(phi)
+    pc.plot_interactive(phi, max_disp=X.shape[0])
 
 
 def testProjCoordsKleinBottle(NSamples, NLandmarks):
