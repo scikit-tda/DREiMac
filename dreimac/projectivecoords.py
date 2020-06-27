@@ -349,18 +349,21 @@ class ProjectiveCoords(object):
         return res
 
     def update_display_coords(self):
+        S = -2*np.ones((self.idx_disp.size, 2))
         if len(self.selected) > 0 and self.coords.size > 0:
             # Update projective coordinates if at least
             # one point in the persistence diagram is selected
-            S0 = get_stereo_proj_codim1(self.coords, self.u)
-            S = -2*np.ones_like(S0)
-            S[self.idx_disp, :] = S0[self.idx_disp, :]
-            if self.coords_scatter:
-                # Updated scatterplot
-                self.coords_scatter.set_offsets(S)
-            else:
-                for i, ab in enumerate(self.images_scatter):
-                    ab.xybox = S[i, :]
+            S = get_stereo_proj_codim1(self.coords[self.idx_disp, :], self.u)
+        if self.coords_scatter:
+            # Updated scatterplot
+            self.coords_scatter.set_offsets(S)
+            C = self.coords_colors[self.idx_disp, :]
+            self.coords_scatter.set_color(C)
+        else:
+            for i, (im, ab) in enumerate(self.patch_boxes):
+                ab.xybox = S[i, :]
+                idx = self.idx_disp[i]
+                im.set_data(self.f[idx])
         self.ax_coords.figure.canvas.draw()
 
     def onpick(self, evt):
@@ -378,18 +381,13 @@ class ProjectiveCoords(object):
                 res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
                 self.coords = res['X']
                 # If the number of points exceeds the maximum to plot, select
-                # a subset with a greedy permutation
+                # a subset with a greedy permutation, using the arclength
+                # metric on RP2
                 if self.X_.shape[0] > self.max_disp:
-                    self.idx_disp = get_greedy_perm_euclidean(self.coords, self.max_disp)['perm']
-                self.update_display_coords()
+                    self.idx_disp = get_greedy_perm_pc(self.coords, self.max_disp, csm_fn = get_csm_projarc)['perm']
             else:
                 self.selected_plot.set_offsets(np.zeros((0, 2)))
-                if self.coords_scatter:
-                    self.coords_scatter.set_offsets(-2*np.ones((self.X_.shape[0], 2)))
-                else:
-                    for ab in self.images_scatter:
-                        ab.xybox = (-1, -1)
-        self.ax_persistence.figure.canvas.draw()
+        self.update_display_coords()
         self.ax_coords.figure.canvas.draw()
         return True
     
@@ -470,17 +468,32 @@ class ProjectiveCoords(object):
         if self.X_.shape[0] > max_disp:
             self.idx_disp = np.random.permutation(self.X_.shape[0])[0:max_disp]
         # Setup some dummy points outside of the axis just to get the colors right
-        pix = -2*np.ones(self.X_.shape[0])
+        pix = -2*np.ones(self.idx_disp.size)
         self.coords_scatter = None
-        self.images_scatter = []
+        self.patch_boxes = []
         if type(f) is list:
+            # Figure out range of patches
+            minpatch = np.inf
+            maxpatch = -np.inf
             for patch in f:
-                im = OffsetImage(patch, zoom=1, cmap = 'gray')
+                minpatch = min(minpatch, np.min(patch))
+                maxpatch = max(maxpatch, np.max(patch))
+            for i in range(self.idx_disp.size):
+                # Setup a bunch of empty images
+                im = OffsetImage(np.array([[minpatch, maxpatch]]), zoom=zoom, cmap = 'gray')
                 ab = AnnotationBbox(im, (0.5, 0.5), xycoords='data', frameon=False)
                 self.ax_coords.add_artist(ab)
-                self.images_scatter.append(ab)
+                self.patch_boxes.append((im, ab))
         else:
-            self.coords_scatter = self.ax_coords.scatter(pix, pix, c=f, cmap='magma_r')
+            self.coords_colors = f
+            if f.size == self.X_.shape[0]:
+                # Scalar function, so need to apply colormap
+                c = plt.get_cmap('magma_r')
+                fscaled = f - np.min(f)
+                fscaled = fscaled/np.max(fscaled)
+                C = c(np.array(np.round(fscaled*255), dtype=np.int32))
+                self.coords_colors = C[:, 0:3]
+            self.coords_scatter = self.ax_coords.scatter(pix, pix)
             self.coords = np.array([[]])
         plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
@@ -512,7 +525,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     theta = np.arccos(np.abs(SOrig[:, 0]))
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    pc.plot_interactive(phi, max_disp=NSamples)
+    pc.plot_interactive(phi)
 
 
 def testProjCoordsKleinBottle(NSamples, NLandmarks):

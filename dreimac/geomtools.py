@@ -24,7 +24,7 @@ def get_csm(X, Y):
         A matrix holding the coordinates of M points
     Y : ndarray (N, d) 
         A matrix holding the coordinates of N points
-    Return
+    Returns
     ------
     D : ndarray (M, N)
         An MxN Euclidean cross-similarity matrix
@@ -32,6 +32,27 @@ def get_csm(X, Y):
     C = np.sum(X**2, 1)[:, None] + np.sum(Y**2, 1)[None, :] - 2*X.dot(Y.T)
     C[C < 0] = 0
     return np.sqrt(C)
+
+def get_csm_projarc(X, Y):
+    """
+    Return the projective arc length cross-similarity between two point
+    clouds specified as points on the sphere
+    Parameters
+    ----------
+    X : ndarray (M, d)
+        A matrix holding the coordinates of M points on RP^{d-1}
+    Y : ndarray (N, d) 
+        A matrix holding the coordinates of N points on RP^{d-1}
+    Returns
+    ------
+    D : ndarray (M, N)
+        An MxN  cross-similarity matrix
+    """
+    D = np.abs(X.dot(Y.T))
+    D[D < -1] = -1
+    D[D > 1] = 1
+    D = np.arccos(np.abs(D))
+    return D
 
 def get_ssm(X):
     return get_csm(X, X)
@@ -41,12 +62,12 @@ def get_ssm(X):
          Greedy Permutations
 #########################################"""
 
-def get_greedy_perm_euclidean(X, M, verbose = False):
+def get_greedy_perm_pc(X, M, verbose = False, csm_fn = get_csm):
     """
     A Naive O(NM) algorithm to do furthest points sampling, assuming
-    the input is a Euclidean point cloud.  This saves computation
-    over having compute the full distance matrix if the number of
-    landmarks M << N
+    the input is a point cloud specified in Euclidean space.  This saves 
+    computation over having compute the full distance matrix if the number
+    of landmarks M << N
     
     Parameters
     ----------
@@ -56,6 +77,8 @@ def get_greedy_perm_euclidean(X, M, verbose = False):
         Number of landmarks to compute
     verbose: boolean
         Whether to print progress
+    csm_fn: function X, Y -> D
+        Cross-similarity function (Euclidean by default)
 
     Return
     ------
@@ -70,14 +93,14 @@ def get_greedy_perm_euclidean(X, M, verbose = False):
     N = X.shape[0]
     perm = np.zeros(M, dtype=np.int64)
     lambdas = np.zeros(M)
-    ds = get_csm(X[0, :][None, :], X).flatten()
+    ds = csm_fn(X[0, :][None, :], X).flatten()
     D = np.zeros((M, N))
     D[0, :] = ds
     for i in range(1, M):
         idx = np.argmax(ds)
         perm[i] = idx
         lambdas[i] = ds[idx]
-        thisds = get_csm(X[idx, :][None, :], X).flatten()
+        thisds = csm_fn(X[idx, :][None, :], X).flatten()
         D[i, :] = thisds
         ds = np.minimum(ds, thisds)
     Y = X[perm, :]
