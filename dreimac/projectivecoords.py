@@ -392,15 +392,22 @@ class ProjectiveCoords(object):
         return True
     
     def onstereo_click(self, evt):
+        self.stereo_pressed = True
+        self.onstereo_move(evt)
+    
+    def onstereo_release(self, evt):
+        self.stereo_pressed = False
+
+    def onstereo_move(self, evt):
         """
         Change the north pole on the projective plane for
         stereographic projection
         """
-        if evt.inaxes == self.ax_pickstereo:
+        if evt.inaxes == self.ax_pickstereo and self.stereo_pressed:
             x = np.array([evt.xdata, evt.ydata])
             x, self.u = circle_to_3dnorthpole(x)
             self.selected_northpole_plot.set_offsets(x)
-            self.ax_pickstereo.figure.canvas.draw
+            self.ax_pickstereo.figure.canvas.draw()
             self.update_display_coords()
 
     def plot_interactive(self, f, zoom=1, max_disp = 1000):
@@ -455,10 +462,12 @@ class ProjectiveCoords(object):
         self.ax_pickstereo = fig.add_subplot(132)
         self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
         plot_rp2_circle(self.ax_pickstereo, do_arrows=False)
-        self.selected_northpole = np.array([0, 0])
         self.u = np.array([0, 0, 1])
         self.ax_pickstereo.set_title("Stereographic North Pole")
+        self.stereo_pressed = False
+        fig.canvas.mpl_connect('motion_notify_event', self.onstereo_move)
         fig.canvas.mpl_connect('button_press_event', self.onstereo_click)
+        fig.canvas.mpl_connect('button_release_event', self.onstereo_release)
 
         ## Step 3: Setup axis for coordinates.  Start with axis 
         ## which is the ordinary north pole
@@ -497,7 +506,21 @@ class ProjectiveCoords(object):
             self.coords = np.array([[]])
         plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
-        plt.show()
+        return fig
+    
+    def get_selected_info(self):
+        """
+        Return information about what the user selected in
+        the interactive plot
+        Returns
+        -------
+        {
+            'cocycle_idxs':ndarray(dtype = int)
+                Indices of the selected cocycles,
+            '
+        }
+        """
+        idxs = np.array(list(self.selected))
 
 
 def testProjCoordsRP2(NSamples, NLandmarks):
@@ -548,7 +571,7 @@ def testProjCoordsKleinBottle(NSamples, NLandmarks):
     X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
     X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
     pc = ProjectiveCoords(X, NLandmarks, verbose=True)
-    pc.plot_interactive(phi)
+    pc.plot_interactive(theta)
 
 
 def getLinePatches(dim, NAngles, NOffsets, sigma):
@@ -590,7 +613,8 @@ def testProjCoordsLinePatches():
     P = getLinePatches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
     patches = [np.reshape(P[i, :], (dim, dim)) for i in range(P.shape[0])]
     pc = ProjectiveCoords(P, n_landmarks=100)
-    pc.plot_interactive(patches, max_disp=200)
+    fig = pc.plot_interactive(patches, max_disp=200)
+    plt.show()
 
 
 if __name__ == '__main__':
