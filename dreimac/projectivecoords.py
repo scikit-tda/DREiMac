@@ -270,14 +270,21 @@ class ProjectiveCoords(object):
         if verbose:
             print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
         self.X_ = X
-        self.dgms_ = res['dgms']
         self.dist_land_data_ = res['dperm2all']
         self.idx_land_ = res['idx_perm']
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
+        self.dgms_ = res['dgms']
         self.cocycles_ = res['cocycles']
+        # Sort persistence diagrams in descending order of persistence
+        idxs = np.argsort(self.dgms_[1][:, 0]-self.dgms_[1][:, 1])
+        self.dgms_[1] = self.dgms_[1][idxs, :]
+        self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
         reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
         self.n_landmarks_ = n_landmarks
         self.type_ = "proj"
+        # GUI variables
+        self.selected = set([])
+        self.u = np.array([0, 0, 1])
 
     def get_coordinates(self, perc = 0.99, cocycle_idx = [0], proj_dim = 3, partunity_fn = partunity_linear):
         """
@@ -366,29 +373,39 @@ class ProjectiveCoords(object):
                 im.set_data(self.f[idx])
         self.ax_coords.figure.canvas.draw()
 
+    def toggle_persistence(self, clicked):
+        """
+        Toggle including a cocycle from a set of points in the 
+        persistence diagram
+        Parameters
+        ----------
+        clicked: list of int
+            Indices to toggle
+        """
+        self.selected = self.selected.symmetric_difference(set(clicked))
+        idxs = np.array(list(self.selected))
+        if idxs.size > 0:
+            ## Step 1: Highlight point on persistence diagram
+            self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
+            ## Step 2: Update projective coordinates
+            res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
+            self.coords = res['X']
+            # If the number of points exceeds the maximum to plot, select
+            # a subset with a greedy permutation, using the arclength
+            # metric on RP2
+            if self.X_.shape[0] > self.max_disp:
+                self.idx_disp = get_greedy_perm_pc(self.coords, self.max_disp, csm_fn = get_csm_projarc)['perm']
+        else:
+            self.selected_plot.set_offsets(np.zeros((0, 2)))
+        self.update_display_coords()
+        self.ax_coords.figure.canvas.draw()
+
     def onpick(self, evt):
         """
         Toggle a point in the persistence diagram
         """
         if evt.artist == self.dgmplot:
-            ## Step 1: Highlight point on persistence diagram
-            clicked = set(evt.ind.tolist())
-            self.selected = self.selected.symmetric_difference(clicked)
-            idxs = np.array(list(self.selected))
-            if idxs.size > 0:
-                self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
-                ## Step 2: Update projective coordinates
-                res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs)
-                self.coords = res['X']
-                # If the number of points exceeds the maximum to plot, select
-                # a subset with a greedy permutation, using the arclength
-                # metric on RP2
-                if self.X_.shape[0] > self.max_disp:
-                    self.idx_disp = get_greedy_perm_pc(self.coords, self.max_disp, csm_fn = get_csm_projarc)['perm']
-            else:
-                self.selected_plot.set_offsets(np.zeros((0, 2)))
-        self.update_display_coords()
-        self.ax_coords.figure.canvas.draw()
+            self.toggle_persistence(evt.ind.tolist())
         return True
     
     def onstereo_click(self, evt):
@@ -410,7 +427,7 @@ class ProjectiveCoords(object):
             self.ax_pickstereo.figure.canvas.draw()
             self.update_display_coords()
 
-    def plot_interactive(self, f, zoom=1, max_disp = 1000):
+    def plot(self, f, zoom=1, max_disp = 1000, cocycle_idxs = [], u = np.array([0, 0, 1])):
         """
         Do an interactive plot, with H1 on the left and a 
         2D dimension reduced version of the point cloud on the right.
@@ -431,6 +448,10 @@ class ProjectiveCoords(object):
             If using patches, the factor by which to zoom in on them
         max_disp: int
             The maximum number of points to display
+        cocycle_idxs: list of int
+            A list of cocycles to start with
+        u: ndarray(3, float)
+            The initial stereographic north pole
         """
         self.f = f
         self.max_disp = max_disp
@@ -462,7 +483,7 @@ class ProjectiveCoords(object):
         self.ax_pickstereo = fig.add_subplot(132)
         self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
         plot_rp2_circle(self.ax_pickstereo, do_arrows=False)
-        self.u = np.array([0, 0, 1])
+        self.u = u # Initial u
         self.ax_pickstereo.set_title("Stereographic North Pole")
         self.stereo_pressed = False
         fig.canvas.mpl_connect('motion_notify_event', self.onstereo_move)
@@ -506,6 +527,11 @@ class ProjectiveCoords(object):
             self.coords = np.array([[]])
         plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
+        if len(cocycle_idxs) > 0:
+            # If some initial cocycle indices were chosen, update
+            # the plot
+            self.toggle_persistence(cocycle_idxs)
+            self.selected_northpole_plot.set_offsets(self.u[0:2])
         return fig
     
     def get_selected_info(self):
@@ -517,10 +543,11 @@ class ProjectiveCoords(object):
         {
             'cocycle_idxs':ndarray(dtype = int)
                 Indices of the selected cocycles,
-            '
+            'u':ndarray(3, float)
+                The stereographic north pole
         }
         """
-        idxs = np.array(list(self.selected))
+        return {'cocycle_idxs':np.array(list(self.selected)), 'u':self.u}
 
 
 def testProjCoordsRP2(NSamples, NLandmarks):
@@ -548,7 +575,7 @@ def testProjCoordsRP2(NSamples, NLandmarks):
     theta = np.arccos(np.abs(SOrig[:, 0]))
     
     pc = ProjectiveCoords(D, NLandmarks, distance_matrix=True, verbose=True)
-    pc.plot_interactive(phi, max_disp=X.shape[0])
+    pc.plot(phi, max_disp=X.shape[0])
 
 
 def testProjCoordsKleinBottle(NSamples, NLandmarks):
@@ -571,7 +598,7 @@ def testProjCoordsKleinBottle(NSamples, NLandmarks):
     X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
     X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
     pc = ProjectiveCoords(X, NLandmarks, verbose=True)
-    pc.plot_interactive(theta)
+    pc.plot(theta)
 
 
 def getLinePatches(dim, NAngles, NOffsets, sigma):
@@ -613,7 +640,7 @@ def testProjCoordsLinePatches():
     P = getLinePatches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
     patches = [np.reshape(P[i, :], (dim, dim)) for i in range(P.shape[0])]
     pc = ProjectiveCoords(P, n_landmarks=100)
-    fig = pc.plot_interactive(patches, max_disp=200)
+    fig = pc.plot(patches, max_disp=200, cocycle_idxs=[0])
     plt.show()
 
 

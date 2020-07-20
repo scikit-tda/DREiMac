@@ -46,6 +46,10 @@ class CircularCoords(object):
         self.idx_land_ = res['idx_perm']
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
         self.cocycles_ = res['cocycles']
+        # Sort persistence diagrams in descending order of persistence
+        idxs = np.argsort(self.dgms_[1][:, 0]-self.dgms_[1][:, 1])
+        self.dgms_[1] = self.dgms_[1][idxs, :]
+        self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
         reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
         self.n_landmarks_ = n_landmarks
         self.type_ = "circ"
