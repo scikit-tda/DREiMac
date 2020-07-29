@@ -6,7 +6,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from ripser import ripser
 import time
 import warnings
-from geomtools import *
+from .geomtools import *
 
 """#########################################
     Projective Coordinates Utilities

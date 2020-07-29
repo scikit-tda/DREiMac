@@ -5,7 +5,7 @@ import scipy
 from scipy.sparse.linalg import lsqr
 import time
 import matplotlib.pyplot as plt
-from geomtools import *
+from .geomtools import *
 from ripser import ripser
 import warnings
 
