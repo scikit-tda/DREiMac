@@ -258,6 +258,3 @@ def do_two_circle_test():
     
     c = CircularCoords(X, 100, prime = prime)
     c.plot_interactive(X)
-
-if __name__ == '__main__':
-    do_two_circle_test()
