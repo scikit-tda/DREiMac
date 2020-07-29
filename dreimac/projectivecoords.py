@@ -601,7 +601,7 @@ def testProjCoordsKleinBottle(NSamples, NLandmarks):
     pc.plot(theta)
 
 
-def getLinePatches(dim, NAngles, NOffsets, sigma):
+def get_line_patches(dim, NAngles, NOffsets, sigma):
     """
     Sample a set of line segments, as witnessed by square patches
     Parameters
@@ -637,7 +637,7 @@ def testProjCoordsLinePatches():
     Test projective coordinates on a set of line segment patches
     """
     dim = 10
-    P = getLinePatches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
+    P = get_line_patches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
     patches = [np.reshape(P[i, :], (dim, dim)) for i in range(P.shape[0])]
     pc = ProjectiveCoords(P, n_landmarks=100)
     fig = pc.plot(patches, max_disp=200, cocycle_idxs=[0])
