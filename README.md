@@ -3,7 +3,13 @@
 
 # Python version
 
-Code can be found in dreimac/
+Code can be found in dreimac/.  To install, type
+
+~~~~~ bash
+python setup.py install
+~~~~~
+
+at the root of the directory.  Then, you can import dreimac from any python file or notebook
 
 
 # Javascript version

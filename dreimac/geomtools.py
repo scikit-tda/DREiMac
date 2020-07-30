@@ -141,21 +141,6 @@ def get_greedy_perm_dm(D, M, verbose = False):
     DLandmarks = D[perm, :] 
     return {'perm':perm, 'lambdas':lambdas, 'DLandmarks':DLandmarks}
 
-def test_greedy_perm_euclidean():
-    t = np.linspace(0, 2*np.pi, 10000)
-    X = np.zeros((len(t), 2))
-    X[:, 0] = np.cos(t)
-    X[:, 1] = np.sin(t)
-    res = get_greedy_perm_euclidean(X, 50, True)
-    Y, D = res['Y'], res['D']
-    plt.subplot(121)
-    plt.scatter(X[:, 0], X[:, 1], 10)
-    plt.scatter(Y[:, 0], Y[:, 1], 40)
-    plt.subplot(122)
-    plt.imshow(D, aspect = 'auto')
-    plt.show()
-
-
 
 
 """#########################################
@@ -284,5 +269,4 @@ def partunity_exp(ds, r_cover):
     """
     return np.exp(r_cover**2/(ds**2-r_cover**2))
 
-if __name__ == '__main__':
-    test_greedy_perm_euclidean()
+PARTUNITY_FNS = {'linear':partunity_linear, 'quadratic':partunity_quadratic, 'exp':partunity_exp}

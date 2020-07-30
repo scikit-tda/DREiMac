@@ -8,14 +8,13 @@ from ripser import ripser
 import time
 import warnings
 from .geomtools import *
+from .emcoords import *
 
 """#########################################
     Projective Coordinates Utilities
 #########################################"""
 
-PARTUNITY_FNS = {'linear':partunity_linear, 'quadratic':partunity_quadratic, 'exp':partunity_exp}
-
-def ppca(class_map, proj_dim, verbose = False):
+def ppca(class_map, proj_dim, verbose=False):
     """
     Principal Projective Component Analysis (Jose Perea 2017)
     Parameters
@@ -65,7 +64,7 @@ def ppca(class_map, proj_dim, verbose = False):
     return {'variance':variance, 'X':XRet.T}
 
 
-def rotmat(a, b = np.array([])):
+def rotmat(a, b=np.array([])):
     """
     Construct a d x d rotation matrix that rotates
     a vector a so that it coincides with a vector b
@@ -106,7 +105,7 @@ def rotmat(a, b = np.array([])):
     return rot
 
 
-def get_stereo_proj_codim1(pX, u = np.array([])):
+def get_stereo_proj_codim1(pX, u=np.array([])):
     """
     Do a projective stereographic projection
     Parameters
@@ -134,7 +133,7 @@ def get_stereo_proj_codim1(pX, u = np.array([])):
     S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
     return S.T
 
-def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15), do_arrows = True, pad = 1.1):
+def plot_rp2_circle(ax, arrowcolor='c', facecolor=(0.15, 0.15, 0.15), do_arrows=True, pad=1.1):
     """
     Plot a circle with arrows showing the identifications for RP2.
     Set an equal aspect ratio and get rid of the axis ticks, since
@@ -165,7 +164,7 @@ def plot_rp2_circle(ax, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15), do_arr
     ax.set_xlim([-pad, pad])
     ax.set_ylim([-pad, pad])
 
-def plot_rp2_stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
+def plot_rp2_stereo(S, f, arrowcolor='c', facecolor=(0.15, 0.15, 0.15)):
     """
     Plot a 2D Stereographic Projection
     Parameters
@@ -184,7 +183,7 @@ def plot_rp2_stereo(S, f, arrowcolor = 'c', facecolor = (0.15, 0.15, 0.15)):
         plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
 
 
-def plot_rp3_stereo(ax, S, f, draw_sphere = False):
+def plot_rp3_stereo(ax, S, f, draw_sphere=False):
     """
     Plot a 3D Stereographic Projection
 
@@ -248,7 +247,7 @@ def circle_to_3dnorthpole(x):
         Main Projective Coordinates Class
 #########################################"""
 
-class ProjectiveCoords(object):
+class ProjectiveCoords(EMCoords):
     def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
         """
         Parameters
@@ -265,32 +264,13 @@ class ProjectiveCoords(object):
         partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
             A partition of unity function
         """
-        assert(maxdim >= 1)
-        self.verbose = verbose
-        if verbose:
-            tic = time.time()
-            print("Doing TDA...")
-        res = ripser(X, distance_matrix=distance_matrix, coeff=2, maxdim=maxdim, n_perm=n_landmarks, do_cocycles=True)
-        if verbose:
-            print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-        self.X_ = X
-        self.dist_land_data_ = res['dperm2all']
-        self.idx_land_ = res['idx_perm']
-        self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
-        self.dgms_ = res['dgms']
-        self.cocycles_ = res['cocycles']
-        # Sort persistence diagrams in descending order of persistence
-        idxs = np.argsort(self.dgms_[1][:, 0]-self.dgms_[1][:, 1])
-        self.dgms_[1] = self.dgms_[1][idxs, :]
-        self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
-        reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
-        self.n_landmarks_ = n_landmarks
+        EMCoords.__init__(self, X, n_landmarks, distance_matrix, 2, maxdim, verbose)
         self.type_ = "proj"
         # GUI variables
         self.selected = set([])
         self.u = np.array([0, 0, 1])
 
-    def get_coordinates(self, perc = 0.99, cocycle_idx = [0], proj_dim = 3, partunity_fn = partunity_linear):
+    def get_coordinates(self, perc=0.99, cocycle_idx=[0], proj_dim=2, partunity_fn=partunity_linear):
         """
         Perform multiscale projective coordinates via persistent cohomology of 
         sparse filtrations (Jose Perea 2018)
@@ -359,10 +339,15 @@ class ProjectiveCoords(object):
         return res
 
     def update_display_coords(self):
+        # If the number of points exceeds the maximum to plot, select
+        # a subset with a greedy permutation, using the arclength
+        # metric on RP2
         S = -2*np.ones((self.idx_disp.size, 2))
         if len(self.selected) > 0 and self.coords.size > 0:
             # Update projective coordinates if at least
             # one point in the persistence diagram is selected
+            if self.X_.shape[0] > self.max_disp:
+                self.idx_disp = get_greedy_perm_pc(self.coords, self.max_disp, csm_fn = get_csm_projarc)['perm']
             S = get_stereo_proj_codim1(self.coords[self.idx_disp, :], self.u)
         if self.coords_scatter:
             # Updated scatterplot
@@ -375,40 +360,19 @@ class ProjectiveCoords(object):
                 idx = self.idx_disp[i]
                 im.set_data(self.f[idx])
         self.ax_coords.figure.canvas.draw()
-
+    
     def recompute_coords(self, clicked = []):
         """
         Toggle including a cocycle from a set of points in the 
-        persistence diagram
+        persistence diagram, and update the projective coordinates accordingly
         Parameters
         ----------
         clicked: list of int
             Indices to toggle
         """
-        self.selected = self.selected.symmetric_difference(set(clicked))
-        idxs = np.array(list(self.selected))
-        fmt = "c%i +"*len(idxs)
-        fmt = fmt[0:-1]
-        self.selected_cocycle_text.set_text(fmt%tuple(idxs))
-        for idx in idxs:
-            self.persistence_text_labels[idx].set_text("%i"%idx)
-        if idxs.size > 0:
-            ## Step 1: Highlight point on persistence diagram
-            self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
-            ## Step 2: Update projective coordinates
-            perc = self.perc_slider.val
-            partunity_fn = PARTUNITY_FNS[self.partunity_selector.value_selected]
-            res = self.get_coordinates(proj_dim=2, cocycle_idx = idxs, perc=perc, partunity_fn = partunity_fn)
-            self.coords = res['X']
-            # If the number of points exceeds the maximum to plot, select
-            # a subset with a greedy permutation, using the arclength
-            # metric on RP2
-            if self.X_.shape[0] > self.max_disp:
-                self.idx_disp = get_greedy_perm_pc(self.coords, self.max_disp, csm_fn = get_csm_projarc)['perm']
-        else:
-            self.selected_plot.set_offsets(np.zeros((0, 2)))
+        EMCoords.recompute_coords(self, clicked)
+        self.coords = self.coords['X']
         self.update_display_coords()
-        self.ax_coords.figure.canvas.draw()
 
     def onpick(self, evt):
         """
@@ -443,14 +407,11 @@ class ProjectiveCoords(object):
     def on_partunity_selector_change(self, evt):
         self.recompute_coords()
 
-    def plot(self, f, zoom=1, max_disp = 1000, cocycle_idxs = [], u = np.array([0, 0, 1]), perc = 0.99, partunity_fn = partunity_linear, figsize=(10, 10)):
+    def plot(self, f, zoom=1, max_disp=1000, init_params = {'cocycle_idxs':[], 'u':np.array([0, 0, 1]), 'perc':0.99, 'partunity_fn':partunity_linear}, figsize=(10, 10)):
         """
-        Do an interactive plot, with H1 on the left and a 
-        2D dimension reduced version of the point cloud on the right.
-        The right plot will be colored by the specified scalar function, or
-        a set of specified images will be placed on top of them.  
-        Left click on points in the persistence  diagram to toggle their
-        inclusion in the circular coordinates
+        Do an interactive plot of projective coordinates, where users
+        can choose to toggle different representative cocycles and adjust
+        the stereographic north pole
         Parameters
         ----------
         f : Display information for the points
@@ -464,73 +425,52 @@ class ProjectiveCoords(object):
             If using patches, the factor by which to zoom in on them
         max_disp: int
             The maximum number of points to display
-        cocycle_idxs: list of int
-            A list of cocycles to start with
-        u: ndarray(3, float)
-            The initial stereographic north pole
-        perc: float
-            The percent coverage to start with
-        partunity_fn: (dist_land_data, r_cover) -> phi
-            The partition of unity function to start with
+        init_params: dict
+            The intial parameters.  Optional fields of the dictionary are as follows:
+            {
+                cocycle_idxs: list of int
+                    A list of cocycles to start with
+                u: ndarray(3, float)
+                    The initial stereographic north pole
+                perc: float
+                    The percent coverage to start with
+                partunity_fn: (dist_land_data, r_cover) -> phi
+                    The partition of unity function to start with
+            }
         figsize: tuple(float, float)
             Size of the figure
         """
+        if not 'cocycle_idxs' in init_params:
+            init_params['cocycle_idxs'] = []
+        if not 'u' in init_params:
+            init_params['u'] = np.array([0, 0, 1])
+        if not 'perc' in init_params:
+            init_params['perc'] = 0.99
+        if not 'partunity_fn' in init_params:
+            init_params['partunity_fn'] = partunity_linear
+        
         self.f = f
         self.max_disp = max_disp
         fig = plt.figure(figsize=figsize)
         ## Step 1: Setup H1 plot, along with initially empty text labels
         ## for each persistence point
         self.ax_persistence = fig.add_subplot(221)
-        dgm = self.dgms_[1]
-        ax_min, ax_max = np.min(dgm), np.max(dgm)
-        x_r = ax_max - ax_min
-        buffer = x_r / 5
-        x_down = ax_min - buffer / 2
-        x_up = ax_max + buffer
-        y_down, y_up = x_down, x_up
-        self.ax_persistence.plot([x_down, x_up], [x_down, x_up], "--", c=np.array([0.0, 0.0, 0.0]))
-        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', picker=5, c='C0')
-        self.selected_plot = self.ax_persistence.scatter([], [], 100, c='C1')
-        self.ax_persistence.set_xlim([x_down, x_up])
-        self.ax_persistence.set_ylim([y_down, y_up])
-        self.ax_persistence.set_aspect('equal', 'box')
-        self.ax_persistence.set_title("Persistent H1")
-        self.ax_persistence.set_xlabel("Birth")
-        self.ax_persistence.set_ylabel("Death")
+        self.setup_ax_persistence()
         fig.canvas.mpl_connect('pick_event', self.onpick)
         self.selected = set([])
-        self.persistence_text_labels = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
 
         ## Step 2: Setup window for choosing coverage / partition of unity type
         ## and for displaying the chosen cocycle
-        ax_perc_slider = fig.add_axes([0.6, 0.85, 0.3, 0.03])
-        self.perc_slider = Slider(ax_perc_slider, "Coverage", valmin=0, valmax=1, valstep=0.01, valinit=perc)
+        self.perc_slider, self.partunity_selector = EMCoords.setup_param_chooser_gui(self, fig, 0.6, 0.8, 0.5, 0.4, init_params)
         self.perc_slider.on_changed(self.on_perc_slider_move)
-        
-        ax_part_unity_label = fig.add_axes([0.52, 0.8, 0.08, 0.045])
-        ax_part_unity_label.text(0.1, 0.3, "Partition\nof Unity")
-        ax_part_unity_label.set_axis_off()
-        ax_part_unity = fig.add_axes([0.6, 0.8, 0.1, 0.045])
-        active_idx = 0
-        keys = tuple(PARTUNITY_FNS.keys())
-        for i, key in enumerate(keys):
-            if partunity_fn == PARTUNITY_FNS[key]:
-                active_idx = i
-        self.partunity_selector = RadioButtons(ax_part_unity, keys, active=active_idx)
         self.partunity_selector.on_clicked(self.on_partunity_selector_change)
 
-        ax_selected_cocycles_label = fig.add_axes([0.52, 0.75, 0.08, 0.045])
-        ax_selected_cocycles_label.text(0.1, 0.3, "Selected\nCocycle")
-        ax_selected_cocycles_label.set_axis_off()
-        ax_selected_cocycles = fig.add_axes([0.6, 0.75, 0.3, 0.045])
-        self.selected_cocycle_text = ax_selected_cocycles.text(0.02, 0.5, "")
-        ax_selected_cocycles.set_axis_off()
 
         ## Step 3: Setup axis for picking stereographic north pole
         self.ax_pickstereo = fig.add_subplot(223)
         self.selected_northpole_plot = self.ax_pickstereo.scatter([0], [0], 100, c='C1')
         plot_rp2_circle(self.ax_pickstereo, do_arrows=False)
-        self.u = u # Initial u
+        self.u = init_params['u'] # Initial u
         self.ax_pickstereo.set_title("Stereographic North Pole")
         self.stereo_pressed = False
         fig.canvas.mpl_connect('motion_notify_event', self.onstereo_move)
@@ -574,13 +514,13 @@ class ProjectiveCoords(object):
             self.coords = np.array([[]])
         plot_rp2_circle(self.ax_coords)
         self.ax_coords.set_title("Projective Coordinates")
-        if len(cocycle_idxs) > 0:
+        if len(init_params['cocycle_idxs']) > 0:
             # If some initial cocycle indices were chosen, update
             # the plot
-            self.recompute_coords(cocycle_idxs)
+            self.recompute_coords(init_params['cocycle_idxs'])
             self.selected_northpole_plot.set_offsets(self.u[0:2])
         plt.show()
-    
+
     def get_selected_info(self):
         """
         Return information about what the user selected in
@@ -594,16 +534,13 @@ class ProjectiveCoords(object):
                 Indices of the selected cocycles,
             'perc': float
                 The selected percent coverage,
-            'u':ndarray(3, float)
-                The stereographic north pole
+            'u': ndarray(3)
+                The selected stereographic north pole
         }
         """
-        return {
-                'partunity_fn':PARTUNITY_FNS[self.partunity_selector.value_selected], 
-                'cocycle_idxs':np.array(list(self.selected)), 
-                'perc':self.perc_slider.val,
-                'u':self.u
-                }
+        ret = EMCoords.get_selected_info(self)
+        ret['u'] = self.u
+        return ret
 
 
 def do_rp2_test(NSamples, NLandmarks):
@@ -696,4 +633,4 @@ def do_line_segment_patch_test():
     P = get_line_patches(dim=dim, NAngles = 200, NOffsets = 200, sigma=0.25)
     patches = [np.reshape(P[i, :], (dim, dim)) for i in range(P.shape[0])]
     pc = ProjectiveCoords(P, n_landmarks=100)
-    pc.plot(patches, max_disp=200, cocycle_idxs=[0])
+    pc.plot(patches, max_disp=200, init_params={'cocycle_idxs':[0]})
