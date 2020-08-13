@@ -461,7 +461,7 @@ class ProjectiveCoords(EMCoords):
 
         ## Step 2: Setup window for choosing coverage / partition of unity type
         ## and for displaying the chosen cocycle
-        self.perc_slider, self.partunity_selector = EMCoords.setup_param_chooser_gui(self, fig, 0.6, 0.8, 0.5, 0.4, init_params)
+        self.perc_slider, self.partunity_selector, self.selected_cocycle_text = EMCoords.setup_param_chooser_gui(self, fig, 0.6, 0.8, 0.5, 0.4, init_params)
         self.perc_slider.on_changed(self.on_perc_slider_move)
         self.partunity_selector.on_clicked(self.on_partunity_selector_change)
 
