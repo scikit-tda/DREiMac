@@ -407,7 +407,7 @@ class ProjectiveCoords(EMCoords):
     def on_partunity_selector_change(self, evt):
         self.recompute_coords()
 
-    def plot(self, f, zoom=1, max_disp=1000, init_params = {'cocycle_idxs':[], 'u':np.array([0, 0, 1]), 'perc':0.99, 'partunity_fn':partunity_linear}, figsize=(10, 10)):
+    def plot(self, f, zoom=1, max_disp=1000, init_params = {'cocycle_idxs':[], 'u':np.array([0, 0, 1]), 'perc':0.99, 'partunity_fn':partunity_linear}, figsize=(10, 10), dpi=80):
         """
         Do an interactive plot of projective coordinates, where users
         can choose to toggle different representative cocycles and adjust
@@ -438,7 +438,9 @@ class ProjectiveCoords(EMCoords):
                     The partition of unity function to start with
             }
         figsize: tuple(float, float)
-            Size of the figure
+            Size of the figure in inches
+        dpi: int
+            Dot pixels per inch of figure
         """
         if not 'cocycle_idxs' in init_params:
             init_params['cocycle_idxs'] = []
@@ -451,7 +453,7 @@ class ProjectiveCoords(EMCoords):
         
         self.f = f
         self.max_disp = max_disp
-        fig = plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize, dpi=dpi)
         ## Step 1: Setup H1 plot, along with initially empty text labels
         ## for each persistence point
         self.ax_persistence = fig.add_subplot(221)
@@ -461,7 +463,7 @@ class ProjectiveCoords(EMCoords):
 
         ## Step 2: Setup window for choosing coverage / partition of unity type
         ## and for displaying the chosen cocycle
-        self.perc_slider, self.partunity_selector = EMCoords.setup_param_chooser_gui(self, fig, 0.6, 0.8, 0.5, 0.4, init_params)
+        self.perc_slider, self.partunity_selector, self.selected_cocycle_text = EMCoords.setup_param_chooser_gui(self, fig, 0.6, 0.8, 0.5, 0.4, init_params)
         self.perc_slider.on_changed(self.on_perc_slider_move)
         self.partunity_selector.on_clicked(self.on_partunity_selector_change)
 

@@ -162,10 +162,10 @@ class EMCoords(object):
         ax_selected_cocycles_label.text(0.1, 0.3, "Selected\nCocycle")
         ax_selected_cocycles_label.set_axis_off()
         ax_selected_cocycles = fig.add_axes([xstart, ystart-height*0.15, 0.2*width, 0.045])
-        self.selected_cocycle_text = ax_selected_cocycles.text(0.02, 0.5, "")
+        selected_cocycle_text = ax_selected_cocycles.text(0.02, 0.5, "")
         ax_selected_cocycles.set_axis_off()
 
-        return perc_slider, partunity_selector
+        return perc_slider, partunity_selector, selected_cocycle_text
 
     def get_selected_info(self):
         """
