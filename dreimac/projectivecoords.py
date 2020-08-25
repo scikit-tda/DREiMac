@@ -521,6 +521,7 @@ class ProjectiveCoords(EMCoords):
             # the plot
             self.recompute_coords(init_params['cocycle_idxs'])
             self.selected_northpole_plot.set_offsets(self.u[0:2])
+        plt.tight_layout()
         plt.show()
 
     def get_selected_info(self):
