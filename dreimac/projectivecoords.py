@@ -384,22 +384,29 @@ class ProjectiveCoords(EMCoords):
     
     def onstereo_click(self, evt):
         self.stereo_pressed = True
-        self.onstereo_move(evt)
+        self.onstereo_move(evt, just_clicked=True)
     
     def onstereo_release(self, evt):
         self.stereo_pressed = False
 
-    def onstereo_move(self, evt):
+    def onstereo_move(self, evt, just_clicked=False):
         """
         Change the north pole on the projective plane for
         stereographic projection
+        Parameters
+        ----------
+        evt: matplotlib event
+            Mouse event
+        just_clicked: boolean
+            Whether this was just clicked
         """
-        if evt.inaxes == self.ax_pickstereo and self.stereo_pressed:
-            x = np.array([evt.xdata, evt.ydata])
-            x, self.u = circle_to_3dnorthpole(x)
-            self.selected_northpole_plot.set_offsets(x)
-            self.ax_pickstereo.figure.canvas.draw()
-            self.update_display_coords()
+        if just_clicked or self.dragging_enabled:
+            if evt.inaxes == self.ax_pickstereo and self.stereo_pressed:
+                x = np.array([evt.xdata, evt.ydata])
+                x, self.u = circle_to_3dnorthpole(x)
+                self.selected_northpole_plot.set_offsets(x)
+                self.ax_pickstereo.figure.canvas.draw()
+                self.update_display_coords()
     
     def on_perc_slider_move(self, evt):
         self.recompute_coords()
@@ -407,7 +414,7 @@ class ProjectiveCoords(EMCoords):
     def on_partunity_selector_change(self, evt):
         self.recompute_coords()
 
-    def plot(self, f, zoom=1, max_disp=1000, init_params = {'cocycle_idxs':[], 'u':np.array([0, 0, 1]), 'perc':0.99, 'partunity_fn':partunity_linear}, figsize=(10, 10), dpi=80):
+    def plot(self, f, using_jupyter=True, zoom=1, max_disp=1000, init_params = {'cocycle_idxs':[], 'u':np.array([0, 0, 1]), 'perc':0.99, 'partunity_fn':partunity_linear}, dpi=None, dragging_enabled=False):
         """
         Do an interactive plot of projective coordinates, where users
         can choose to toggle different representative cocycles and adjust
@@ -421,6 +428,8 @@ class ProjectiveCoords(EMCoords):
             2) A list of colors with which to color the points, specified as
                an Nx3 array
             3) A list of images to place at each location
+        using_jupyter: boolean
+            Whether this is an interactive plot in jupyter
         zoom: int
             If using patches, the factor by which to zoom in on them
         max_disp: int
@@ -437,10 +446,11 @@ class ProjectiveCoords(EMCoords):
                 partunity_fn: (dist_land_data, r_cover) -> phi
                     The partition of unity function to start with
             }
-        figsize: tuple(float, float)
-            Size of the figure in inches
         dpi: int
             Dot pixels per inch of figure
+        dragging_enabled: boolean
+            Whether to enable dragging of the stereographic north pole
+            (May be very slow in jupyter notebook)
         """
         if not 'cocycle_idxs' in init_params:
             init_params['cocycle_idxs'] = []
@@ -453,7 +463,13 @@ class ProjectiveCoords(EMCoords):
         
         self.f = f
         self.max_disp = max_disp
-        fig = plt.figure(figsize=figsize, dpi=dpi)
+        self.dragging_enabled = dragging_enabled
+        if using_jupyter and in_notebook():
+            import matplotlib
+            matplotlib.use("nbAgg")
+        if not dpi:
+            dpi = compute_dpi(2, 2)
+        fig = plt.figure(figsize=(2*DREIMAC_FIG_RES, 2*DREIMAC_FIG_RES), dpi=dpi)
         ## Step 1: Setup H1 plot, along with initially empty text labels
         ## for each persistence point
         self.ax_persistence = fig.add_subplot(221)
@@ -521,8 +537,6 @@ class ProjectiveCoords(EMCoords):
             # the plot
             self.recompute_coords(init_params['cocycle_idxs'])
             self.selected_northpole_plot.set_offsets(self.u[0:2])
-        win = fig.canvas.window()
-        win.setFixedSize(win.size())
         plt.show()
 
     def get_selected_info(self):

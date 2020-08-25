@@ -158,7 +158,7 @@ class CircularCoords(EMCoords):
     def update_colors(self):
         if len(self.selected) > 0:
             idxs = np.array(list(self.selected))
-            self.selected_plot.set_offsets(self.dgms_[1][idxs, :])
+            self.selected_plot.set_offsets(self.dgm1_lifetime[idxs, :])
             ## Step 2: Update circular coordinates on point cloud
             thetas = self.coords
             c = plt.get_cmap('magma_r')
@@ -208,7 +208,7 @@ class CircularCoords(EMCoords):
     def on_partunity_selector_change_dimred(self, evt):
         self.recompute_coords_dimred()
 
-    def plot_dimreduced(self, Y, init_params = {'cocycle_idxs':[], 'perc':0.99, 'partunity_fn':partunity_linear, 'azim':-60, 'elev':30}, figres=5, dpi=80):
+    def plot_dimreduced(self, Y, using_jupyter = True, init_params = {'cocycle_idxs':[], 'perc':0.99, 'partunity_fn':partunity_linear, 'azim':-60, 'elev':30}, dpi=None):
         """
         Do an interactive plot of circular coordinates, coloring a dimension
         reduced version of the point cloud by the circular coordinates
@@ -217,6 +217,8 @@ class CircularCoords(EMCoords):
         ----------
         Y: ndarray(N, d)
             A 2D point cloud with the same number of points as X
+        using_jupyter: boolean
+            Whether this is an interactive plot in jupyter
         init_params: dict
             The intial parameters.  Optional fields of the dictionary are as follows:
             {
@@ -233,24 +235,27 @@ class CircularCoords(EMCoords):
                 elev: float
                     Initial elevation for 3d plots
             }
-        figres: float
-            Resolution of each square subplot, in inches
         dpi: int
             Dot pixels per inch
         """
         if Y.shape[1] < 2 or Y.shape[1] > 3:
             raise Exception("Dimension reduced version must be in 2D or 3D")
         self.Y = Y
-        fig = plt.figure(figsize=(figres*2, figres), dpi=dpi)
+        if using_jupyter and in_notebook():
+            import matplotlib
+            matplotlib.use("nbAgg")
+        if not dpi:
+            dpi = compute_dpi(2, 1)
+        fig = plt.figure(figsize=(DREIMAC_FIG_RES*2, DREIMAC_FIG_RES), dpi=dpi)
         ## Step 1: Plot H1
         self.ax_persistence = fig.add_subplot(121)
-        self.setup_ax_persistence()
+        self.setup_ax_persistence(y_compress=1.37)
         fig.canvas.mpl_connect('pick_event', self.onpick_dimred)
         self.selected = set([])
 
         ## Step 2: Setup window for choosing coverage / partition of unity type
         ## and for displaying the chosen cocycle
-        self.perc_slider, self.partunity_selector, self.selected_cocycle_text = EMCoords.setup_param_chooser_gui(self, fig, 0.3, 0.25, 0.35, 0.5, init_params)
+        self.perc_slider, self.partunity_selector, self.selected_cocycle_text = EMCoords.setup_param_chooser_gui(self, fig, 0.25, 0.75, 0.4, 0.5, init_params)
         self.perc_slider.on_changed(self.on_perc_slider_move_dimred)
         self.partunity_selector.on_clicked(self.on_partunity_selector_change_dimred)
 
@@ -279,8 +284,6 @@ class CircularCoords(EMCoords):
             # If some initial cocycle indices were chosen, update
             # the plot
             self.recompute_coords_dimred(init_params['cocycle_idxs'])
-        win = fig.canvas.window()
-        win.setFixedSize(win.size())
         plt.show()
     
     def get_selected_dimreduced_info(self):
@@ -463,10 +466,10 @@ class CircularCoords(EMCoords):
         height = 1/self.plots_in_one
         x = evt.x
         y = evt.y
-        if y > 0.5*(self.figres*self.dpi*2):
+        if y > 0.5*(DREIMAC_FIG_RES*self.dpi*2):
             print("Clicked in upper half")
 
-    def plot_torii(self, f, zoom=1, max_disp=1000, figres=5, dpi=80, coords_info=2, plots_in_one = 2):
+    def plot_torii(self, f, using_jupyter=True, zoom=1, max_disp=1000, dpi=None, coords_info=2, plots_in_one = 2):
         """
         Do an interactive plot of circular coordinates, where points are drawn on S1, 
         on S1 x S1, or S1 x S1 x S1
@@ -480,12 +483,12 @@ class CircularCoords(EMCoords):
             2) A list of colors with which to color the points, specified as
                an Nx3 array
             3) A list of images to place at each location
+        using_jupyter: boolean
+            Whether this is an interactive plot in jupyter
         zoom: int
             If using patches, the factor by which to zoom in on them
         max_disp: int
             The maximum number of points to display
-        figres: float
-            Dimension of each subplot square, in inches
         dpi: int
             Dot pixels per inch
         coords_info: Information about how to perform circular coordinates.  There will
@@ -525,8 +528,12 @@ class CircularCoords(EMCoords):
         while len(coords_info) < n_plots*plots_in_one:
             coords_info.append({'selected':set([]), 'perc':0.99, 'partunity_fn':partunity_linear})
         self.selecting_idx = 0 # Index of circular coordinate which is currently being selected
-        fig = plt.figure(figsize=(figres*(n_plots+1), figres*2), dpi=dpi)
-        self.figres = figres
+        if using_jupyter and in_notebook():
+            import matplotlib
+            matplotlib.use("nbAgg")
+        if not dpi:
+            dpi = compute_dpi(n_plots+1, 2)
+        fig = plt.figure(figsize=(DREIMAC_FIG_RES*(n_plots+1), DREIMAC_FIG_RES*2), dpi=dpi)
         self.dpi = dpi
         self.fig = fig
 
@@ -552,7 +559,7 @@ class CircularCoords(EMCoords):
                 coords_info[idx]['perc_slider'], coords_info[idx]['partunity_selector'], coords_info[idx]['selected_cocycle_text'] = self.setup_param_chooser_gui(fig, xstart, ystart, width, height, coords_info[idx])
                 coords_info[idx]['perc_slider'].on_changed(self.on_perc_slider_move_torii)
                 coords_info[idx]['partunity_selector'].on_clicked = self.on_partunity_selector_change_torii
-                dgm = self.dgms_[1]
+                dgm = self.dgm1_lifetime
                 coords_info[idx]['persistence_text_labels'] = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
                 coords_info[idx]['idx'] = idx
                 coords_info[idx]['coords'] = np.zeros(self.X_.shape[0])
@@ -601,11 +608,6 @@ class CircularCoords(EMCoords):
         for i in range(len(coords_info)):
             self.select_torii_coord(i)
             self.recompute_coords_torii([])
-        
-        win = fig.canvas.window()
-        win.setFixedSize(win.size())
-        plt.show()
-
 
 def do_two_circle_test():
     """
@@ -631,11 +633,12 @@ def do_two_circle_test():
     fscaled = fscaled/np.max(fscaled)
     c = plt.get_cmap('magma_r')
     C = c(np.array(np.round(fscaled*255), dtype=np.int32))[:, 0:3]
-    plt.scatter(X[:, 0], X[:, 1], s=SCATTER_SIZE, c=C)
+    #plt.scatter(X[:, 0], X[:, 1], s=SCATTER_SIZE, c=C)
     
     cc = CircularCoords(X, 100, prime = prime)
-    #cc.plot_dimreduced(X)
-    cc.plot_torii(f, coords_info=2, plots_in_one=3)
+    cc.plot_dimreduced(X, using_jupyter=False)
+    #cc.plot_torii(f, coords_info=2, plots_in_one=3)
+    plt.show()
 
 def do_torus_test():
     """
