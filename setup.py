@@ -31,7 +31,7 @@ setup(
     license='Apache2',
     packages=['dreimac'],
     install_requires=[
-        'numpy'
+        'numpy', 'scipy', 'matplotlib', 'numba', 'persim', 'ripser', 'jupyter', 'pyqt5'
     ],
     extras_require={
         'testing': [ # `pip install -e ".[testing]"``
