@@ -376,8 +376,10 @@ class CircularCoords(EMCoords):
                 else:
                     plot['ax'].set_xlabel('')
                     plot['ax'].set_xlim([-1.1, 1.1])
+                    plot['ax'].set_xticks([])
                     plot['ax'].set_ylabel('')
                     plot['ax'].set_ylim([-1.1, 1.1])
+                    plot['ax'].set_yticks([])
         else:
             X = np.array([])
             if plot['axis_2d']:
@@ -568,7 +570,9 @@ class CircularCoords(EMCoords):
             plot['ax'] = ax
             plot['coords_scatter'] = ax.scatter(pix, pix, c=self.coords_colors) # Scatterplot for circular coordinates
             ax.set_xlim([-1.1, 1.1])
+            ax.set_xticks([])
             ax.set_ylim([-1.1, 1.1])
+            ax.set_yticks([])
             plot['axis_2d'] = True
             plot['patch_boxes'] = [] # Array of image patch display objects
             plot['idx_disp'] = idx_disp # Indices of subset of points to display
