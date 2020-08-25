@@ -585,7 +585,7 @@ def do_two_circle_test():
     
     cc = CircularCoords(X, 100, prime = prime)
     #cc.plot_dimreduced(X)
-    cc.plot_torii(np.concatenate((t, t + 2*np.max(t))), coords=2, plots_in_one=2)
+    cc.plot_torii(np.concatenate((t, t + 2*np.max(t))), coords_info=2, plots_in_one=2)
 
 def do_torus_test():
     """
