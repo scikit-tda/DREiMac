@@ -332,16 +332,16 @@ class CircularCoords(EMCoords):
             c_info = self.coords_info[idx]
             if len(c_info['selected']) > 0:
                 # Only include circular coordinates that have at least
-                # on persistence dot selected
+                # one persistence dot selected
                 coords.append(c_info['coords'])
                 labels.append("Coords {}".format(idx))
-        
         ## Step 3: Adjust the plot accordingly
         if len(labels) > 0:
             X = np.array([])
             if len(labels) == 1:
                 # Just a single coordinate; put it on a circle
-                X = np.array([np.cos(self.coords), np.sin(self.coords)]).T
+                coords = np.array(coords).flatten()
+                X = np.array([np.cos(coords), np.sin(coords)]).T
             else:
                 X = np.array(coords).T
             updating_axes = False
@@ -369,9 +369,23 @@ class CircularCoords(EMCoords):
                     plot['ax'] = self.fig.add_subplot(2, n_plots+1, n_plots+3+plot_idx)
                     plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], c=self.coords_colors)
                 else:
-                    plot['coords_scatter'].set_offsets(X[:, 0], X[:, 1])
-                plot['ax'].set_xlabel(labels[0])
-                plot['ax'].set_ylabel(labels[1])
+                    plot['coords_scatter'].set_offsets(X)
+                if len(labels) > 1:
+                    plot['ax'].set_xlabel(labels[0])
+                    plot['ax'].set_ylabel(labels[1])
+                else:
+                    plot['ax'].set_xlabel('')
+                    plot['ax'].set_xlim([-1.1, 1.1])
+                    plot['ax'].set_ylabel('')
+                    plot['ax'].set_ylim([-1.1, 1.1])
+        else:
+            X = np.array([])
+            if plot['axis_2d']:
+                X = -2*np.ones((plot['idx_disp'].size, 2))
+            else:
+                X = -2*np.ones((plot['idx_disp'].size, 3))
+            plot['coords_scatter'].set_offsets(X)
+            
     
     def recompute_coords_torii(self, clicked = []):
         """
@@ -386,6 +400,7 @@ class CircularCoords(EMCoords):
         """
         EMCoords.recompute_coords(self, clicked)
         # Save away circular coordinates
+        self.coords_info[self.selected_coord_idx]['selected'] = self.selected
         self.coords_info[self.selected_coord_idx]['coords'] = self.coords
         self.update_plot_torii(self.selected_coord_idx)
 
@@ -551,7 +566,9 @@ class CircularCoords(EMCoords):
             pix = -2*np.ones(idx_disp.size)
             plot = {}
             plot['ax'] = ax
-            plot['coords_scatter'] = ax.scatter(pix, pix) # Scatterplot for circular coordinates
+            plot['coords_scatter'] = ax.scatter(pix, pix, c=self.coords_colors) # Scatterplot for circular coordinates
+            ax.set_xlim([-1.1, 1.1])
+            ax.set_ylim([-1.1, 1.1])
             plot['axis_2d'] = True
             plot['patch_boxes'] = [] # Array of image patch display objects
             plot['idx_disp'] = idx_disp # Indices of subset of points to display
@@ -580,12 +597,22 @@ def do_two_circle_test():
     X[0:N, 1] = np.sin(t)
     X[N::, 0] = 2*np.cos(t) + 4
     X[N::, 1] = 2*np.sin(t) + 4
-    X = X[np.random.permutation(X.shape[0]), :]
+    perm = np.random.permutation(X.shape[0])
+    X = X[perm, :]
     X = X + 0.2*np.random.randn(X.shape[0], 2)
+
+    f = np.concatenate((t, t + np.max(t)))
+    f = f[perm]
+    fscaled = f - np.min(f)
+    fscaled = fscaled/np.max(fscaled)
+    c = plt.get_cmap('magma_r')
+    C = c(np.array(np.round(fscaled*255), dtype=np.int32))[:, 0:3]
+    plt.scatter(X[:, 0], X[:, 1], c=C)
+    plt.show()
     
     cc = CircularCoords(X, 100, prime = prime)
     #cc.plot_dimreduced(X)
-    cc.plot_torii(np.concatenate((t, t + 2*np.max(t))), coords_info=2, plots_in_one=2)
+    cc.plot_torii(f, coords_info=2, plots_in_one=2)
 
 def do_torus_test():
     """
