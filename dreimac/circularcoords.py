@@ -207,7 +207,7 @@ class CircularCoords(EMCoords):
     def on_partunity_selector_change_dimred(self, evt):
         self.recompute_coords_dimred()
 
-    def plot_dimreduced(self, Y, init_params = {'cocycle_idxs':[], 'perc':0.99, 'partunity_fn':partunity_linear, 'azim':-60, 'elev':30}):
+    def plot_dimreduced(self, Y, init_params = {'cocycle_idxs':[], 'perc':0.99, 'partunity_fn':partunity_linear, 'azim':-60, 'elev':30}, figres=5, dpi=80):
         """
         Do an interactive plot of circular coordinates, coloring a dimension
         reduced version of the point cloud by the circular coordinates
@@ -232,11 +232,15 @@ class CircularCoords(EMCoords):
                 elev: float
                     Initial elevation for 3d plots
             }
+        figres: float
+            Resolution of each square subplot, in inches
+        dpi: int
+            Dot pixels per inch
         """
         if Y.shape[1] < 2 or Y.shape[1] > 3:
             raise Exception("Dimension reduced version must be in 2D or 3D")
         self.Y = Y
-        fig = plt.figure(figsize=(12, 6))
+        fig = plt.figure(figsize=(figres*2, figres), dpi=dpi)
         ## Step 1: Plot H1
         self.ax_persistence = fig.add_subplot(121)
         self.setup_ax_persistence()
@@ -430,7 +434,7 @@ class CircularCoords(EMCoords):
     def on_partunity_selector_change_torii(self, evt):
         self.recompute_coords_torii()
 
-    def plot_torii(self, f, zoom=1, max_disp=1000, figres=5, coords_info=2, plots_in_one = 2):
+    def plot_torii(self, f, zoom=1, max_disp=1000, figres=5, dpi=80, coords_info=2, plots_in_one = 2):
         """
         Do an interactive plot of circular coordinates, where points are drawn on S1, 
         on S1 x S1, or S1 x S1 x S1
@@ -449,7 +453,9 @@ class CircularCoords(EMCoords):
         max_disp: int
             The maximum number of points to display
         figres: float
-            Dimension of each subplot
+            Dimension of each subplot square, in inches
+        dpi: int
+            Dot pixels per inch
         coords_info: Information about how to perform circular coordinates.  There will
             be as many plots as the ceil of the number of circular coordinates, and
             they will be plotted pairwise.
@@ -487,7 +493,7 @@ class CircularCoords(EMCoords):
         while len(coords_info) < n_plots*plots_in_one:
             coords_info.append({'selected':set([]), 'perc':0.99, 'partunity_fn':partunity_linear})
         self.selecting_idx = 0 # Index of circular coordinate which is currently being selected
-        fig = plt.figure(figsize=(figres*(n_plots+1), figres*2))
+        fig = plt.figure(figsize=(figres*(n_plots+1), figres*2), dpi=dpi)
         self.fig = fig
 
         ## Step 2: Setup H1 plot, along with initially empty text labels
