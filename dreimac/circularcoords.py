@@ -103,7 +103,6 @@ class CircularCoords(EMCoords):
         R = np.zeros((NEdges, 2))
         R[:, 0] = J
         R[:, 1] = I
-        np.savetxt("R.txt", R, delimiter=',')
         #Make a flat array of NEdges weights parallel to the rows of R
         if do_weighted:
             W = dist_land_land[I, J]
