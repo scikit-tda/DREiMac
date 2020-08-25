@@ -18,6 +18,7 @@ import warnings
 """#########################################
         Main Circular Coordinates Class
 #########################################"""
+SCATTER_SIZE = 2
 
 class CircularCoords(EMCoords):
     def __init__(self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False):
@@ -256,7 +257,7 @@ class CircularCoords(EMCoords):
         ## Step 3: Setup axis for coordinates
         if Y.shape[1] == 3:
             self.ax_coords = fig.add_subplot(122, projection='3d')
-            self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], Y[:, 2], cmap='magma_r')
+            self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], Y[:, 2], s=SCATTER_SIZE, cmap='magma_r')
             # Equal aspect ratio hack for 3D
             pad = 0.1
             maxes = np.max(Y)
@@ -271,13 +272,15 @@ class CircularCoords(EMCoords):
                 self.ax_coords.elev = init_params['elev']
         else:
             self.ax_coords = fig.add_subplot(122)
-            self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], cmap='magma_r')
+            self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], s=SCATTER_SIZE, cmap='magma_r')
             self.ax_coords.set_aspect('equal')
         self.ax_coords.set_title("Dimension Reduced Point Cloud")
         if len(init_params['cocycle_idxs']) > 0:
             # If some initial cocycle indices were chosen, update
             # the plot
             self.recompute_coords_dimred(init_params['cocycle_idxs'])
+        win = fig.canvas.window()
+        win.setFixedSize(win.size())
         plt.show()
     
     def get_selected_dimreduced_info(self):
@@ -358,7 +361,7 @@ class CircularCoords(EMCoords):
             if X.shape[1] == 3:
                 if updating_axes:
                     plot['ax'] = self.fig.add_subplot(2, n_plots+1, n_plots+3+plot_idx, projection='3d')
-                    plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], X[:, 2], c=self.coords_colors)
+                    plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], X[:, 2], s=SCATTER_SIZE, c=self.coords_colors)
                 else:
                     plot['coords_scatter'].set_offsets(X[:, 0], X[:, 1], X[:, 2])
                 plot['ax'].set_xlabel(labels[0])
@@ -367,7 +370,7 @@ class CircularCoords(EMCoords):
             else:
                 if updating_axes:
                     plot['ax'] = self.fig.add_subplot(2, n_plots+1, n_plots+3+plot_idx)
-                    plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], c=self.coords_colors)
+                    plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], s=SCATTER_SIZE, c=self.coords_colors)
                 else:
                     plot['coords_scatter'].set_offsets(X)
                 if len(labels) > 1:
@@ -451,6 +454,18 @@ class CircularCoords(EMCoords):
     def on_partunity_selector_change_torii(self, evt):
         self.recompute_coords_torii()
 
+    def on_click_torii_plot(self, evt):
+        """
+        React to a click event, and change the selected
+        circular coordinate if necessary
+        """
+        width = 1/(self.n_plots+1)
+        height = 1/self.plots_in_one
+        x = evt.x
+        y = evt.y
+        if y > 0.5*(self.figres*self.dpi*2):
+            print("Clicked in upper half")
+
     def plot_torii(self, f, zoom=1, max_disp=1000, figres=5, dpi=80, coords_info=2, plots_in_one = 2):
         """
         Do an interactive plot of circular coordinates, where points are drawn on S1, 
@@ -511,6 +526,8 @@ class CircularCoords(EMCoords):
             coords_info.append({'selected':set([]), 'perc':0.99, 'partunity_fn':partunity_linear})
         self.selecting_idx = 0 # Index of circular coordinate which is currently being selected
         fig = plt.figure(figsize=(figres*(n_plots+1), figres*2), dpi=dpi)
+        self.figres = figres
+        self.dpi = dpi
         self.fig = fig
 
         ## Step 2: Setup H1 plot, along with initially empty text labels
@@ -541,6 +558,7 @@ class CircularCoords(EMCoords):
                 coords_info[idx]['coords'] = np.zeros(self.X_.shape[0])
                 idx += 1
         self.coords_info = coords_info
+        fig.canvas.mpl_connect('button_press_event', self.on_click_torii_plot)
 
         ## Step 3: Figure out colors of coordinates
         self.coords_colors = None
@@ -568,7 +586,7 @@ class CircularCoords(EMCoords):
             pix = -2*np.ones(idx_disp.size)
             plot = {}
             plot['ax'] = ax
-            plot['coords_scatter'] = ax.scatter(pix, pix, c=self.coords_colors) # Scatterplot for circular coordinates
+            plot['coords_scatter'] = ax.scatter(pix, pix, s=SCATTER_SIZE, c=self.coords_colors) # Scatterplot for circular coordinates
             ax.set_xlim([-1.1, 1.1])
             ax.set_xticks([])
             ax.set_ylim([-1.1, 1.1])
@@ -584,6 +602,8 @@ class CircularCoords(EMCoords):
             self.select_torii_coord(i)
             self.recompute_coords_torii([])
         
+        win = fig.canvas.window()
+        win.setFixedSize(win.size())
         plt.show()
 
 
@@ -611,12 +631,11 @@ def do_two_circle_test():
     fscaled = fscaled/np.max(fscaled)
     c = plt.get_cmap('magma_r')
     C = c(np.array(np.round(fscaled*255), dtype=np.int32))[:, 0:3]
-    plt.scatter(X[:, 0], X[:, 1], c=C)
-    plt.show()
+    plt.scatter(X[:, 0], X[:, 1], s=SCATTER_SIZE, c=C)
     
     cc = CircularCoords(X, 100, prime = prime)
     #cc.plot_dimreduced(X)
-    cc.plot_torii(f, coords_info=2, plots_in_one=2)
+    cc.plot_torii(f, coords_info=2, plots_in_one=3)
 
 def do_torus_test():
     """
