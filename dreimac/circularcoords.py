@@ -255,7 +255,7 @@ class CircularCoords(EMCoords):
 
         ## Step 2: Setup window for choosing coverage / partition of unity type
         ## and for displaying the chosen cocycle
-        self.perc_slider, self.partunity_selector, self.selected_cocycle_text = EMCoords.setup_param_chooser_gui(self, fig, 0.25, 0.75, 0.4, 0.5, init_params)
+        self.perc_slider, self.partunity_selector, self.selected_cocycle_text, _ = EMCoords.setup_param_chooser_gui(self, fig, 0.25, 0.75, 0.4, 0.5, init_params)
         self.perc_slider.on_changed(self.on_perc_slider_move_dimred)
         self.partunity_selector.on_clicked(self.on_partunity_selector_change_dimred)
 
@@ -365,11 +365,10 @@ class CircularCoords(EMCoords):
                 if updating_axes:
                     plot['ax'] = self.fig.add_subplot(2, n_plots+1, n_plots+3+plot_idx, projection='3d')
                     plot['coords_scatter'] = plot['ax'].scatter(X[:, 0], X[:, 1], X[:, 2], s=SCATTER_SIZE, c=self.coords_colors)
+                    plot['ax'].set_title('Joint 3D Plot')
                 else:
-                    plot['coords_scatter'].set_offsets(X[:, 0], X[:, 1], X[:, 2])
-                plot['ax'].set_xlabel(labels[0])
-                plot['ax'].set_ylabel(labels[1])
-                plot['ax'].set_zlabel(labels[2])
+                    plot['coords_scatter'].set_offsets(X)
+                set_pi_axis_labels(plot['ax'], labels)
             else:
                 if updating_axes:
                     plot['ax'] = self.fig.add_subplot(2, n_plots+1, n_plots+3+plot_idx)
@@ -377,15 +376,14 @@ class CircularCoords(EMCoords):
                 else:
                     plot['coords_scatter'].set_offsets(X)
                 if len(labels) > 1:
-                    plot['ax'].set_xlabel(labels[0])
-                    plot['ax'].set_ylabel(labels[1])
+                    set_pi_axis_labels(plot['ax'], labels)
+                    plot['ax'].set_title('Joint 2D Plot')
                 else:
                     plot['ax'].set_xlabel('')
                     plot['ax'].set_xlim([-1.1, 1.1])
-                    plot['ax'].set_xticks([])
                     plot['ax'].set_ylabel('')
                     plot['ax'].set_ylim([-1.1, 1.1])
-                    plot['ax'].set_yticks([])
+                    plot['ax'].set_title(labels[0])
         else:
             X = np.array([])
             if plot['axis_2d']:
@@ -433,9 +431,10 @@ class CircularCoords(EMCoords):
         idx: int
             Index of the plot to select
         """
-        self.selected_coord_idx = idx
         for i, coordsi in enumerate(self.coords_info):
             if i == idx:
+                self.selected_coord_idx = idx
+                coordsi = self.coords_info[idx]
                 # Swap in the appropriate GUI objects for selection
                 self.selected = coordsi['selected']
                 self.selected_cocycle_text = coordsi['selected_cocycle_text']
@@ -443,13 +442,16 @@ class CircularCoords(EMCoords):
                 self.partunity_selector = coordsi['partunity_selector']
                 self.persistence_text_labels = coordsi['persistence_text_labels']
                 self.coords = coordsi['coords']
+                coordsi['button'].color = 'red'
                 for j in np.array(list(self.selected)):
                     self.persistence_text_labels[j].set_text("%i"%j)
+                idxs = np.array(list(self.selected), dtype=int)
+                if idxs.size > 0:
+                    self.selected_plot.set_offsets(self.dgm1_lifetime[idxs, :])
+                else:
+                    self.selected_plot.set_offsets(np.array([[np.nan]*2]))
             else:
-                # For other circular coordinate selections, clear the selected 
-                # dots from the persistence plot
-                for label in self.persistence_text_labels:
-                    label.set_text("")
+                coordsi['button'].color = 'gray'
 
     def on_perc_slider_move_torii(self, evt):
         self.recompute_coords_torii()
@@ -457,19 +459,14 @@ class CircularCoords(EMCoords):
     def on_partunity_selector_change_torii(self, evt):
         self.recompute_coords_torii()
 
-    def on_click_torii_plot(self, evt):
+    def on_click_torii_button(self, evt, idx):
         """
         React to a click event, and change the selected
         circular coordinate if necessary
         """
-        width = 1/(self.n_plots+1)
-        height = 1/self.plots_in_one
-        x = evt.x
-        y = evt.y
-        if y > 0.5*(DREIMAC_FIG_RES*self.dpi*2):
-            print("Clicked in upper half")
+        self.select_torii_coord(idx)
 
-    def plot_torii(self, f, using_jupyter=True, zoom=1, max_disp=1000, dpi=None, coords_info=2, plots_in_one = 2):
+    def plot_torii(self, f, using_jupyter=True, zoom=1, dpi=None, coords_info=2, plots_in_one = 2):
         """
         Do an interactive plot of circular coordinates, where points are drawn on S1, 
         on S1 x S1, or S1 x S1 x S1
@@ -487,8 +484,6 @@ class CircularCoords(EMCoords):
             Whether this is an interactive plot in jupyter
         zoom: int
             If using patches, the factor by which to zoom in on them
-        max_disp: int
-            The maximum number of points to display
         dpi: int
             Dot pixels per inch
         coords_info: Information about how to perform circular coordinates.  There will
@@ -516,7 +511,6 @@ class CircularCoords(EMCoords):
             raise Exception("Cannot be fewer than 2 or more than 3 circular coordinates in one plot")
         self.plots_in_one = plots_in_one
         self.f = f
-        self.max_disp = max_disp
         ## Step 1: Figure out how many plots are needed to accommodate all
         ## circular coordinates
         n_plots = 1
@@ -549,23 +543,22 @@ class CircularCoords(EMCoords):
         ## Also store variables for selecting cocycle representatives
         width = 1/(n_plots+1)
         height = 1/plots_in_one
-        idx = 0
         partunity_keys = tuple(PARTUNITY_FNS.keys())
         for i in range(n_plots):
             xstart = width*(i+1.4)
             for j in range(plots_in_one):
+                idx = i*plots_in_one+j
                 # Setup plots and state for a particular circular coordinate
                 ystart = 0.8 - 0.4*height*j
-                coords_info[idx]['perc_slider'], coords_info[idx]['partunity_selector'], coords_info[idx]['selected_cocycle_text'] = self.setup_param_chooser_gui(fig, xstart, ystart, width, height, coords_info[idx])
+                coords_info[idx]['perc_slider'], coords_info[idx]['partunity_selector'], coords_info[idx]['selected_cocycle_text'], coords_info[idx]['button'] = self.setup_param_chooser_gui(fig, xstart, ystart, width, height, coords_info[idx], idx)
                 coords_info[idx]['perc_slider'].on_changed(self.on_perc_slider_move_torii)
                 coords_info[idx]['partunity_selector'].on_clicked = self.on_partunity_selector_change_torii
+                coords_info[idx]['button'].on_clicked(button_callback_factory(self.on_click_torii_button, idx))
                 dgm = self.dgm1_lifetime
                 coords_info[idx]['persistence_text_labels'] = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
                 coords_info[idx]['idx'] = idx
                 coords_info[idx]['coords'] = np.zeros(self.X_.shape[0])
-                idx += 1
         self.coords_info = coords_info
-        fig.canvas.mpl_connect('button_press_event', self.on_click_torii_plot)
 
         ## Step 3: Figure out colors of coordinates
         self.coords_colors = None
@@ -586,26 +579,19 @@ class CircularCoords(EMCoords):
         for i in range(n_plots):
             # 2D by default, but can change to 3D later
             ax = fig.add_subplot(2, n_plots+1, n_plots+3+i)
-            idx_disp = np.arange(self.X_.shape[0])
-            if self.X_.shape[0] > max_disp:
-                idx_disp = np.random.permutation(self.X_.shape[0])[0:max_disp]
-            # Setup some dummy points outside of the axis just to get the colors right
-            pix = -2*np.ones(idx_disp.size)
+            pix = -2*np.ones(self.X_.shape[0])
             plot = {}
             plot['ax'] = ax
             plot['coords_scatter'] = ax.scatter(pix, pix, s=SCATTER_SIZE, c=self.coords_colors) # Scatterplot for circular coordinates
             ax.set_xlim([-1.1, 1.1])
-            ax.set_xticks([])
             ax.set_ylim([-1.1, 1.1])
-            ax.set_yticks([])
             plot['axis_2d'] = True
             plot['patch_boxes'] = [] # Array of image patch display objects
-            plot['idx_disp'] = idx_disp # Indices of subset of points to display
             plots.append(plot)
         self.plots = plots
 
         ## Step 5: Initialize plots with information passed along
-        for i in range(len(coords_info)):
+        for i in reversed(range(len(coords_info))):
             self.select_torii_coord(i)
             self.recompute_coords_torii([])
 
@@ -636,8 +622,8 @@ def do_two_circle_test():
     #plt.scatter(X[:, 0], X[:, 1], s=SCATTER_SIZE, c=C)
     
     cc = CircularCoords(X, 100, prime = prime)
-    cc.plot_dimreduced(X, using_jupyter=False)
-    #cc.plot_torii(f, coords_info=2, plots_in_one=3)
+    #cc.plot_dimreduced(X, using_jupyter=False)
+    cc.plot_torii(f, coords_info=2, plots_in_one=3)
     plt.show()
 
 def do_torus_test():
@@ -657,5 +643,7 @@ def do_torus_test():
     X[:, 1] = (R + r*np.cos(s))*np.sin(t)
     X[:, 2] = r*np.sin(s)
     
-    cc = CircularCoords(X, 100, prime = prime)
-    cc.plot_dimreduced(X)
+    cc = CircularCoords(X, 100, prime=prime)
+    #cc.plot_dimreduced(X)
+    cc.plot_torii(s, coords_info=2, plots_in_one=2)
+    plt.show()

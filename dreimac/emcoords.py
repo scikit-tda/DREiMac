@@ -11,7 +11,7 @@ import scipy
 from scipy.sparse.linalg import lsqr
 import time
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.widgets import Slider, RadioButtons
+from matplotlib.widgets import Slider, RadioButtons, Button
 from .geomtools import *
 from ripser import ripser
 import warnings
@@ -182,7 +182,7 @@ class EMCoords(object):
             self.coords = {'X':np.zeros((0, 2))}
             self.selected_plot.set_offsets(np.zeros((0, 2)))
 
-    def setup_param_chooser_gui(self, fig, xstart, ystart, width, height, init_params):
+    def setup_param_chooser_gui(self, fig, xstart, ystart, width, height, init_params, button_idx = -1):
         """
         Setup a GUI area 
         Parameters
@@ -199,6 +199,9 @@ class EMCoords(object):
             Height of GUI element
         init_params: dict
             Initial parameters
+        button_idx: int
+            Index of the circular coordinate to create a press button, or None
+            if no button is created
         Returns
         -------
         percslider: matplotlib.widgets.Slider
@@ -232,7 +235,12 @@ class EMCoords(object):
         selected_cocycle_text = ax_selected_cocycles.text(0.02, 0.5, "")
         ax_selected_cocycles.set_axis_off()
 
-        return perc_slider, partunity_selector, selected_cocycle_text
+        # Button to select this particular coordinate
+        select_button = None
+        if button_idx > -1:
+            ax_button_label = fig.add_axes([xstart+width*0.25, ystart, 0.2*width, 0.045])
+            select_button = Button(ax_button_label, "Coords {}".format(button_idx))
+        return perc_slider, partunity_selector, selected_cocycle_text, select_button
 
     def get_selected_info(self):
         """
@@ -254,3 +262,36 @@ class EMCoords(object):
                 'cocycle_idxs':np.array(list(self.selected)), 
                 'perc':self.perc_slider.val,
                 }
+
+"""#########################################
+        Miscellaneous Utilities
+#########################################"""
+
+def button_callback_factory(callback, k):
+    """
+    Setup a button callback that's linked to a particular
+    circular coordinate index.  Having this function takes
+    care of scoping issues
+    Parameters
+    ----------
+    callback: function
+        The callback to use
+    k: int
+        The index of the circular coordinate
+    """
+    return lambda evt: callback(evt, k)
+
+def set_pi_axis_labels(ax, labels):
+    ax.set_xlabel(labels[0])
+    ax.set_xlim([-0.2, 2*np.pi+0.2])
+    ax.set_xticks([0, np.pi, 2*np.pi])
+    ax.set_xticklabels(["0", "$\\pi$", "$2\\pi$"])
+    ax.set_ylabel(labels[1])
+    ax.set_ylim([-0.2, 2*np.pi+0.2])
+    ax.set_yticks([0, np.pi, 2*np.pi])
+    ax.set_yticklabels(["0", "$\\pi$", "$2\\pi$"])
+    if len(labels) > 2:
+        ax.set_zlabel(labels[1])
+        ax.set_zlim([-0.2, 2*np.pi+0.2])
+        ax.set_zticks([0, np.pi, 2*np.pi])
+        ax.set_zticklabels(["0", "$\\pi$", "$2\\pi$"])
