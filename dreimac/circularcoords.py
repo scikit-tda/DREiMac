@@ -263,14 +263,7 @@ class CircularCoords(EMCoords):
         if Y.shape[1] == 3:
             self.ax_coords = fig.add_subplot(122, projection='3d')
             self.coords_scatter = self.ax_coords.scatter(Y[:, 0], Y[:, 1], Y[:, 2], s=SCATTER_SIZE, cmap='magma_r')
-            # Equal aspect ratio hack for 3D
-            pad = 0.1
-            maxes = np.max(Y)
-            mins = np.min(Y)
-            r = maxes - mins
-            self.ax_coords.set_xlim([mins-r*pad, maxes+r*pad])
-            self.ax_coords.set_ylim([mins-r*pad, maxes+r*pad])
-            self.ax_coords.set_zlim([mins-r*pad, maxes+r*pad])
+            set_3dplot_equalaspect(self.ax_coords, Y)
             if 'azim' in init_params:
                 self.ax_coords.azim = init_params['azim']
             if 'elev' in init_params:
@@ -387,9 +380,9 @@ class CircularCoords(EMCoords):
         else:
             X = np.array([])
             if plot['axis_2d']:
-                X = -2*np.ones((plot['idx_disp'].size, 2))
+                X = -2*np.ones((self.X_.shape[0], 2))
             else:
-                X = -2*np.ones((plot['idx_disp'].size, 3))
+                X = -2*np.ones((self.X_.shape[0], 3))
             plot['coords_scatter'].set_offsets(X)
             
     
@@ -452,6 +445,7 @@ class CircularCoords(EMCoords):
                     self.selected_plot.set_offsets(np.array([[np.nan]*2]))
             else:
                 coordsi['button'].color = 'gray'
+        self.ax_persistence.set_title("H1 Cocycle Selection: Coordinate {}".format(idx))
 
     def on_perc_slider_move_torii(self, evt):
         self.recompute_coords_torii()
@@ -466,7 +460,7 @@ class CircularCoords(EMCoords):
         """
         self.select_torii_coord(idx)
 
-    def plot_torii(self, f, using_jupyter=True, zoom=1, dpi=None, coords_info=2, plots_in_one = 2):
+    def plot_torii(self, f, using_jupyter=True, zoom=1, dpi=None, coords_info=2, plots_in_one = 2, lowerleft_plot = None, lowerleft_3d=False):
         """
         Do an interactive plot of circular coordinates, where points are drawn on S1, 
         on S1 x S1, or S1 x S1 x S1
@@ -506,6 +500,10 @@ class CircularCoords(EMCoords):
                }
         plots_in_one: int
             The max number of circular coordinates to put in one plot
+        lowerleft_plot: function(matplotlib axis)
+            A function that plots something in the lower left
+        lowerleft_3d: boolean
+            Whether the lower left plot is 3D
         """
         if plots_in_one < 2 or plots_in_one > 3:
             raise Exception("Cannot be fewer than 2 or more than 3 circular coordinates in one plot")
@@ -594,6 +592,16 @@ class CircularCoords(EMCoords):
         for i in reversed(range(len(coords_info))):
             self.select_torii_coord(i)
             self.recompute_coords_torii([])
+        
+        ## Step 6: Plot something in the lower left corner if desired
+        if lowerleft_plot:
+            if lowerleft_3d:
+                ax = fig.add_subplot(2, n_plots+1, n_plots+2, projection='3d')
+            else:
+                ax = fig.add_subplot(2, n_plots+1, n_plots+2)
+            lowerleft_plot(ax)
+
+        plt.show()
 
 def do_two_circle_test():
     """
@@ -624,7 +632,6 @@ def do_two_circle_test():
     cc = CircularCoords(X, 100, prime = prime)
     #cc.plot_dimreduced(X, using_jupyter=False)
     cc.plot_torii(f, coords_info=2, plots_in_one=3)
-    plt.show()
 
 def do_torus_test():
     """
@@ -642,8 +649,11 @@ def do_torus_test():
     X[:, 0] = (R + r*np.cos(s))*np.cos(t)
     X[:, 1] = (R + r*np.cos(s))*np.sin(t)
     X[:, 2] = r*np.sin(s)
-    
+
     cc = CircularCoords(X, 100, prime=prime)
-    #cc.plot_dimreduced(X)
-    cc.plot_torii(s, coords_info=2, plots_in_one=2)
-    plt.show()
+    f = s
+    def plot_torus(ax):
+        ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=f, cmap='magma_r')
+        set_3dplot_equalaspect(ax, X)
+
+    cc.plot_torii(f, coords_info=2, plots_in_one=2, lowerleft_plot=plot_torus, lowerleft_3d=True)

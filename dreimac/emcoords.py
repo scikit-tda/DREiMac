@@ -145,7 +145,7 @@ class EMCoords(object):
         self.ax_persistence.set_xlim([x_down, x_up])
         self.ax_persistence.set_ylim([y_down, y_up])
         self.ax_persistence.set_aspect('equal', 'box')
-        self.ax_persistence.set_title("Persistent H1")
+        self.ax_persistence.set_title("H1 Cocycle Selection")
         self.ax_persistence.set_xlabel("Birth")
         self.ax_persistence.set_ylabel("Lifetime")
         self.persistence_text_labels = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
@@ -282,6 +282,15 @@ def button_callback_factory(callback, k):
     return lambda evt: callback(evt, k)
 
 def set_pi_axis_labels(ax, labels):
+    """
+    Set the axis labels of plots to be the pi symbols
+    Parameters
+    ----------
+    ax: matplotlib handle
+        The axes of which to change the symbol labels
+    labels: list of string
+        The names of the axes
+    """
     ax.set_xlabel(labels[0])
     ax.set_xlim([-0.2, 2*np.pi+0.2])
     ax.set_xticks([0, np.pi, 2*np.pi])
@@ -295,3 +304,22 @@ def set_pi_axis_labels(ax, labels):
         ax.set_zlim([-0.2, 2*np.pi+0.2])
         ax.set_zticks([0, np.pi, 2*np.pi])
         ax.set_zticklabels(["0", "$\\pi$", "$2\\pi$"])
+
+def set_3dplot_equalaspect(ax, X, pad=0.1):
+    """
+    An equal aspect ratio hack for 3D
+    Parameters
+    ----------
+    ax: matplotlib axis
+        Handle to the axis to change
+    X: ndarray(N, 3)
+        Point cloud that's being plotted
+    pad: float
+        The factor of padding to use around the point cloud
+    """
+    maxes = np.max(X)
+    mins = np.min(X)
+    r = maxes - mins
+    ax.set_xlim([mins-r*pad, maxes+r*pad])
+    ax.set_ylim([mins-r*pad, maxes+r*pad])
+    ax.set_zlim([mins-r*pad, maxes+r*pad])
