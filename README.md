@@ -3,13 +3,28 @@
 
 # Python version
 
-Code can be found in dreimac/.  To install, type
-
+Code can be found in dreimac/.  If you're using conda and would like to create a virtual environment first, type
 ~~~~~ bash
-python setup.py install
+conda create -n dreimac python=3.6
+conda activate dreimac
 ~~~~~
 
-at the root of the directory.  Then, you can import dreimac from any python file or notebook
+Then, to install, type
+~~~~~ bash
+git clone https://github.com/ctralie/DREiMac.git
+cd DREiMac
+pip install cython
+pip install -e .
+~~~~~
+
+Then, you can import dreimac from any python file or notebook.  For example, if you type the following from the root of the repository
+~~~~~ bash
+cd notebooks
+jupyter notebook
+~~~~~
+
+then you will be able to interactively explore the notebooks we have setup
+
 
 ## Two Circles Example
 
