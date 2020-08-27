@@ -30,8 +30,11 @@ setup(
     author_email="ctralie@alumni.princeton.edu",
     license='Apache2',
     packages=['dreimac'],
+    setup_requires=[
+        'cython', 'numpy'
+    ],
     install_requires=[
-        'numpy', 'scipy', 'matplotlib', 'numba', 'persim', 'ripser', 'jupyter', 'screeninfo'
+        'cython', 'numpy', 'scipy', 'matplotlib', 'numba', 'persim', 'ripser', 'jupyter', 'screeninfo'
     ],
     extras_require={
         'testing': [ # `pip install -e ".[testing]"``
