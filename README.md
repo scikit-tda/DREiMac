@@ -11,6 +11,20 @@ python setup.py install
 
 at the root of the directory.  Then, you can import dreimac from any python file or notebook
 
+## Two Circles Example
+
+The example below shows an example of the interactive circular coordinates interface on a point cloud of two noisy circles in 2D
+
+<img src = "notesbooks/Selecting_Circles.gif">
+
+
+## Torus Example
+
+The example below shows an example of the interactive circular coordinates interface on a 3D point cloud of a torus
+
+<img src = "notesbooks/Selecting_Torus.gif">
+
+
 
 # Javascript version
 
