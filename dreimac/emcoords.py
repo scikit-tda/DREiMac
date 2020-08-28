@@ -140,7 +140,8 @@ class EMCoords(object):
         y_down, y_up = x_down, x_up
         y_up += (y_up-y_down)*(y_compress-1)
         self.ax_persistence.plot([0, ax_max], [0, 0], "--", c=np.array([0.0, 0.0, 0.0]))
-        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', picker=5, c='C0')
+        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', c='C0')
+        self.dgmplot.set_pickradius(5)
         self.selected_plot = self.ax_persistence.scatter([], [], 100, c='C1')
         self.ax_persistence.set_xlim([x_down, x_up])
         self.ax_persistence.set_ylim([y_down, y_up])
@@ -267,9 +268,9 @@ class EMCoords(object):
         Miscellaneous Utilities
 #########################################"""
 
-def button_callback_factory(callback, k):
+def callback_factory(callback, k):
     """
-    Setup a button callback that's linked to a particular
+    Setup a callback that's linked to a particular
     circular coordinate index.  Having this function takes
     care of scoping issues
     Parameters
