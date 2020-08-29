@@ -1,6 +1,8 @@
 # DREiMac
 ## Dimension Reduction with Eilenberg-MacClane Coordinates
 
+### Chris Tralie, Tom Mease, Jose Perea
+
 # Python version
 
 Code can be found in dreimac/.  If you're using conda and would like to create a virtual environment first, type
