@@ -447,18 +447,35 @@ class CircularCoords(EMCoords):
                 coordsi['button'].color = 'gray'
         self.ax_persistence.set_title("H1 Cocycle Selection: Coordinate {}".format(idx))
 
-    def on_perc_slider_move_torii(self, evt):
-        self.recompute_coords_torii()
+    def on_perc_slider_move_torii(self, evt, idx):
+        """
+        React to a change in coverage
+        a particular circular coordinate, and recompute the 
+        coordinates if they aren't trivial
+        """
+        if not self.selected_coord_idx == idx:
+            self.select_torii_coord(idx)
+        if len(self.selected) > 0:
+            self.recompute_coords_torii()
 
-    def on_partunity_selector_change_torii(self, evt):
-        self.recompute_coords_torii()
+    def on_partunity_selector_change_torii(self, evt, idx):
+        """
+        React to a change in partition of unity type for 
+        a particular circular coordinate, and recompute the 
+        coordinates if they aren't trivial
+        """
+        if not self.selected_coord_idx == idx:
+            self.select_torii_coord(idx)
+        if len(self.selectd) > 0:
+            self.recompute_coords_torii()
 
     def on_click_torii_button(self, evt, idx):
         """
         React to a click event, and change the selected
         circular coordinate if necessary
         """
-        self.select_torii_coord(idx)
+        if not self.selected_coord_idx == idx:
+            self.select_torii_coord(idx)
 
     def plot_torii(self, f, using_jupyter=True, zoom=1, dpi=None, coords_info=2, plots_in_one = 2, lowerleft_plot = None, lowerleft_3d=False):
         """
@@ -549,9 +566,9 @@ class CircularCoords(EMCoords):
                 # Setup plots and state for a particular circular coordinate
                 ystart = 0.8 - 0.4*height*j
                 coords_info[idx]['perc_slider'], coords_info[idx]['partunity_selector'], coords_info[idx]['selected_cocycle_text'], coords_info[idx]['button'] = self.setup_param_chooser_gui(fig, xstart, ystart, width, height, coords_info[idx], idx)
-                coords_info[idx]['perc_slider'].on_changed(self.on_perc_slider_move_torii)
-                coords_info[idx]['partunity_selector'].on_clicked = self.on_partunity_selector_change_torii
-                coords_info[idx]['button'].on_clicked(button_callback_factory(self.on_click_torii_button, idx))
+                coords_info[idx]['perc_slider'].on_changed(callback_factory(self.on_perc_slider_move_torii, idx))
+                coords_info[idx]['partunity_selector'].on_clicked = callback_factory(self.on_partunity_selector_change_torii, idx)
+                coords_info[idx]['button'].on_clicked(callback_factory(self.on_click_torii_button, idx))
                 dgm = self.dgm1_lifetime
                 coords_info[idx]['persistence_text_labels'] = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
                 coords_info[idx]['idx'] = idx
