@@ -1,5 +1,5 @@
 # DREiMac
-## Dimension Reduction with Eilenberg-MacClane Coordinates
+## Dimension Reduction with Eilenberg-MacLane Coordinates
 
 ### Chris Tralie, Tom Mease, Jose Perea
 
@@ -30,14 +30,14 @@ then you will be able to interactively explore the notebooks we have setup
 
 ## Two Circles Example
 
-The example below shows an example of the interactive circular coordinates interface on a point cloud of two noisy circles in 2D
+Below is an example showing the interactive circular coordinates interface on a data set comprised of two noisy circles in 2D
 
 <img src = "notebooks/Selecting_Circles.gif">
 
 
 ## Torus Example
 
-The example below shows an example of the interactive circular coordinates interface on a 3D point cloud of a torus
+Below is an example showing the interactive circular coordinates interface on a 3D point cloud of a torus
 
 <img src = "notebooks/Selecting_Torus.gif">
 
