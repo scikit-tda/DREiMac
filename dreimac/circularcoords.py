@@ -662,7 +662,6 @@ def do_torus_test():
     X = np.zeros((N, 3))
     s = np.random.rand(N)*2*np.pi
     t = np.random.rand(N)*2*np.pi
-    t = 2*np.pi*t
     X[:, 0] = (R + r*np.cos(s))*np.cos(t)
     X[:, 1] = (R + r*np.cos(s))*np.sin(t)
     X[:, 2] = r*np.sin(s)

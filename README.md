@@ -7,7 +7,7 @@
 
 Code can be found in dreimac/.  If you're using conda and would like to create a virtual environment first, type
 ~~~~~ bash
-conda create -n dreimac python=3.6
+conda create -n dreimac python=3.8.3
 conda activate dreimac
 ~~~~~
 
@@ -16,7 +16,8 @@ Then, to install, type
 git clone https://github.com/ctralie/DREiMac.git
 cd DREiMac
 pip install cython
-pip install -e .
+pip install -r requirements.txt
+python setup.py install
 ~~~~~
 
 Then, you can import dreimac from any python file or notebook.  For example, if you type the following from the root of the repository

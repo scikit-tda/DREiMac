@@ -1,9 +1,9 @@
-matplotlib==3.1.3
-numba==0.48.0
-numpy==1.18.1
-persim==0.1.2
+matplotlib==3.2.2
+numba==0.50.1
+numpy==1.18.5
+persim==0.1.3
 ripser==0.5.3
 scikit-tda==0.0.3
-scipy==1.4.1
+scipy==1.5.0
 jupyter==1.0.0
 screeninfo==0.6.5
