@@ -18,7 +18,7 @@ import warnings
 """#########################################
         Main Circular Coordinates Class
 #########################################"""
-SCATTER_SIZE = 2
+SCATTER_SIZE = 50
 
 class CircularCoords(EMCoords):
     def __init__(self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False):

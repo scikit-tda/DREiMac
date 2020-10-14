@@ -300,7 +300,7 @@ def set_pi_axis_labels(ax, labels):
     ax.set_yticks([0, np.pi, 2*np.pi])
     ax.set_yticklabels(["0", "$\\pi$", "$2\\pi$"])
     if len(labels) > 2:
-        ax.set_zlabel(labels[1])
+        ax.set_zlabel(labels[2])
         ax.set_zlim([-0.2, 2*np.pi+0.2])
         ax.set_zticks([0, np.pi, 2*np.pi])
         ax.set_zticklabels(["0", "$\\pi$", "$2\\pi$"])
