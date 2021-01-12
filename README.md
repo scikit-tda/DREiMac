@@ -1,7 +1,12 @@
 # DREiMac
 ## Dimension Reduction with Eilenberg-MacLane Coordinates
-
 ### Chris Tralie, Tom Mease, Jose Perea
+
+DREiMac is a library for topological data coordinatization, visualization and dimensionality reduction. 
+It leverages [Eilenberg-MacLane spaces](https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology), and turns persistent cohomology computations 
+into topology-preserving coordinates for data.
+
+TO USE: interactively select persistent cohomlogy classes,  parameters, and DREiMac will compute maps from the data to appropriate (low-dimensional skeleta of Eilenberg-MacLane) spaces consistent with the underlying data topology.
 
 # Python version
 
