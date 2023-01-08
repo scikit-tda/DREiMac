@@ -270,6 +270,9 @@ class ProjectiveCoords(EMCoords):
         self.selected = set([])
         self.u = np.array([0, 0, 1])
 
+    def get_rep_cocycle(self):
+        return EMCoords.get_rep_cocycle_p_dim(self, p=2, dim=1)
+
     def get_coordinates(self, perc=0.99, cocycle_idx=[0], proj_dim=2, partunity_fn=partunity_linear):
         """
         Perform multiscale projective coordinates via persistent cohomology of 

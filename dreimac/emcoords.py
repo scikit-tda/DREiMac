@@ -121,6 +121,16 @@ class EMCoords(object):
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
 
+    def get_rep_cocycle_p_dim(self, p, dim):
+        ### Do whatever
+        return cocycle
+    
+    def get_rep_cocycle(self):
+        return None
+    
+    def get_coordinates(self):
+        cocycle = self.get_rep_cocycle()
+
     def setup_ax_persistence(self, y_compress=1):
         """
         Setup the persistence plot in an interactive window
