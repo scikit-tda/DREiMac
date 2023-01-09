@@ -1,18 +1,10 @@
 """
 A superclass for shared code across all different types of coordinates
 """
-import subprocess
-import os
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d import proj3d
-import scipy
 from scipy.sparse.linalg import lsqr
 import time
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.widgets import Slider, RadioButtons, Button
-from .geomtools import *
+from .utils import *
 from ripser import ripser
 import warnings
 
@@ -82,6 +74,10 @@ def compute_dpi(width_cells, height_cells, width_frac=0.5, height_frac=0.65, ver
 class EMCoords(object):
     def __init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose):
         """
+        Perform persistent homology on the landmarks, store distance
+        from the landmarks to themselves and to the rest of the points,
+        and sort persistence diagrams and cocycles in decreasing order of persistence
+
         Parameters
         ----------
         X: ndarray(N, d)
@@ -120,206 +116,93 @@ class EMCoords(object):
         reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
-
-    def setup_ax_persistence(self, y_compress=1):
+    
+    def get_rep_cocycle(self, cocycle_idx):
         """
-        Setup the persistence plot in an interactive window
+        Compute the representative cocycle, given a list of cocycle indices
+
         Parameters
         ----------
-        y_compress: float
-            The factor by which to compress the y-axis to make room
-            for a plot underneath
-        """
-        dgm = self.dgm1_lifetime
-        # Switch to lifetime
-        ax_min, ax_max = np.min(dgm), np.max(dgm)
-        x_r = ax_max - ax_min
-        buffer = x_r / 5
-        x_down = ax_min - buffer / 2
-        x_up = ax_max + buffer
-        y_down, y_up = x_down, x_up
-        y_up += (y_up-y_down)*(y_compress-1)
-        self.ax_persistence.plot([0, ax_max], [0, 0], "--", c=np.array([0.0, 0.0, 0.0]))
-        self.dgmplot, = self.ax_persistence.plot(dgm[:, 0], dgm[:, 1], 'o', c='C0', picker=5)
-        self.selected_plot = self.ax_persistence.scatter([], [], 100, c='C1')
-        self.ax_persistence.set_xlim([x_down, x_up])
-        self.ax_persistence.set_ylim([y_down, y_up])
-        self.ax_persistence.set_aspect('equal', 'box')
-        self.ax_persistence.set_title("H1 Cocycle Selection")
-        self.ax_persistence.set_xlabel("Birth")
-        self.ax_persistence.set_ylabel("Lifetime")
-        self.persistence_text_labels = [self.ax_persistence.text(dgm[i, 0], dgm[i, 1], '') for i in range(dgm.shape[0])]
-
-    def recompute_coords(self, clicked=[], clear_persistence_text = False):
-        """
-        Toggle including a cocycle from a set of points in the 
-        persistence diagram
-        Parameters
-        ----------
-        clicked: list of int
-            Indices to toggle
-        clear_persistence_text: boolean
-            Whether to clear all previously labeled dots
-        """
-        self.selected = self.selected.symmetric_difference(set(clicked))
-        idxs = np.array(list(self.selected))
-        fmt = "c%i +"*len(idxs)
-        fmt = fmt[0:-1]
-        self.selected_cocycle_text.set_text(fmt%tuple(idxs))
-        if clear_persistence_text:
-            for label in self.persistence_text_labels:
-                label.set_text("")
-        for idx in idxs:
-            self.persistence_text_labels[idx].set_text("%i"%idx)
-        if idxs.size > 0:
-            ## Step 1: Highlight point on persistence diagram
-            self.selected_plot.set_offsets(self.dgm1_lifetime[idxs, :])
-            ## Step 2: Update coordinates
-            perc = self.perc_slider.val
-            partunity_fn = PARTUNITY_FNS[self.partunity_selector.value_selected]
-            self.coords = self.get_coordinates(cocycle_idx = idxs, perc=perc, partunity_fn = partunity_fn)
-        else:
-            self.coords = {'X':np.zeros((0, 2))}
-            self.selected_plot.set_offsets(np.zeros((0, 2)))
-
-    def setup_param_chooser_gui(self, fig, xstart, ystart, width, height, init_params, button_idx = -1):
-        """
-        Setup a GUI area 
-        Parameters
-        ----------
-        fig: matplotlib figure handle
-            Handle to the interactive figure
-        xstart: float
-            Where this GUI element is starting along x
-        ystart: float
-            Where this GUI element is starting along y
-        width: float
-            Width of GUI element
-        height: float
-            Height of GUI element
-        init_params: dict
-            Initial parameters
-        button_idx: int
-            Index of the circular coordinate to create a press button, or None
-            if no button is created
-        Returns
-        -------
-        percslider: matplotlib.widgets.Slider
-            Handle to to the slider for choosing coverage
-        partunity_selector: matplotlib.widgets.RadioButtons
-            Radio buttons for choosing partition of unity type
-        """
-        # Percent coverage slider
-        ax_perc_slider = fig.add_axes([xstart, ystart+height*0.15, 0.5*width, 0.02])
-        perc = init_params['perc']
-        perc_slider = Slider(ax_perc_slider, "Coverage", valmin=0, valmax=1, valstep=0.01, valinit=perc)
+        cocycle_idx : list
+            Add the cocycles together at the indices in this list
         
-        # Partition of unity radio button
-        ax_part_unity_label = fig.add_axes([xstart-width*0.175, ystart, 0.3*width, 0.045])
-        ax_part_unity_label.text(0.1, 0.3, "Partition\nof Unity")
-        ax_part_unity_label.set_axis_off()
-        ax_part_unity = fig.add_axes([xstart, ystart, 0.2*width, 0.045])
-        active_idx = 0
-        partunity_fn = init_params['partunity_fn']
-        partunity_keys = tuple(PARTUNITY_FNS.keys())
-        for i, key in enumerate(partunity_keys):
-            if partunity_fn == PARTUNITY_FNS[key]:
-                active_idx = i
-        partunity_selector = RadioButtons(ax_part_unity, partunity_keys, active=active_idx)
-
-        # Selected cocycle display
-        ax_selected_cocycles_label = fig.add_axes([xstart-width*0.175, ystart-height*0.15, 0.3*width, 0.045])
-        ax_selected_cocycles_label.text(0.1, 0.3, "Selected\nCocycle")
-        ax_selected_cocycles_label.set_axis_off()
-        ax_selected_cocycles = fig.add_axes([xstart, ystart-height*0.15, 0.2*width, 0.045])
-        selected_cocycle_text = ax_selected_cocycles.text(0.02, 0.5, "")
-        ax_selected_cocycles.set_axis_off()
-
-        # Button to select this particular coordinate
-        select_button = None
-        if button_idx > -1:
-            ax_button_label = fig.add_axes([xstart+width*0.25, ystart, 0.2*width, 0.045])
-            select_button = Button(ax_button_label, "Coords {}".format(button_idx))
-        return perc_slider, partunity_selector, selected_cocycle_text, select_button
-
-    def get_selected_info(self):
-        """
-        Return information about what the user selected in
-        the interactive plot
         Returns
         -------
-        {
-            'partunity_fn': (dist_land_data, r_cover) -> phi
-                The selected function handle for the partition of unity
-            'cocycle_idxs':ndarray(dtype = int)
-                Indices of the selected cocycles,
-            'perc': float
-                The selected percent coverage,
-        }
+        cohomdeath: float
+            Cohomological death
+        cohombirth: float
+            Cohomological birth
+        cocycle: ndarray(K, 3, dtype=int)
+            Representative cocycle.  First two columns are vertex indices,
+            and third column is value in field of prime self.prime_
         """
-        return {
-                'partunity_fn':PARTUNITY_FNS[self.partunity_selector.value_selected], 
-                'cocycle_idxs':np.array(list(self.selected)), 
-                'perc':self.perc_slider.val,
-                }
+        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
+        cohomdeath = -np.inf
+        cohombirth = np.inf
+        cocycle = np.zeros((0, 3))
+        prime = self.prime_
+        for k in range(len(cocycle_idx)):
+            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=prime)
+            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
+            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+        return cohomdeath, cohombirth, cocycle
+    
+    def get_cover_radius(self, perc, cohomdeath, cohombirth):
+        """
+        Determine radius for covering balls
 
-"""#########################################
-        Miscellaneous Utilities
-#########################################"""
+        Parameters
+        ----------
+        perc : float
+            Percent coverage
+        cohomdeath: float
+            Cohomological death
+        cohombirth: float
+            Cohomological birth
+        
+        Returns
+        -------
+        float: Covering radius
+        """
+        dist_land_data = self.dist_land_data_
+        coverage = np.max(np.min(dist_land_data, 1))
+        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+        self.r_cover_ = r_cover # Store covering radius for reference
+        if self.verbose:
+            print("r_cover = %.3g"%r_cover)
+        self.r_cover_ = r_cover
+        return r_cover
+    
+    def get_covering_partition(self, r_cover, partunity_fn):
+        """
+        Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
-def callback_factory(callback, k):
-    """
-    Setup a callback that's linked to a particular
-    circular coordinate index.  Having this function takes
-    care of scoping issues
-    Parameters
-    ----------
-    callback: function
-        The callback to use
-    k: int
-        The index of the circular coordinate
-    """
-    return lambda evt: callback(evt, k)
-
-def set_pi_axis_labels(ax, labels):
-    """
-    Set the axis labels of plots to be the pi symbols
-    Parameters
-    ----------
-    ax: matplotlib handle
-        The axes of which to change the symbol labels
-    labels: list of string
-        The names of the axes
-    """
-    ax.set_xlabel(labels[0])
-    ax.set_xlim([-0.2, 2*np.pi+0.2])
-    ax.set_xticks([0, np.pi, 2*np.pi])
-    ax.set_xticklabels(["0", "$\\pi$", "$2\\pi$"])
-    ax.set_ylabel(labels[1])
-    ax.set_ylim([-0.2, 2*np.pi+0.2])
-    ax.set_yticks([0, np.pi, 2*np.pi])
-    ax.set_yticklabels(["0", "$\\pi$", "$2\\pi$"])
-    if len(labels) > 2:
-        ax.set_zlabel(labels[2])
-        ax.set_zlim([-0.2, 2*np.pi+0.2])
-        ax.set_zticks([0, np.pi, 2*np.pi])
-        ax.set_zticklabels(["0", "$\\pi$", "$2\\pi$"])
-
-def set_3dplot_equalaspect(ax, X, pad=0.1):
-    """
-    An equal aspect ratio hack for 3D
-    Parameters
-    ----------
-    ax: matplotlib axis
-        Handle to the axis to change
-    X: ndarray(N, 3)
-        Point cloud that's being plotted
-    pad: float
-        The factor of padding to use around the point cloud
-    """
-    maxes = np.max(X)
-    mins = np.min(X)
-    r = maxes - mins
-    ax.set_xlim([mins-r*pad, maxes+r*pad])
-    ax.set_ylim([mins-r*pad, maxes+r*pad])
-    ax.set_zlim([mins-r*pad, maxes+r*pad])
+        Parameters
+        ----------
+        r_cover: float
+            Covering radius
+        partunity_fn: (dist_land_data, r_cover) -> phi
+            A function from the distances of each landmark to a bump function
+        
+        Returns
+        -------
+        varphi: ndarray(n_data, dtype=float)
+            varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b)),
+        ball_indx: ndarray(n_data, dtype=int)
+            The index of the first open set each data point belongs to
+        """
+        dist_land_data = self.dist_land_data_
+        U = dist_land_data < r_cover
+        phi = np.zeros_like(dist_land_data)
+        phi[U] = partunity_fn(dist_land_data[U], r_cover)
+        # Compute the partition of unity 
+        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are %i point not covered by a landmark"%nzero)
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx

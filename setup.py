@@ -26,7 +26,7 @@ setup(
     description="Dimension reduction with Eilenberg-MacClane coordinates",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Chris Tralie",
+    author="Chris Tralie, Jose Perea, Luis Scoccola",
     author_email="ctralie@alumni.princeton.edu",
     license='Apache2',
     packages=['dreimac'],
@@ -56,7 +56,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     keywords='topological data analysis, dimension reduction'
 )

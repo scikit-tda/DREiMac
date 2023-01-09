@@ -12,7 +12,7 @@ TO USE: interactively select persistent cohomlogy classes,  parameters, and DREi
 
 Code can be found in dreimac/.  If you're using conda and would like to create a virtual environment first, type
 ~~~~~ bash
-conda create -n dreimac python=3.8.3
+conda create -n dreimac python=3.9
 conda activate dreimac
 ~~~~~
 
@@ -20,9 +20,7 @@ Then, to install, type
 ~~~~~ bash
 git clone https://github.com/ctralie/DREiMac.git
 cd DREiMac
-pip install cython
-pip install -r requirements.txt
-python setup.py install
+pip install -e .
 ~~~~~
 
 Then, you can import dreimac from any python file or notebook.  For example, if you type the following from the root of the repository
@@ -32,21 +30,6 @@ jupyter notebook
 ~~~~~
 
 then you will be able to interactively explore the notebooks we have setup
-
-
-## Two Circles Example
-
-Below is an example showing the interactive circular coordinates interface on a data set comprised of two noisy circles in 2D
-
-<img src = "notebooks/Selecting_Circles.gif">
-
-
-## Torus Example
-
-Below is an example showing the interactive circular coordinates interface on a 3D point cloud of a torus
-
-<img src = "notebooks/Selecting_Torus.gif">
-
 
 
 # Javascript version
