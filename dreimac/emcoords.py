@@ -200,7 +200,7 @@ class EMCoords(object):
         denom = np.sum(phi, 0)
         nzero = np.sum(denom == 0)
         if nzero > 0:
-            warnings.warn("There are %i point not covered by a landmark"%nzero)
+            warnings.warn("There are {} point not covered by a landmark".format(nzero))
             denom[denom == 0] = 1
         varphi = phi / denom[None, :]
         # To each data point, associate the index of the first open set it belongs to

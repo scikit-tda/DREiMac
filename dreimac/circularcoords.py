@@ -8,7 +8,6 @@ from .emcoords import *
 """#########################################
         Main Circular Coordinates Class
 #########################################"""
-SCATTER_SIZE = 50
 
 class CircularCoords(EMCoords):
     def __init__(self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False):
@@ -109,6 +108,11 @@ class CircularCoords(EMCoords):
             Add the cocycles together at the indices in this list
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
+        
+        Returns
+        -------
+        thetas: ndarray(N)
+            Circular coordinates
         """
         n_landmarks = self.n_landmarks_
         n_data = self.X_.shape[0]
