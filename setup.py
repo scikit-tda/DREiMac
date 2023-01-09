@@ -34,7 +34,7 @@ setup(
         'cython', 'numpy'
     ],
     install_requires=[
-        'cython', 'numpy', 'scipy', 'matplotlib', 'numba', 'persim', 'ripser', 'jupyter', 'screeninfo'
+        'cython', 'numpy', 'scipy', 'matplotlib', 'numba', 'persim', 'ripser'
     ],
     extras_require={
         'testing': [ # `pip install -e ".[testing]"``
