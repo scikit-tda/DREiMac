@@ -2,10 +2,9 @@
 A superclass for shared code across all different types of coordinates
 """
 import numpy as np
-import scipy
 from scipy.sparse.linalg import lsqr
 import time
-from .geomtools import *
+from .utils import *
 from ripser import ripser
 import warnings
 
@@ -75,6 +74,10 @@ def compute_dpi(width_cells, height_cells, width_frac=0.5, height_frac=0.65, ver
 class EMCoords(object):
     def __init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose):
         """
+        Perform persistent homology on the landmarks, store distance
+        from the landmarks to themselves and to the rest of the points,
+        and sort persistence diagrams and cocycles in decreasing order of persistence
+
         Parameters
         ----------
         X: ndarray(N, d)
@@ -113,3 +116,93 @@ class EMCoords(object):
         reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
+    
+    def get_rep_cocycle(self, cocycle_idx):
+        """
+        Compute the representative cocycle, given a list of cocycle indices
+
+        Parameters
+        ----------
+        cocycle_idx : list
+            Add the cocycles together at the indices in this list
+        
+        Returns
+        -------
+        cohomdeath: float
+            Cohomological death
+        cohombirth: float
+            Cohomological birth
+        cocycle: ndarray(K, 3, dtype=int)
+            Representative cocycle.  First two columns are vertex indices,
+            and third column is value in field of prime self.prime_
+        """
+        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
+        cohomdeath = -np.inf
+        cohombirth = np.inf
+        cocycle = np.zeros((0, 3))
+        prime = self.prime_
+        for k in range(len(cocycle_idx)):
+            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=prime)
+            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
+            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+        return cohomdeath, cohombirth, cocycle
+    
+    def get_cover_radius(self, perc, cohomdeath, cohombirth):
+        """
+        Determine radius for covering balls
+
+        Parameters
+        ----------
+        perc : float
+            Percent coverage
+        cohomdeath: float
+            Cohomological death
+        cohombirth: float
+            Cohomological birth
+        
+        Returns
+        -------
+        float: Covering radius
+        """
+        dist_land_data = self.dist_land_data_
+        coverage = np.max(np.min(dist_land_data, 1))
+        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
+        self.r_cover_ = r_cover # Store covering radius for reference
+        if self.verbose:
+            print("r_cover = %.3g"%r_cover)
+        self.r_cover_ = r_cover
+        return r_cover
+    
+    def get_covering_partition(self, r_cover, partunity_fn):
+        """
+        Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
+
+        Parameters
+        ----------
+        r_cover: float
+            Covering radius
+        partunity_fn: (dist_land_data, r_cover) -> phi
+            A function from the distances of each landmark to a bump function
+        
+        Returns
+        -------
+        varphi: ndarray(n_data, dtype=float)
+            varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b)),
+        ball_indx: ndarray(n_data, dtype=int)
+            The index of the first open set each data point belongs to
+        """
+        dist_land_data = self.dist_land_data_
+        U = dist_land_data < r_cover
+        phi = np.zeros_like(dist_land_data)
+        phi[U] = partunity_fn(dist_land_data[U], r_cover)
+        # Compute the partition of unity 
+        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are %i point not covered by a landmark"%nzero)
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx

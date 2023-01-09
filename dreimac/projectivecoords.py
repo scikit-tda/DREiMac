@@ -1,11 +1,9 @@
 import numpy as np 
 import numpy.linalg as linalg
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt 
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import time
 import warnings
-from .geomtools import *
+from .utils import *
 from .emcoords import *
 
 class ProjectiveCoords(EMCoords):
@@ -262,7 +260,7 @@ class ProjectiveCoords(EMCoords):
         partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
             A partition of unity function
         """
-        EMCoords.__init__(self, X, n_landmarks, distance_matrix, 2, maxdim, verbose)
+        EMCoords.__init__(self, X=X, n_landmarks=n_landmarks, distance_matrix=distance_matrix, prime=2, maxdim=maxdim, verbose=verbose)
         self.type_ = "proj"
         # GUI variables
         self.selected = set([])
@@ -291,39 +289,17 @@ class ProjectiveCoords(EMCoords):
             The projective coordinates
         }
         """
-        ## Step 1: Come up with the representative cocycle as a formal sum
-        ## of the chosen cocycles
         n_landmarks = self.n_landmarks_
         n_data = self.X_.shape[0]
-        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
-        cohomdeath = -np.inf
-        cohombirth = np.inf
-        cocycle = np.zeros((0, 3))
-        for k in range(len(cocycle_idx)):
-            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=2)
-            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
-            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+        ## Step 1: Come up with the representative cocycle as a formal sum
+        ## of the chosen cocycles
+        cohomdeath, cohombirth, cocycle = EMCoords.get_rep_cocycle(self, cocycle_idx)
 
         ## Step 2: Determine radius for balls
-        dist_land_data = self.dist_land_data_
-        coverage = np.max(np.min(dist_land_data, 1))
-        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-        self.r_cover_ = r_cover # Store covering radius for reference
-        if self.verbose:
-            print("r_cover = %.3g"%r_cover)
+        r_cover = EMCoords.get_cover_radius(self, perc, cohomdeath, cohombirth)
 
         ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-        U = dist_land_data < r_cover
-        phi = np.zeros_like(dist_land_data)
-        phi[U] = partunity_fn(dist_land_data[U], r_cover)
-        denom = np.sum(phi, 0)
-        nzero = np.sum(denom == 0)
-        if nzero > 0:
-            warnings.warn("There are %i point not covered by a landmark"%nzero)
-            denom[denom == 0] = 1
-        varphi = phi / denom[None, :]
-        # To each data point, associate the index of the first open set it belongs to
-        ball_indx = np.argmax(U, 0)
+        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
         ## Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
         # compute all transition functions

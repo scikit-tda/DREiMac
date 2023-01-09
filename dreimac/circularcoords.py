@@ -1,18 +1,8 @@
-import subprocess
-import os
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d import proj3d
 import scipy
 from scipy.sparse.linalg import lsqr
-import time
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.widgets import Slider, RadioButtons
-from .geomtools import *
+from .utils import *
 from .emcoords import *
-from ripser import ripser
-import warnings
 
 
 """#########################################
@@ -37,52 +27,35 @@ class CircularCoords(EMCoords):
             Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
             but it may be of interest to see other dimensions (e.g. for a torus)
         """
-        EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
+        EMCoords.__init__(self, X=X, n_landmarks=n_landmarks, distance_matrix=distance_matrix, prime=prime, maxdim=maxdim, verbose=verbose)
         self.type_ = "circ"
 
-    def get_coordinates(self, perc = 0.99, do_weighted = False, cocycle_idx = [0], partunity_fn = PartUnity.linear):
+    def get_cocycle_projection(self, cocycle, r_cover, do_weighted):
         """
-        Perform circular coordinates via persistent cohomology of 
-        sparse filtrations (Jose Perea 2018)
+        Setup coboundary matrix, delta_0, for Cech_{r_cover }
+        and use it to find a projection of the cocycle
+        onto the image of delta0
+        
         Parameters
         ----------
-        perc : float
-            Percent coverage
+        cocycle: ndarray(K, 3, dtype=int)
+            Representative cocycle.  First two columns are vertex indices,
+            and third column is value in field of prime self.prime_
+        r_cover: float
+            Covering radius
         do_weighted : boolean
             Whether to make a weighted cocycle on the representatives
-        cocycle_idx : list
-            Add the cocycles together in this list
-        partunity_fn: (dist_land_data, r_cover) -> phi
-            A function from the distances of each landmark to a bump function
-        """
-        ## Step 1: Come up with the representative cocycle as a formal sum
-        ## of the chosen cocycles
-        n_landmarks = self.n_landmarks_
-        n_data = self.X_.shape[0]
-        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
-        cohomdeath = -np.inf
-        cohombirth = np.inf
-        cocycle = np.zeros((0, 3))
-        prime = self.prime_
-        for k in range(len(cocycle_idx)):
-            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=prime)
-            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
-            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
-
-        ## Step 2: Determine radius for balls
-        dist_land_data = self.dist_land_data_
-        dist_land_land = self.dist_land_land_
-        coverage = np.max(np.min(dist_land_data, 1))
-        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-        self.r_cover_ = r_cover # Store covering radius for reference
-        if self.verbose:
-            print("r_cover = %.3g"%r_cover)
         
-
-        ## Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
-        ## and use it to find a projection of the cocycle
-        ## onto the image of delta0
-
+        Returns
+        -------
+        tau: ndarray(n_landmarks)
+            Scalar function on the landmarks whose image under delta0 best matches cocycle
+        theta: ndarray(n_edges)
+            The image of tau under delta0
+        """
+        prime = self.prime_
+        n_landmarks = self.n_landmarks_
+        dist_land_land = self.dist_land_land_
         #Lift to integer cocycle
         val = np.array(cocycle[:, 2])
         val[val > (prime-1)/2] -= prime
@@ -120,26 +93,44 @@ class CircularCoords(EMCoords):
         theta[:, 1] = I
         theta[:, 2] = -delta0.dot(tau)
         theta = add_cocycles(cocycle, theta, real=True)
+        return tau, theta
+
+    def get_coordinates(self, perc = 0.99, do_weighted = False, cocycle_idx = [0], partunity_fn = PartUnity.linear):
+        """
+        Perform circular coordinates via persistent cohomology of 
+        sparse filtrations (Jose Perea 2018)
+        Parameters
+        ----------
+        perc : float
+            Percent coverage
+        do_weighted : boolean
+            Whether to make a weighted cocycle on the representatives
+        cocycle_idx : list
+            Add the cocycles together at the indices in this list
+        partunity_fn: (dist_land_data, r_cover) -> phi
+            A function from the distances of each landmark to a bump function
+        """
+        n_landmarks = self.n_landmarks_
+        n_data = self.X_.shape[0]
+        ## Step 1: Come up with the representative cocycle as a formal sum
+        ## of the chosen cocycles
+        cohomdeath, cohombirth, cocycle = EMCoords.get_rep_cocycle(self, cocycle_idx)
+        
+
+        ## Step 2: Determine radius for balls
+        r_cover = EMCoords.get_cover_radius(self, perc, cohomdeath, cohombirth)
+        
+
+        ## Step 3: Setup coboundary matrix, delta_0, for Cech_{r_cover }
+        ## and use it to find a projection of the cocycle
+        ## onto the image of delta0
+        tau, theta = self.get_cocycle_projection(cocycle, r_cover, do_weighted)
         
 
         ## Step 4: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-        U = dist_land_data < r_cover
-        phi = np.zeros_like(dist_land_data)
-        phi[U] = partunity_fn(dist_land_data[U], r_cover)
-        # Compute the partition of unity 
-        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
-        denom = np.sum(phi, 0)
-        nzero = np.sum(denom == 0)
-        if nzero > 0:
-            warnings.warn("There are %i point not covered by a landmark"%nzero)
-            denom[denom == 0] = 1
-        varphi = phi / denom[None, :]
-
-        # To each data point, associate the index of the first open set it belongs to
-        ball_indx = np.argmax(U, 0)
+        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
         ## Step 5: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-        
         # compute all transition functions
         theta_matrix = np.zeros((n_landmarks, n_landmarks))
         I = np.array(theta[:, 0], dtype = np.int64)
