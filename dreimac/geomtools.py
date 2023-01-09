@@ -5,8 +5,6 @@ and cross-similarity matrices, for doing "greedy permutations," and for
 some topological operations like adding cocycles and creating partitions of unity
 """
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.misc
 import scipy.sparse as sparse
 
 """#########################################
@@ -221,52 +219,192 @@ def reindex_cocycles(cocycles, idx_land, N):
         Partition of Unity Functions
 #########################################"""
 
-def partunity_linear(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return r_cover - ds
+class PartUnity:
+    @staticmethod
+    def linear(ds, r_cover):
+        """
+        Parameters
+        ----------
+        ds: ndarray(n)
+            Some subset of distances between landmarks and 
+            data points
+        r_cover: float
+            Covering radius
+        Returns
+        -------
+        varphi: ndarray(n)
+            The bump function
+        """
+        return r_cover - ds
+    
+    @staticmethod
+    def quadratic(ds, r_cover):
+        """
+        Parameters
+        ----------
+        ds: ndarray(n)
+            Some subset of distances between landmarks and 
+            data points
+        r_cover: float
+            Covering radius
+        Returns
+        -------
+        varphi: ndarray(n)
+            The bump function
+        """
+        return (r_cover - ds)**2
 
-def partunity_quadratic(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return (r_cover - ds)**2
+    @staticmethod
+    def exp(ds, r_cover):
+        """
+        Parameters
+        ----------
+        ds: ndarray(n)
+            Some subset of distances between landmarks and 
+            data points
+        r_cover: float
+            Covering radius
+        Returns
+        -------
+        varphi: ndarray(n)
+            The bump function
+        """
+        return np.exp(r_cover**2/(ds**2-r_cover**2))
 
-def partunity_exp(ds, r_cover):
-    """
-    Parameters
-    ----------
-    ds: ndarray(n)
-        Some subset of distances between landmarks and 
-        data points
-    r_cover: float
-        Covering radius
-    Returns
-    -------
-    varphi: ndarray(n)
-        The bump function
-    """
-    return np.exp(r_cover**2/(ds**2-r_cover**2))
 
-PARTUNITY_FNS = {'linear':partunity_linear, 'quadratic':partunity_quadratic, 'exp':partunity_exp}
+"""#########################################
+            Geometry Examples
+#########################################"""
+
+## TODO: These probably belong in tdasets, but I'll keep them here for now
+
+class GeometryExamples:
+    @staticmethod
+    def line_patches(dim, n_angles, n_offsets, sigma):
+        """
+        Sample a set of line segments, as witnessed by square patches
+        Parameters
+        ----------
+        dim: int
+            Patches will be dim x dim
+        n_angles: int
+            Number of angles to sweep between 0 and pi
+        n_offsets: int
+            Number of offsets to sweep from the origin to the edge of the patch
+        sigma: float
+            The blur parameter.  Higher sigma is more blur
+        
+        Returns
+        -------
+        ndarray(n_angles*n_offsets, dim*dim)
+            An array of all of the patches raveled into dim*dim dimensional Euclidean space
+        """
+        N = n_angles*n_offsets
+        P = np.zeros((N, dim*dim))
+        thetas = np.linspace(0, np.pi, n_angles+1)[0:n_angles]
+        #ps = np.linspace(-0.5*np.sqrt(2), 0.5*np.sqrt(2), n_offsets)
+        ps = np.linspace(-1, 1, n_offsets)
+        idx = 0
+        [Y, X] = np.meshgrid(np.linspace(-0.5, 0.5, dim), np.linspace(-0.5, 0.5, dim))
+        for i in range(n_angles):
+            c = np.cos(thetas[i])
+            s = np.sin(thetas[i])
+            for j in range(n_offsets):
+                patch = X*c + Y*s + ps[j]
+                patch = np.exp(-patch**2/sigma**2)
+                P[idx, :] = patch.flatten()
+                idx += 1
+        return P
+
+    @staticmethod
+    def rp2_metric(n_samples, seed=None):
+        """
+        Return a distance matrix of points on the projective plane
+        obtained by identifying antipodal Gaussian random samples 
+        of a sphere
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of random samples on the projective plane
+        seed: int
+            Seed to use.  If omitted, use the number of samples as a seed
+        
+        Returns
+        -------
+        ndarray(n_samples, 3)
+            Original points on the sphere
+        ndarray(n_samples, n_samples)
+            Distance matrix of rp2
+        """
+        if seed is None:
+            seed = n_samples
+        np.random.seed(seed)
+        X = np.random.randn(n_samples, 3)
+        X = X/np.sqrt(np.sum(X**2, 1))[:, None]
+        return X, get_csm_projarc(X, X)
+
+    @staticmethod
+    def torus_3d(n_samples, R, r, seed=None):
+        """
+        Return points sampled on a 3D torus
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of random samples on the projective plane
+        R: float
+            Outer radius
+        r: float
+            Inner radius
+        seed: int
+            Seed to use.  If omitted, use the number of samples as a seed
+        
+        Returns
+        -------
+        X: ndarray(n_samples, 4)
+            3D torus samples
+        """
+        if seed is None:
+            seed = n_samples
+        np.random.seed(seed)
+        X = np.zeros((n_samples, 3))
+        s = np.random.rand(n_samples)*2*np.pi
+        t = np.random.rand(n_samples)*2*np.pi
+        X[:, 0] = (R + r*np.cos(s))*np.cos(t)
+        X[:, 1] = (R + r*np.cos(s))*np.sin(t)
+        X[:, 2] = r*np.sin(s)
+        return X
+
+    @staticmethod
+    def klein_bottle_4d(n_samples, R, r, seed=None):        
+        """
+        Return samples on a klein bottle in 4D
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of random samples on the projective plane
+        R: float
+            Outer radius
+        r: float
+            Inner radius
+        seed: int
+            Seed to use.  If omitted, use the number of samples as a seed
+        
+        Returns
+        -------
+        X: ndarray(n_samples, 4)
+            4D klein bottle samples
+        """
+        if seed is None:
+            seed = n_samples
+        np.random.seed(seed)
+        theta = np.random.rand(n_samples)*2*np.pi
+        phi = np.random.rand(n_samples)*2*np.pi
+        X = np.zeros((n_samples, 4))
+        X[:, 0] = (R + r*np.cos(theta))*np.cos(phi)
+        X[:, 1] = (R + r*np.cos(theta))*np.sin(phi)
+        X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
+        X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
+        return X
