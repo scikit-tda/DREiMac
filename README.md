@@ -18,7 +18,7 @@ conda activate dreimac
 
 Then, to install, type
 ~~~~~ bash
-git clone https://github.com/ctralie/DREiMac.git
+git clone https://github.com/scikit-tda/DREiMac.git
 cd DREiMac
 pip install -e .
 ~~~~~
