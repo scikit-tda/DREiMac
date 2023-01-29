@@ -1,3 +1,8 @@
+[![PyPI version](https://badge.fury.io/py/dreimac.svg)](https://badge.fury.io/py/dreimac)
+[![Downloads](https://img.shields.io/pypi/dm/dreimac)](https://pypi.python.org/pypi/dreimac/)
+[![codecov](https://codecov.io/gh/scikit-tda/dreimac/branch/master/graph/badge.svg)](https://codecov.io/gh/scikit-tda/dreimac)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # DREiMac
 ## Dimension Reduction with Eilenberg-MacLane Coordinates
 ### Chris Tralie, Tom Mease, Jose Perea
