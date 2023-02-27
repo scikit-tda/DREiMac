@@ -155,11 +155,57 @@ class GeometryUtils:
 
 
 
+
+
+
 """#########################################
         Cohomology Utility Functions
 #########################################"""
 
-def add_cocycles(c1, c2, p = 2, real = False):
+
+def linear_combination_one_cocycles(cocycles, coefficients, characteristic = 0, real = False):
+    """
+    Compute a linear combination of cocycles
+
+    Parameters
+    ----------
+    cocycles : list of triples [vertex index, vertex index, value]
+        List representing a list of cocycles
+    
+    coefficients: list of numbers
+        Numbers representing the coefficient of each cocycle in the linear combination
+
+    characteristic : integer, optional
+        Integer representing the characteristic to mod out after performing linear combination.
+        If zero, then no mod operation is performed.
+
+    real : boolean, optional
+        Whether to treat the values in the cocycles as floats or as ints.
+    """
+    assert len(cocycles) == len(coefficients)
+    assert len(cocycles) > 0
+    assert isinstance(characteristic, int)
+    assert (not real) or (characteristic == 0)
+
+    res_as_dict = {}
+    for cocycle, coefficient in zip(cocycles, coefficients):
+        for i,j,v in cocycle:
+            i, j = min(i,j), max(i,j)
+            if not (i,j) in res_as_dict:
+                res_as_dict[(i,j)] = v * coefficient
+            else:
+                res_as_dict[(i,j)] += v * coefficient
+
+    dtype = np.float32 if real else np.int
+    res_as_list = list(res_as_dict.items())
+    res = np.zeros((len(res_as_dict), 3), dtype=dtype)
+    res[:, 0:2] = np.array([ij for ij,_ in res_as_list])
+    res[:, 2] = np.array([v for _,v in res_as_list])
+    if characteristic > 0:
+        res[:, 2] = np.mod(res[:, 2], characteristic)
+    return res
+
+def add_cocycles(c1, c2, p = 0, real=False):
     """
     Add two cocycles together under a field
 
@@ -174,25 +220,10 @@ def add_cocycles(c1, c2, p = 2, real = False):
     real: bool
         Whether this is meant to be a real cocycle
     """
-    S = {}
-    c = np.concatenate((c1, c2), 0)
-    for k in range(c.shape[0]):
-        [i, j, v] = c[k, :]
-        i, j = min(i, j), max(i, j)
-        if not (i, j) in S:
-            S[(i, j)] = v
-        else:
-            S[(i, j)] += v
-    cret = np.zeros((len(S), 3))
-    cret[:, 0:2] = np.array([s for s in S])
-    cret[:, 2] = np.array([np.mod(S[s], p) for s in S])
-    dtype = np.int64
-    if real:
-        dtype = np.float32
-    cret = np.array(cret[cret[:, -1] > 0, :], dtype = dtype)
-    return cret
+    return linear_combination_one_cocycles([c1,c2], [1,1], characteristic=p, real=real)
 
-def make_delta0(R):
+
+def _make_delta0(R):
     """
     Return the delta0 coboundary matrix
 
@@ -443,6 +474,39 @@ class GeometryExamples:
         X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
         return X
 
+    @staticmethod
+    def genus_two_surface():
+        """
+        Return samples on a genus two surface in 3D
+        """
+
+        R2 = 9
+        R = 5
+        r = 2
+        Ns = 80
+        Nt = 120
+        N = Ns * Nt
+        Y = np.zeros((N, 3))
+        s = np.linspace(0,2*np.pi,Ns,endpoint=False)
+        t = np.linspace(0,2*np.pi,Nt,endpoint=False)
+        st = np.array([[x,y] for x in s for y in t])
+        s = st[:,0]
+        t = st[:,1]
+        Y[:, 0] = (R + r*np.cos(s))*np.cos(t)
+        Y[:, 1] = (R + r*np.cos(s))*np.sin(t)
+        Y[:, 2] = r*np.sin(s)
+
+        Z = np.zeros((N, 3))
+        Z[:, 0] = R2 + (R + r*np.cos(s))*np.cos(t)
+        Z[:, 1] = (R + r*np.cos(s))*np.sin(t)
+        Z[:, 2] = r*np.sin(s)
+
+
+        Y = Y[(Y[:,0] <= 4.5)]
+        Z = Z[(Z[:,0] >= 4.5)]
+
+        return np.concatenate((Y,Z), axis = 0)
+
 
 """#########################################
         Matplotlib Plotting Utilities
@@ -506,3 +570,179 @@ class PlotUtils:
         ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
         ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
         ax.set_facecolor((0.35, 0.35, 0.35))
+
+    @staticmethod
+    def set_axes_equal(ax):
+        # taken from https://stackoverflow.com/a/31364297/2171328
+        """Make axes of 3D plot have equal scale so that spheres appear as spheres,
+        cubes as cubes, etc..  This is one possible solution to Matplotlib's
+        ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
+
+        Input
+          ax: a matplotlib axis, e.g., as output from plt.gca().
+        """
+
+        x_limits = ax.get_xlim3d()
+        y_limits = ax.get_ylim3d()
+        z_limits = ax.get_zlim3d()
+
+        x_range = abs(x_limits[1] - x_limits[0])
+        x_middle = np.mean(x_limits)
+        y_range = abs(y_limits[1] - y_limits[0])
+        y_middle = np.mean(y_limits)
+        z_range = abs(z_limits[1] - z_limits[0])
+        z_middle = np.mean(z_limits)
+
+        # The plot bounding box is a sphere in the sense of the infinity
+        # norm, hence I call half the max range the plot radius.
+        plot_radius = 0.5*max([x_range, y_range, z_range])
+
+        ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+        ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+        ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+    @staticmethod
+    def plot_2d_scatter_with_different_colorings(X, colorings = [], cmap="viridis", width=10, point_size=2):
+        """
+        Plot a 2D point cloud as many times as the number of colorings given.
+
+        Parameters
+        ----------
+        X : ndarray (N, 2)
+            A point cloud in 2D
+        colorings : ndarray (n, N) or list of lists
+            A list of n colorings, each one consisting of a list or array of N floats representing
+            the color of each data point
+        cmap : string
+            Matplotlib colormap to use
+        width : int
+            The width of the final plot
+        """
+        import matplotlib.pyplot as plt
+
+        if len(colorings) == 0:
+            plt.figure(figsize=(4,4))
+            plt.scatter(X[:,0], X[:,1], s=point_size)
+            plt.axis("equal")
+            plt.axis("off")
+        elif len(colorings) == 1:
+            plt.figure(figsize=(4,4))
+            plt.scatter(X[:,0], X[:,1], s=point_size, c=colorings[0], cmap=cmap)
+            plt.axis("equal")
+            plt.axis("off")
+        else:
+            num_colorings = len(colorings)
+            fig, axs = plt.subplots(1, num_colorings)
+            fig.set_figwidth(width)
+    
+            for i, c in enumerate(colorings):
+                axs[i].scatter(X[:,0],X[:,1], s=point_size, c=c, cmap=cmap)
+                axs[i].set_aspect("equal")
+                axs[i].axis("off")
+
+
+"""#########################################
+        Matplotlib Plotting Utilities
+#########################################"""
+class CircleMapUtils:
+
+    @staticmethod
+    def offset(circle_map, offset):
+        """
+        Rotationally offset a circle-valued map.
+
+        ----------
+        circle_map: ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            points on the circle.
+
+        offset: float
+            A number between 0 and 2pi representing a rotational offset.
+        
+        Returns
+        -------
+        ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            the rotation of the given points by the given offset.
+        """
+
+        return (circle_map + offset) % (2 * np.pi)
+
+    @staticmethod
+    def linear_combination(circle_maps, linear_combination_matrix):
+        """
+        Given k circle-valued maps on a dataset with n points and an l x k
+        matrix with integer coefficients, return the l linear combinations of the
+        given circle-valued maps induced by the given matrix.
+
+        Parameters
+        ----------
+        circle_maps: ndarray(k, n, dtype=float)
+            A numpy array with rows containing n points in the circle represented as
+            floats between 0 and 2pi.
+
+        linear_combination_matrix: ndarray(l, k, dtype=int)
+            A numpy array encoding l integer linear combinations of the given k
+            circle-valued maps.
+
+        Returns
+        -------
+        ndarray(l, n, dtype=float)
+            A numpy array with rows containing n points in the circle representing 
+            the l linear combinations of the given k circle-valued maps.
+        """
+
+        assert isinstance(circle_maps, np.ndarray)
+        assert len(circle_maps.shape) == 2
+        assert isinstance(linear_combination_matrix, np.ndarray)
+        assert len(linear_combination_matrix.shape) == 2 or len(linear_combination_matrix.shape) == 1
+
+        if len(linear_combination_matrix.shape) == 2:
+            assert circle_maps.shape[0] == linear_combination_matrix.shape[1]
+            return (linear_combination_matrix @ circle_maps) % (2 * np.pi)
+        else: 
+            assert circle_maps.shape[0] == linear_combination_matrix.shape[0]
+            return ((np.array([linear_combination_matrix]) @ circle_maps) % (2 * np.pi))[0]
+
+
+    @staticmethod
+    def levelset_coloring(circle_map, n_levelsets = 4, smoothing = 0.25):
+        """
+        Given points on the circle and a number of levelsets subdivide the
+        circle into the given number of levelsets and return a smoothened
+        membership function to the levelsets. This is useful for coloring a
+        dataset X according to a circle-valued map X -> S^1.
+
+        Parameters
+        ----------
+        circle_map: ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            points on the circle.
+
+        n_levelset: int, optional, default is 4
+            Number of levelsets to evenly cover the circle.
+
+        smoothing: float, optional, default is 0.25
+            How much to smoothen the membership function
+
+        Returns
+        -------
+        ndarray
+            The smoothened membership function of each of the given
+            points in the circle.
+        """
+        assert isinstance(n_levelsets, int)
+        assert n_levelsets > 0
+        n_levelsets *= 2
+        colors = circle_map/(2 * np.pi)
+        # transition should be between 0 (very fast) and 1 (slow)
+        if smoothing == 0:
+            return np.array([ np.floor(c*n_levelsets)%2 for c in colors ])
+        k = smoothing
+        def sigmoid(x):
+            x = (x-0.5) * 2
+            s = 1 / (1 + np.exp(-x / k)) 
+            return s
+        def triangle(y):
+            return y if y < 1 else 2 - y
+        return np.array([ sigmoid(triangle((c*n_levelsets)%2)) for c in colors ])

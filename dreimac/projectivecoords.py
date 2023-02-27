@@ -266,7 +266,7 @@ class ProjectiveCoords(EMCoords):
         self.selected = set([])
         self.u = np.array([0, 0, 1])
 
-    def get_coordinates(self, perc=0.99, cocycle_idx=[0], proj_dim=2, partunity_fn=PartUnity.linear):
+    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear):
         """
         Perform multiscale projective coordinates via persistent cohomology of 
         sparse filtrations (Jose Perea 2018)
@@ -293,7 +293,9 @@ class ProjectiveCoords(EMCoords):
         n_data = self.X_.shape[0]
         ## Step 1: Come up with the representative cocycle as a formal sum
         ## of the chosen cocycles
-        cohomdeath, cohombirth, cocycle = EMCoords.get_rep_cocycle(self, cocycle_idx)
+        cohomdeath, cohombirth, cocycle = self.get_representative_one_cocycle(cocycle_idx)
+        cohombirth /= 2.
+        cohomdeath /= 2.
 
         ## Step 2: Determine radius for balls
         r_cover = EMCoords.get_cover_radius(self, perc, cohomdeath, cohombirth)

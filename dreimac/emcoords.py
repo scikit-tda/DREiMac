@@ -117,36 +117,71 @@ class EMCoords(object):
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
     
-    def get_rep_cocycle(self, cocycle_idx):
+    def lift_to_integer_one_cocycle(self, cocycle):
         """
-        Compute the representative cocycle, given a list of cocycle indices
+        Lift the given cocycle with values in a prime field to a cocycle with integer coefficients.
 
         Parameters
         ----------
-        cocycle_idx : list
-            Add the cocycles together at the indices in this list
+        cocycle : ndarray(K, 3, dtype=int)
+            Cocycle to be lifted to integer coefficients.
+
+        Note
+        ----
+        This routine modifies the input cocycle.
+        
+        Returns
+        -------
+        cocycle : ndarray(K, 3, dtype=int)
+            Cocycle with same support as input cocycle and integer coefficients.
+        """
+        cocycle[cocycle[:,2] > (self.prime_-1)/2,2] -= self.prime_
+        return cocycle
+   
+    def get_representative_one_cocycle(self, cohomology_class):
+        """
+        Compute the representative cocycle, given a list of cohomology classes
+
+        Parameters
+        ----------
+        cohomology_class : integer or dictionary { cocycle_index : integer_coefficient }
+            Uses the linear combination specified by the dictionary or the given cocycle index
         
         Returns
         -------
         cohomdeath: float
-            Cohomological death
+            Cohomological death of the linear combination or single cocycle
         cohombirth: float
-            Cohomological birth
+            Cohomological birth of the linear combination or single cocycle
         cocycle: ndarray(K, 3, dtype=int)
             Representative cocycle.  First two columns are vertex indices,
             and third column is value in field of prime self.prime_
         """
-        dgm1 = self.dgms_[1]/2.0 #Need so that Cech is included in rips
-        cohomdeath = -np.inf
-        cohombirth = np.inf
-        cocycle = np.zeros((0, 3))
-        prime = self.prime_
-        for k in range(len(cocycle_idx)):
-            cocycle = add_cocycles(cocycle, self.cocycles_[1][cocycle_idx[k]], p=prime)
-            cohomdeath = max(cohomdeath, dgm1[cocycle_idx[k], 0])
-            cohombirth = min(cohombirth, dgm1[cocycle_idx[k], 1])
+
+        assert isinstance(cohomology_class, dict) or isinstance(cohomology_class, int)
+
+        dgm = self.dgms_[1]
+        if isinstance(cohomology_class, int):
+            return dgm[cohomology_class,0], dgm[cohomology_class,1], self.cocycles_[1][cohomology_class]
+
+        cohomology_class_as_list = list(cohomology_class.items())
+        cocycles_indices = [ i for i,_ in cohomology_class_as_list ]
+        coefficients = [ v for _,v in cohomology_class_as_list ]
+        cocycles = [ self.cocycles_[1][i] for i in cocycles_indices ]
+        cohomdeaths = dgm[cocycles_indices,0]
+        cohombirths = dgm[cocycles_indices,1]
+        
+        cohombirth = min(cohombirths)
+        cohomdeath = max(cohomdeaths)
+        if cohomdeath >= cohombirth:
+            raise Exception("\
+                The supports of the chosen persistent cohomology classes do not intersect")
+
+        cocycle = linear_combination_one_cocycles(cocycles, coefficients, self.prime_, real=False)
+
         return cohomdeath, cohombirth, cocycle
-    
+
+
     def get_cover_radius(self, perc, cohomdeath, cohombirth):
         """
         Determine radius for covering balls
