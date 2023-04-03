@@ -27,7 +27,9 @@ class TestProjective:
         theta = np.arccos(np.abs(SOrig[:, 0]))
         
         pc = ProjectiveCoords(D, n_landmarks, distance_matrix=True, verbose=True)
-        ## TODO: Check something about projective coordinates
+        coordinates = pc.get_coordinates()
+        assert len(coordinates['X']) == len(X)
+
 
 
     def test_klein_bottle(self):
@@ -40,7 +42,8 @@ class TestProjective:
         r = 1
         X = GeometryExamples.klein_bottle_4d(n_samples, R, r)
         pc = ProjectiveCoords(X, n_landmarks, verbose=True)
-        ## TODO: Check something about projective coordinates
+        coordinates = pc.get_coordinates()
+        assert len(coordinates['X']) == len(X)
 
 
     def test_line_segment(self):
@@ -50,4 +53,5 @@ class TestProjective:
         dim = 10
         P = GeometryExamples.line_patches(dim=dim, n_angles=200, n_offsets=200, sigma=0.25)
         pc = ProjectiveCoords(P, n_landmarks=100)
-        ## TODO: Test something about projective coordinates
+        coordinates = pc.get_coordinates()
+        assert len(coordinates['X']) == len(P)

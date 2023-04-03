@@ -155,132 +155,164 @@ class GeometryUtils:
         return {"perm": perm, "lambdas": lambdas, "DLandmarks": DLandmarks}
 
 
+
+
+
 """#########################################
         Cohomology Utility Functions
 #########################################"""
 
 
-def linear_combination_one_cocycles(
-    cocycles, coefficients, characteristic=0, real=False
-):
-    """
-    Compute a linear combination of cocycles
+class CohomologyUtils:
 
-    Parameters
-    ----------
-    cocycles : list of triples [vertex index, vertex index, value]
-        List representing a list of cocycles
+    @staticmethod
+    def lift_to_integer_cocycle(cocycle, prime):
+        """
+        Lift the given cocycle with values in a prime field to a cocycle with integer coefficients.
 
-    coefficients: list of numbers
-        Numbers representing the coefficient of each cocycle in the linear combination
+        Parameters
+        ----------
+        cocycle : ndarray(K, n, dtype=int)
+            Cocycle to be lifted to integer coefficients.
 
-    characteristic : integer, optional
-        Integer representing the characteristic to mod out after performing linear combination.
-        If zero, then no mod operation is performed.
+        Note
+        ----
+        This routine modifies the input cocycle.
 
-    real : boolean, optional
-        Whether to treat the values in the cocycles as floats or as ints.
-    """
-    assert len(cocycles) == len(coefficients)
-    assert len(cocycles) > 0
-    assert isinstance(characteristic, int)
-    assert (not real) or (characteristic == 0)
+        Returns
+        -------
+        cocycle : ndarray(K, n, dtype=int)
+            Cocycle with same support as input cocycle and integer coefficients.
+        """
+        cocycle[cocycle[:, -1] > (prime - 1) / 2, -1] -= prime
+        return cocycle
 
-    res_as_dict = {}
-    for cocycle, coefficient in zip(cocycles, coefficients):
-        for i, j, v in cocycle:
-            i, j = min(i, j), max(i, j)
-            if not (i, j) in res_as_dict:
-                res_as_dict[(i, j)] = v * coefficient
-            else:
-                res_as_dict[(i, j)] += v * coefficient
-
-    dtype = np.float32 if real else np.int
-    res_as_list = list(res_as_dict.items())
-    res = np.zeros((len(res_as_dict), 3), dtype=dtype)
-    res[:, 0:2] = np.array([ij for ij, _ in res_as_list])
-    res[:, 2] = np.array([v for _, v in res_as_list])
-    if characteristic > 0:
-        res[:, 2] = np.mod(res[:, 2], characteristic)
-    return res
-
-
-def add_cocycles(c1, c2, p=0, real=False):
-    """
-    Add two cocycles together under a field
-
-    Parameters
-    ----------
-    c1: ndarray(N)
-        First cocycle
-    c2: ndarray(N)
-        Second cocycle
-    p: int
-        Field
-    real: bool
-        Whether this is meant to be a real cocycle
-    """
-    return linear_combination_one_cocycles(
-        [c1, c2], [1, 1], characteristic=p, real=real
-    )
+    @staticmethod
+    def reindex_cocycles(cocycles, idx_land, N):
+        """
+        Convert the indices of a set of cocycles to be relative
+        to a list of indices in a greedy permutation
+        Parameters
+        ----------
+        cocycles: list of list of ndarray
+            The cocycles
+        idx_land: ndarray(M, dtype=int)
+            Indices of the landmarks in the greedy permutation, with
+            respect to all points
+        N: int
+            Number of total points
+        """
+        idx_map = -1 * np.ones(N, dtype=int)
+        idx_map[idx_land] = np.arange(idx_land.size)
+        for ck in cocycles:
+            for c in ck:
+                c[:, 0:-1] = idx_map[c[:, 0:-1]]
 
 
-def _make_delta0(R):
-    """
-    Return the delta0 coboundary matrix
 
-    Parameters
-    ----------
-    R: ndarray(n_edges, 2, dtype=int)
-        A matrix specifying edges, where orientation
-        is taken from the first column to the second column
-        R specifies the "natural orientation" of the edges, with the
-        understanding that the ranking will be specified later
-        It is assumed that there is at least one edge incident
-        on every vertex
+#def linear_combination_one_cocycles(
+#    cocycles, coefficients, characteristic=0, real=False
+#):
+#    """
+#    Compute a linear combination of cocycles
+#
+#    Parameters
+#    ----------
+#    cocycles : list of triples [vertex index, vertex index, value]
+#        List representing a list of cocycles
+#
+#    coefficients: list of numbers
+#        Numbers representing the coefficient of each cocycle in the linear combination
+#
+#    characteristic : integer, optional
+#        Integer representing the characteristic to mod out after performing linear combination.
+#        If zero, then no mod operation is performed.
+#
+#    real : boolean, optional
+#        Whether to treat the values in the cocycles as floats or as ints.
+#    """
+#    assert len(cocycles) == len(coefficients)
+#    assert len(cocycles) > 0
+#    assert isinstance(characteristic, int)
+#    assert (not real) or (characteristic == 0)
+#
+#    res_as_dict = {}
+#    for cocycle, coefficient in zip(cocycles, coefficients):
+#        for i, j, v in cocycle:
+#            i, j = min(i, j), max(i, j)
+#            if not (i, j) in res_as_dict:
+#                res_as_dict[(i, j)] = v * coefficient
+#            else:
+#                res_as_dict[(i, j)] += v * coefficient
+#
+#    dtype = np.float32 if real else np.int
+#    res_as_list = list(res_as_dict.items())
+#    res = np.zeros((len(res_as_dict), 3), dtype=dtype)
+#    res[:, 0:2] = np.array([ij for ij, _ in res_as_list])
+#    res[:, 2] = np.array([v for _, v in res_as_list])
+#    if characteristic > 0:
+#        res[:, 2] = np.mod(res[:, 2], characteristic)
+#    return res
+#
+#
+#def add_cocycles(c1, c2, p=0, real=False):
+#    """
+#    Add two cocycles together under a field
+#
+#    Parameters
+#    ----------
+#    c1: ndarray(N)
+#        First cocycle
+#    c2: ndarray(N)
+#        Second cocycle
+#    p: int
+#        Field
+#    real: bool
+#        Whether this is meant to be a real cocycle
+#    """
+#    return linear_combination_one_cocycles(
+#        [c1, c2], [1, 1], characteristic=p, real=real
+#    )
 
-    Returns
-    -------
-    scipy.sparse.csr_matrix((n_edges, n_vertices))
-        The coboundary 0 matrix
-    """
-    n_vertices = int(np.max(R) + 1)
-    n_edges = R.shape[0]
-    # Two entries per edge
-    I = np.zeros((n_edges, 2))
-    I[:, 0] = np.arange(n_edges)
-    I[:, 1] = np.arange(n_edges)
-    I = I.flatten()
-    J = R[:, 0:2].flatten()
-    V = np.zeros((n_edges, 2))
-    V[:, 0] = -1
-    V[:, 1] = 1
-    V = V.flatten()
-    I = np.array(I, dtype=int)
-    J = np.array(J, dtype=int)
-    Delta = sparse.coo_matrix((V, (I, J)), shape=(n_edges, n_vertices)).tocsr()
-    return Delta
 
 
-def reindex_cocycles(cocycles, idx_land, N):
-    """
-    Convert the indices of a set of cocycles to be relative
-    to a list of indices in a greedy permutation
-    Parameters
-    ----------
-    cocycles: list of list of ndarray
-        The cocycles
-    idx_land: ndarray(M, dtype=int)
-        Indices of the landmarks in the greedy permutation, with
-        respect to all points
-    N: int
-        Number of total points
-    """
-    idx_map = -1 * np.ones(N, dtype=int)
-    idx_map[idx_land] = np.arange(idx_land.size)
-    for ck in cocycles:
-        for c in ck:
-            c[:, 0:-1] = idx_map[c[:, 0:-1]]
+
+#def _make_delta0(R):
+#    """
+#    Return the delta0 coboundary matrix
+#
+#    Parameters
+#    ----------
+#    R: ndarray(n_edges, 2, dtype=int)
+#        A matrix specifying edges, where orientation
+#        is taken from the first column to the second column
+#        R specifies the "natural orientation" of the edges, with the
+#        understanding that the ranking will be specified later
+#        It is assumed that there is at least one edge incident
+#        on every vertex
+#
+#    Returns
+#    -------
+#    scipy.sparse.csr_matrix((n_edges, n_vertices))
+#        The coboundary 0 matrix
+#    """
+#    n_vertices = int(np.max(R) + 1)
+#    n_edges = R.shape[0]
+#    # Two entries per edge
+#    I = np.zeros((n_edges, 2))
+#    I[:, 0] = np.arange(n_edges)
+#    I[:, 1] = np.arange(n_edges)
+#    I = I.flatten()
+#    J = R[:, 0:2].flatten()
+#    V = np.zeros((n_edges, 2))
+#    V[:, 0] = -1
+#    V[:, 1] = 1
+#    V = V.flatten()
+#    I = np.array(I, dtype=int)
+#    J = np.array(J, dtype=int)
+#    Delta = sparse.coo_matrix((V, (I, J)), shape=(n_edges, n_vertices)).tocsr()
+#    return Delta
+
 
 
 """#########################################
@@ -584,6 +616,21 @@ class GeometryExamples:
         X += (np.random.random(X.shape) - 0.5) * eps
 
         return X
+
+    @staticmethod
+    def sphere(n_samples):
+        """
+        Samples on a 2-sphere in 3D.
+
+        Returns
+        -------
+        X: ndarray(n_samples, 2)
+            2D circles samples
+
+        """
+        np.random.seed(0)
+        data = 2 * np.random.random_sample((n_samples, 3)) - 1
+        return data / np.linalg.norm(data, axis=1)[:, np.newaxis]
 
 
 """#########################################

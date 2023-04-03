@@ -313,4 +313,3 @@ class ProjectiveCoords(EMCoords):
             class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
         res = ProjectiveCoords.ppca(class_map, proj_dim, self.verbose)
         return res
-

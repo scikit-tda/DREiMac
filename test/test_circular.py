@@ -1,6 +1,6 @@
 import numpy as np
 
-from dreimac import CircularCoords, GeometryExamples
+from dreimac import CircularCoords, ToroidalCoords, GeometryExamples
 
 
 class TestCircular:
@@ -31,6 +31,8 @@ class TestCircular:
         fscaled = fscaled/np.max(fscaled)
         
         cc = CircularCoords(X, 100, prime = prime)
+        coords = cc.get_coordinates(cohomology_class=0)
+        assert len(coords) == len(X)
         ## TODO: Check something about circular coordinates
 
     def test_torus(self):
@@ -44,4 +46,35 @@ class TestCircular:
         r = 2
         X = GeometryExamples.torus_3d(n_samples, R, r)
         cc = CircularCoords(X, n_landmarks, prime=prime)
-        ## TODO: Check something about circular coordinates
+        coords = cc.get_coordinates(cohomology_class=0)
+        assert len(coords) == len(X)
+
+    def test_trefoil(self):
+        X = GeometryExamples.trefoil(n_samples = 2500, horizontal_width=10)
+        prime = 41
+        perc = 0.1
+        cohomology_class_index = 0
+        cc = CircularCoords(X, 500, prime=prime)
+        coords = cc.get_coordinates(perc=perc, cohomology_class=cohomology_class_index, check_and_fix_cocycle_condition =False)
+        assert len(coords) == len(X)
+
+        prime = 3
+        large_perc = 0.8
+        cc = CircularCoords(X, 300, prime=prime)
+        coords_large_perc_fixed = cc.get_coordinates(perc=large_perc, cohomology_class=cohomology_class_index)
+        assert len(coords_large_perc_fixed) == len(X)
+
+        coords_large_perc_not_fixed = cc.get_coordinates(perc=large_perc, cohomology_class=cohomology_class_index, check_and_fix_cocycle_condition=False)
+        assert len(coords_large_perc_not_fixed) == len(X)
+        
+    def test_genus_two_surface(self):
+        # TODO: use the following instead
+        # try:
+        #   ...
+        # except ...:
+        #   self.fail(...)
+        X = GeometryExamples.genus_two_surface()
+        tc = ToroidalCoords(X, n_landmarks=1000)
+        cohomology_classes = [0,1,2,3]
+        toroidal_coords = tc.get_coordinates(cohomology_classes = cohomology_classes)
+        assert toroidal_coords.shape == (4,X.shape[0])

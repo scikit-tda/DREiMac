@@ -4,7 +4,7 @@ A superclass for shared code across all different types of coordinates
 import numpy as np
 from scipy.sparse.linalg import lsqr
 import time
-from .utils import *
+from .utils import CohomologyUtils
 from ripser import ripser
 import warnings
 
@@ -59,7 +59,7 @@ class EMCoords(object):
         self.dgm1_lifetime = np.array(self.dgms_[1])
         self.dgm1_lifetime[:, 1] -= self.dgm1_lifetime[:, 0]
         self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
-        reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
+        CohomologyUtils.reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
 
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"

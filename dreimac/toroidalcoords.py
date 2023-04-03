@@ -1,11 +1,10 @@
 import numpy as np
 import scipy
-import scipy.sparse.linalg
+import scipy.sparse as sparse
 from scipy.sparse.linalg import lsqr
 from scipy.optimize import LinearConstraint, milp
-from .utils import PartUnity, CircleMapUtils
+from .utils import PartUnity, CircleMapUtils, CohomologyUtils
 from .emcoords import *
-import warnings
 
 
 class ToroidalCoords(EMCoords):
@@ -101,7 +100,7 @@ class ToroidalCoords(EMCoords):
 
         # lift to integer cocycles
         integer_cocycles = [
-            _lift_to_integer_cocycle(cocycle, prime=self.prime_) for cocycle in cocycles
+            CohomologyUtils.lift_to_integer_cocycle(cocycle, prime=self.prime_) for cocycle in cocycles
         ]
 
 
@@ -219,27 +218,6 @@ def _sparse_cocycle_to_vector(sparse_cocycle, edge_pair_to_row_index, dtype):
             cocycle_as_vector[edge_pair_to_row_index[(j, i)]] = -val
     return cocycle_as_vector
 
-
-def _lift_to_integer_cocycle(cocycle, prime):
-    """
-    Lift the given cocycle with values in a prime field to a cocycle with integer coefficients.
-
-    Parameters
-    ----------
-    cocycle : ndarray(K, 3, dtype=int)
-        Cocycle to be lifted to integer coefficients.
-
-    Note
-    ----
-    This routine modifies the input cocycle.
-
-    Returns
-    -------
-    cocycle : ndarray(K, 3, dtype=int)
-        Cocycle with same support as input cocycle and integer coefficients.
-    """
-    cocycle[cocycle[:, -1] > (prime - 1) / 2, -1] -= prime
-    return cocycle
 
 
 def _integrate_harmonic_representative(cocycle, boundary_matrix, sqrt_inner_product):
