@@ -45,8 +45,9 @@ class CircularCoords(ToroidalCoords):
         self,
         perc=0.99,
         cohomology_class=0,
-        partunity_fn=PartUnity.exp,
+        partunity_fn=PartUnity.linear,
         inner_product="uniform",
+        check_and_fix_cocycle_condition=True,
     ):
         """
         Perform circular coordinates via persistent cohomology of
@@ -68,4 +69,11 @@ class CircularCoords(ToroidalCoords):
             Circular coordinates
         """
 
-        return ToroidalCoords.get_coordinates(self, perc, [cohomology_class], partunity_fn, inner_product)[0]
+        return ToroidalCoords.get_coordinates(
+            self,
+            perc,
+            [cohomology_class],
+            partunity_fn,
+            inner_product,
+            check_and_fix_cocycle_condition,
+        )[0]

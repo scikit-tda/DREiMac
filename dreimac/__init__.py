@@ -1,4 +1,5 @@
 from .circularcoords import CircularCoords
+from .toroidalcoords import ToroidalCoords
 from .projectivecoords import ProjectiveCoords
 from .utils import GeometryUtils, PartUnity, GeometryExamples, PlotUtils
 

@@ -8,68 +8,6 @@ from .utils import *
 from ripser import ripser
 import warnings
 
-"""#########################################
-    Some Window Management Utilities
-#########################################"""
-
-DREIMAC_FIG_RES = 5 # The resolution of a square cell in inches
-
-def in_notebook(): # pragma: no cover
-    """
-    Return true if we're in a notebook session, and false otherwise
-    with help from https://stackoverflow.com/a/22424821
-    """
-    try:
-        from IPython import get_ipython
-        if 'IPKernelApp' not in get_ipython().config:
-            return False
-    except:
-        return False
-    return True
-
-def compute_dpi(width_cells, height_cells, width_frac=0.5, height_frac=0.65, verbose=False):
-    """
-    Automatically compute the dpi so that the figure takes
-    up some proportion of the available screen width/height
-    Parameters
-    ----------
-    width_cells: float
-        The target width of the figure, in units of DREIMAC_FIG_RES
-    height_inches: float
-        The target height of the figure, in units of DREIMAC_FIG_RES
-    width_frac: float
-        The fraction of the available width to take up
-    height_frac: float
-        The fraction of the available height to take up
-    verbose: boolean
-        Whether to print information about the dpi calculation
-    """
-    width_inches = DREIMAC_FIG_RES*width_cells
-    height_inches = DREIMAC_FIG_RES*height_cells
-    # Try to use the screeninfo library to figure out the size of the screen
-    width = 1200
-    height = 900
-    try:
-        import screeninfo
-        monitor = screeninfo.get_monitors()[0]
-        width = monitor.width
-        height = monitor.height
-    except:
-        warnings.warn("Could not accurately determine screen size")
-    dpi_width = int(width_frac*width/width_inches)
-    dpi_height = int(height_frac*height/height_inches)
-    dpi = min(dpi_width, dpi_height)
-    if verbose:
-        print("width = ", width)
-        print("height = ", height)
-        print("dpi_width = ", dpi_width)
-        print("dpi_height = ", dpi_height)
-        print("dpi = ", dpi)
-    return dpi
-
-"""#########################################
-        Main Circular Coordinates Class
-#########################################"""
 
 class EMCoords(object):
     def __init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose):
@@ -92,53 +30,41 @@ class EMCoords(object):
             Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
             but it may be of interest to see other dimensions (e.g. for a torus)
         """
-        assert(maxdim >= 1)
+        assert maxdim >= 1
         self.verbose = verbose
+        self.X_ = X
         if verbose:
             tic = time.time()
             print("Doing TDA...")
-        res = ripser(X, distance_matrix=distance_matrix, coeff=prime, maxdim=maxdim, n_perm=n_landmarks, do_cocycles=True)
+        res = ripser(
+            X,
+            distance_matrix=distance_matrix,
+            coeff=prime,
+            maxdim=maxdim,
+            n_perm=n_landmarks,
+            do_cocycles=True,
+        )
         if verbose:
-            print("Elapsed time persistence: %.3g seconds"%(time.time() - tic))
-        self.X_ = X
+            print("Elapsed time persistence: %.3g seconds" % (time.time() - tic))
         self.prime_ = prime
-        self.dgms_ = res['dgms']
-        self.dist_land_data_ = res['dperm2all']
-        self.idx_land_ = res['idx_perm']
+        self.dgms_ = res["dgms"]
+        self.dist_land_data_ = res["dperm2all"]
+        self.coverage_ = np.max(np.min(self.dist_land_data_, 1))
+        self.idx_land_ = res["idx_perm"]
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
-        self.cocycles_ = res['cocycles']
+        self.cocycles_ = res["cocycles"]
         # Sort persistence diagrams in descending order of persistence
-        idxs = np.argsort(self.dgms_[1][:, 0]-self.dgms_[1][:, 1])
+        idxs = np.argsort(self.dgms_[1][:, 0] - self.dgms_[1][:, 1])
         self.dgms_[1] = self.dgms_[1][idxs, :]
         self.dgm1_lifetime = np.array(self.dgms_[1])
         self.dgm1_lifetime[:, 1] -= self.dgm1_lifetime[:, 0]
         self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
         reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
+
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
-    
-    def lift_to_integer_one_cocycle(self, cocycle):
-        """
-        Lift the given cocycle with values in a prime field to a cocycle with integer coefficients.
 
-        Parameters
-        ----------
-        cocycle : ndarray(K, 3, dtype=int)
-            Cocycle to be lifted to integer coefficients.
-
-        Note
-        ----
-        This routine modifies the input cocycle.
-        
-        Returns
-        -------
-        cocycle : ndarray(K, 3, dtype=int)
-            Cocycle with same support as input cocycle and integer coefficients.
-        """
-        cocycle[cocycle[:,2] > (self.prime_-1)/2,2] -= self.prime_
-        return cocycle
-   
-    def get_representative_one_cocycle(self, cohomology_class):
+    def get_representative_one_cocycle(self, cohomology_class, prime_index=0):
         """
         Compute the representative cocycle, given a list of cohomology classes
 
@@ -146,7 +72,7 @@ class EMCoords(object):
         ----------
         cohomology_class : integer or dictionary { cocycle_index : integer_coefficient }
             Uses the linear combination specified by the dictionary or the given cocycle index
-        
+
         Returns
         -------
         cohomdeath: float
@@ -158,31 +84,17 @@ class EMCoords(object):
             and third column is value in field of prime self.prime_
         """
 
-        assert isinstance(cohomology_class, dict) or isinstance(cohomology_class, int)
+        assert isinstance(cohomology_class, int)
 
         dgm = self.dgms_[1]
-        if isinstance(cohomology_class, int):
-            return dgm[cohomology_class,0], dgm[cohomology_class,1], self.cocycles_[1][cohomology_class]
+        cocycles = self.cocycles_[1]
+        return (
+            dgm[cohomology_class, 0],
+            dgm[cohomology_class, 1],
+            cocycles[cohomology_class],
+        )
 
-        cohomology_class_as_list = list(cohomology_class.items())
-        cocycles_indices = [ i for i,_ in cohomology_class_as_list ]
-        coefficients = [ v for _,v in cohomology_class_as_list ]
-        cocycles = [ self.cocycles_[1][i] for i in cocycles_indices ]
-        cohomdeaths = dgm[cocycles_indices,0]
-        cohombirths = dgm[cocycles_indices,1]
-        
-        cohombirth = min(cohombirths)
-        cohomdeath = max(cohomdeaths)
-        if cohomdeath >= cohombirth:
-            raise Exception("\
-                The supports of the chosen persistent cohomology classes do not intersect")
-
-        cocycle = linear_combination_one_cocycles(cocycles, coefficients, self.prime_, real=False)
-
-        return cohomdeath, cohombirth, cocycle
-
-
-    def get_cover_radius(self, perc, cohomdeath, cohombirth):
+    def get_cover_radius(self, perc, cohomdeath_rips, cohombirth_rips):
         """
         Determine radius for covering balls
 
@@ -194,20 +106,19 @@ class EMCoords(object):
             Cohomological death
         cohombirth: float
             Cohomological birth
-        
+
         Returns
         -------
         float: Covering radius
         """
-        dist_land_data = self.dist_land_data_
-        coverage = np.max(np.min(dist_land_data, 1))
-        r_cover = (1-perc)*max(cohomdeath, coverage) + perc*cohombirth
-        self.r_cover_ = r_cover # Store covering radius for reference
+        if (cohombirth_rips / 2) < cohomdeath_rips:
+            raise Exception("The cohomology class selected is too short.")
+
+        r_cover = (1 - perc) * cohomdeath_rips + perc * (cohombirth_rips / 2)
         if self.verbose:
-            print("r_cover = %.3g"%r_cover)
-        self.r_cover_ = r_cover
+            print("r_cover = %.3g" % r_cover)
         return r_cover
-    
+
     def get_covering_partition(self, r_cover, partunity_fn):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
@@ -218,7 +129,7 @@ class EMCoords(object):
             Covering radius
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
-        
+
         Returns
         -------
         varphi: ndarray(n_data, dtype=float)
@@ -230,7 +141,7 @@ class EMCoords(object):
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
-        # Compute the partition of unity 
+        # Compute the partition of unity
         # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
         denom = np.sum(phi, 0)
         nzero = np.sum(denom == 0)

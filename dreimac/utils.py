@@ -15,29 +15,31 @@ import scipy.sparse as sparse
             Geometry Utilities
 #########################################"""
 
+
 class GeometryUtils:
 
     """#########################################
         Self-Similarity And Cross-Similarity
     #########################################"""
+
     @staticmethod
     def get_csm(X, Y):
         """
         Return the Euclidean cross-similarity matrix between the M points
         in the Mxd matrix X and the N points in the Nxd matrix Y.
-        
+
         Parameters
         ----------
         X : ndarray (M, d)
             A matrix holding the coordinates of M points
-        Y : ndarray (N, d) 
+        Y : ndarray (N, d)
             A matrix holding the coordinates of N points
         Returns
         ------
         D : ndarray (M, N)
             An MxN Euclidean cross-similarity matrix
         """
-        C = np.sum(X**2, 1)[:, None] + np.sum(Y**2, 1)[None, :] - 2*X.dot(Y.T)
+        C = np.sum(X**2, 1)[:, None] + np.sum(Y**2, 1)[None, :] - 2 * X.dot(Y.T)
         C[C < 0] = 0
         return np.sqrt(C)
 
@@ -50,7 +52,7 @@ class GeometryUtils:
         ----------
         X : ndarray (M, d)
             A matrix holding the coordinates of M points on RP^{d-1}
-        Y : ndarray (N, d) 
+        Y : ndarray (N, d)
             A matrix holding the coordinates of N points on RP^{d-1}
         Returns
         ------
@@ -67,7 +69,6 @@ class GeometryUtils:
     def get_ssm(X):
         return GeometryUtils.get_csm(X, X)
 
-
     """#########################################
             Greedy Permutations
     #########################################"""
@@ -76,13 +77,13 @@ class GeometryUtils:
     def get_greedy_perm_pc(X, M, verbose=False, csm_fn=get_csm.__func__):
         """
         A Naive O(NM) algorithm to do furthest points sampling, assuming
-        the input is a point cloud specified in Euclidean space.  This saves 
+        the input is a point cloud specified in Euclidean space.  This saves
         computation over having compute the full distance matrix if the number
         of landmarks M << N
-        
+
         Parameters
         ----------
-        X : ndarray (N, d) 
+        X : ndarray (N, d)
             An Nxd Euclidean point cloud
         M : integer
             Number of landmarks to compute
@@ -94,7 +95,7 @@ class GeometryUtils:
         Return
         ------
         result: Dictionary
-            {'Y': An Mxd array of landmarks, 
+            {'Y': An Mxd array of landmarks,
             'perm': An array of indices into X of the greedy permutation
             'lambdas': Insertion radii of the landmarks
             'D': An MxN array of distances from landmarks to points in X}
@@ -115,17 +116,17 @@ class GeometryUtils:
             D[i, :] = thisds
             ds = np.minimum(ds, thisds)
         Y = X[perm, :]
-        return {'Y':Y, 'perm':perm, 'lambdas':lambdas, 'D':D}
+        return {"Y": Y, "perm": perm, "lambdas": lambdas, "D": D}
 
     @staticmethod
-    def get_greedy_perm_dm(D, M, verbose = False):
+    def get_greedy_perm_dm(D, M, verbose=False):
         """
         A Naive O(NM) algorithm to do furthest points sampling, assuming
         the input is a N x N distance matrix
-        
+
         Parameters
         ----------
-        D : ndarray (N, N) 
+        D : ndarray (N, N)
             An N x N distance matrix
         M : integer
             Number of landmarks to compute
@@ -150,12 +151,8 @@ class GeometryUtils:
             perm[i] = idx
             lambdas[i] = ds[idx]
             ds = np.minimum(ds, D[idx, :])
-        DLandmarks = D[perm, :] 
-        return {'perm':perm, 'lambdas':lambdas, 'DLandmarks':DLandmarks}
-
-
-
-
+        DLandmarks = D[perm, :]
+        return {"perm": perm, "lambdas": lambdas, "DLandmarks": DLandmarks}
 
 
 """#########################################
@@ -163,7 +160,9 @@ class GeometryUtils:
 #########################################"""
 
 
-def linear_combination_one_cocycles(cocycles, coefficients, characteristic = 0, real = False):
+def linear_combination_one_cocycles(
+    cocycles, coefficients, characteristic=0, real=False
+):
     """
     Compute a linear combination of cocycles
 
@@ -171,7 +170,7 @@ def linear_combination_one_cocycles(cocycles, coefficients, characteristic = 0, 
     ----------
     cocycles : list of triples [vertex index, vertex index, value]
         List representing a list of cocycles
-    
+
     coefficients: list of numbers
         Numbers representing the coefficient of each cocycle in the linear combination
 
@@ -189,23 +188,24 @@ def linear_combination_one_cocycles(cocycles, coefficients, characteristic = 0, 
 
     res_as_dict = {}
     for cocycle, coefficient in zip(cocycles, coefficients):
-        for i,j,v in cocycle:
-            i, j = min(i,j), max(i,j)
-            if not (i,j) in res_as_dict:
-                res_as_dict[(i,j)] = v * coefficient
+        for i, j, v in cocycle:
+            i, j = min(i, j), max(i, j)
+            if not (i, j) in res_as_dict:
+                res_as_dict[(i, j)] = v * coefficient
             else:
-                res_as_dict[(i,j)] += v * coefficient
+                res_as_dict[(i, j)] += v * coefficient
 
     dtype = np.float32 if real else np.int
     res_as_list = list(res_as_dict.items())
     res = np.zeros((len(res_as_dict), 3), dtype=dtype)
-    res[:, 0:2] = np.array([ij for ij,_ in res_as_list])
-    res[:, 2] = np.array([v for _,v in res_as_list])
+    res[:, 0:2] = np.array([ij for ij, _ in res_as_list])
+    res[:, 2] = np.array([v for _, v in res_as_list])
     if characteristic > 0:
         res[:, 2] = np.mod(res[:, 2], characteristic)
     return res
 
-def add_cocycles(c1, c2, p = 0, real=False):
+
+def add_cocycles(c1, c2, p=0, real=False):
     """
     Add two cocycles together under a field
 
@@ -220,7 +220,9 @@ def add_cocycles(c1, c2, p = 0, real=False):
     real: bool
         Whether this is meant to be a real cocycle
     """
-    return linear_combination_one_cocycles([c1,c2], [1,1], characteristic=p, real=real)
+    return linear_combination_one_cocycles(
+        [c1, c2], [1, 1], characteristic=p, real=real
+    )
 
 
 def _make_delta0(R):
@@ -236,7 +238,7 @@ def _make_delta0(R):
         understanding that the ranking will be specified later
         It is assumed that there is at least one edge incident
         on every vertex
-    
+
     Returns
     -------
     scipy.sparse.csr_matrix((n_edges, n_vertices))
@@ -244,7 +246,7 @@ def _make_delta0(R):
     """
     n_vertices = int(np.max(R) + 1)
     n_edges = R.shape[0]
-    #Two entries per edge
+    # Two entries per edge
     I = np.zeros((n_edges, 2))
     I[:, 0] = np.arange(n_edges)
     I[:, 1] = np.arange(n_edges)
@@ -258,6 +260,7 @@ def _make_delta0(R):
     J = np.array(J, dtype=int)
     Delta = sparse.coo_matrix((V, (I, J)), shape=(n_edges, n_vertices)).tocsr()
     return Delta
+
 
 def reindex_cocycles(cocycles, idx_land, N):
     """
@@ -273,7 +276,7 @@ def reindex_cocycles(cocycles, idx_land, N):
     N: int
         Number of total points
     """
-    idx_map = -1*np.ones(N, dtype=int)
+    idx_map = -1 * np.ones(N, dtype=int)
     idx_map[idx_land] = np.arange(idx_land.size)
     for ck in cocycles:
         for c in ck:
@@ -284,6 +287,7 @@ def reindex_cocycles(cocycles, idx_land, N):
         Partition of Unity Functions
 #########################################"""
 
+
 class PartUnity:
     @staticmethod
     def linear(ds, r_cover):
@@ -291,7 +295,7 @@ class PartUnity:
         Parameters
         ----------
         ds: ndarray(n)
-            Some subset of distances between landmarks and 
+            Some subset of distances between landmarks and
             data points
         r_cover: float
             Covering radius
@@ -301,14 +305,14 @@ class PartUnity:
             The bump function
         """
         return r_cover - ds
-    
+
     @staticmethod
     def quadratic(ds, r_cover):
         """
         Parameters
         ----------
         ds: ndarray(n)
-            Some subset of distances between landmarks and 
+            Some subset of distances between landmarks and
             data points
         r_cover: float
             Covering radius
@@ -317,7 +321,7 @@ class PartUnity:
         varphi: ndarray(n)
             The bump function
         """
-        return (r_cover - ds)**2
+        return (r_cover - ds) ** 2
 
     @staticmethod
     def exp(ds, r_cover):
@@ -325,7 +329,7 @@ class PartUnity:
         Parameters
         ----------
         ds: ndarray(n)
-            Some subset of distances between landmarks and 
+            Some subset of distances between landmarks and
             data points
         r_cover: float
             Covering radius
@@ -334,7 +338,7 @@ class PartUnity:
         varphi: ndarray(n)
             The bump function
         """
-        return np.exp(r_cover**2/(ds**2-r_cover**2))
+        return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
 
 """#########################################
@@ -342,6 +346,7 @@ class PartUnity:
 #########################################"""
 
 ## TODO: These probably belong in tdasets, but I'll keep them here for now
+
 
 class GeometryExamples:
     @staticmethod
@@ -358,16 +363,16 @@ class GeometryExamples:
             Number of offsets to sweep from the origin to the edge of the patch
         sigma: float
             The blur parameter.  Higher sigma is more blur
-        
+
         Returns
         -------
         ndarray(n_angles*n_offsets, dim*dim)
             An array of all of the patches raveled into dim*dim dimensional Euclidean space
         """
-        N = n_angles*n_offsets
-        P = np.zeros((N, dim*dim))
-        thetas = np.linspace(0, np.pi, n_angles+1)[0:n_angles]
-        #ps = np.linspace(-0.5*np.sqrt(2), 0.5*np.sqrt(2), n_offsets)
+        N = n_angles * n_offsets
+        P = np.zeros((N, dim * dim))
+        thetas = np.linspace(0, np.pi, n_angles + 1)[0:n_angles]
+        # ps = np.linspace(-0.5*np.sqrt(2), 0.5*np.sqrt(2), n_offsets)
         ps = np.linspace(-1, 1, n_offsets)
         idx = 0
         [Y, X] = np.meshgrid(np.linspace(-0.5, 0.5, dim), np.linspace(-0.5, 0.5, dim))
@@ -375,8 +380,8 @@ class GeometryExamples:
             c = np.cos(thetas[i])
             s = np.sin(thetas[i])
             for j in range(n_offsets):
-                patch = X*c + Y*s + ps[j]
-                patch = np.exp(-patch**2/sigma**2)
+                patch = X * c + Y * s + ps[j]
+                patch = np.exp(-(patch**2) / sigma**2)
                 P[idx, :] = patch.flatten()
                 idx += 1
         return P
@@ -385,7 +390,7 @@ class GeometryExamples:
     def rp2_metric(n_samples, seed=None):
         """
         Return a distance matrix of points on the projective plane
-        obtained by identifying antipodal Gaussian random samples 
+        obtained by identifying antipodal Gaussian random samples
         of a sphere
 
         Parameters
@@ -394,7 +399,7 @@ class GeometryExamples:
             Number of random samples on the projective plane
         seed: int
             Seed to use.  If omitted, use the number of samples as a seed
-        
+
         Returns
         -------
         ndarray(n_samples, 3)
@@ -406,7 +411,7 @@ class GeometryExamples:
             seed = n_samples
         np.random.seed(seed)
         X = np.random.randn(n_samples, 3)
-        X = X/np.sqrt(np.sum(X**2, 1))[:, None]
+        X = X / np.sqrt(np.sum(X**2, 1))[:, None]
         return X, GeometryUtils.get_csm_projarc(X, X)
 
     @staticmethod
@@ -424,7 +429,7 @@ class GeometryExamples:
             Inner radius
         seed: int
             Seed to use.  If omitted, use the number of samples as a seed
-        
+
         Returns
         -------
         X: ndarray(n_samples, 4)
@@ -434,15 +439,15 @@ class GeometryExamples:
             seed = n_samples
         np.random.seed(seed)
         X = np.zeros((n_samples, 3))
-        s = np.random.rand(n_samples)*2*np.pi
-        t = np.random.rand(n_samples)*2*np.pi
-        X[:, 0] = (R + r*np.cos(s))*np.cos(t)
-        X[:, 1] = (R + r*np.cos(s))*np.sin(t)
-        X[:, 2] = r*np.sin(s)
+        s = np.random.rand(n_samples) * 2 * np.pi
+        t = np.random.rand(n_samples) * 2 * np.pi
+        X[:, 0] = (R + r * np.cos(s)) * np.cos(t)
+        X[:, 1] = (R + r * np.cos(s)) * np.sin(t)
+        X[:, 2] = r * np.sin(s)
         return X
 
     @staticmethod
-    def klein_bottle_4d(n_samples, R, r, seed=None):        
+    def klein_bottle_4d(n_samples, R, r, seed=None):
         """
         Return samples on a klein bottle in 4D
 
@@ -456,7 +461,7 @@ class GeometryExamples:
             Inner radius
         seed: int
             Seed to use.  If omitted, use the number of samples as a seed
-        
+
         Returns
         -------
         X: ndarray(n_samples, 4)
@@ -465,19 +470,25 @@ class GeometryExamples:
         if seed is None:
             seed = n_samples
         np.random.seed(seed)
-        theta = np.random.rand(n_samples)*2*np.pi
-        phi = np.random.rand(n_samples)*2*np.pi
+        theta = np.random.rand(n_samples) * 2 * np.pi
+        phi = np.random.rand(n_samples) * 2 * np.pi
         X = np.zeros((n_samples, 4))
-        X[:, 0] = (R + r*np.cos(theta))*np.cos(phi)
-        X[:, 1] = (R + r*np.cos(theta))*np.sin(phi)
-        X[:, 2] = r*np.sin(theta)*np.cos(phi/2)
-        X[:, 3] = r*np.sin(theta)*np.sin(phi/2)
+        X[:, 0] = (R + r * np.cos(theta)) * np.cos(phi)
+        X[:, 1] = (R + r * np.cos(theta)) * np.sin(phi)
+        X[:, 2] = r * np.sin(theta) * np.cos(phi / 2)
+        X[:, 3] = r * np.sin(theta) * np.sin(phi / 2)
         return X
 
     @staticmethod
     def genus_two_surface():
         """
         Return samples on a genus two surface in 3D
+
+        Returns
+        -------
+        X: ndarray(n_samples, 3)
+            3D surface samples
+
         """
 
         R2 = 9
@@ -487,36 +498,105 @@ class GeometryExamples:
         Nt = 120
         N = Ns * Nt
         Y = np.zeros((N, 3))
-        s = np.linspace(0,2*np.pi,Ns,endpoint=False)
-        t = np.linspace(0,2*np.pi,Nt,endpoint=False)
-        st = np.array([[x,y] for x in s for y in t])
-        s = st[:,0]
-        t = st[:,1]
-        Y[:, 0] = (R + r*np.cos(s))*np.cos(t)
-        Y[:, 1] = (R + r*np.cos(s))*np.sin(t)
-        Y[:, 2] = r*np.sin(s)
+        s = np.linspace(0, 2 * np.pi, Ns, endpoint=False)
+        t = np.linspace(0, 2 * np.pi, Nt, endpoint=False)
+        st = np.array([[x, y] for x in s for y in t])
+        s = st[:, 0]
+        t = st[:, 1]
+        Y[:, 0] = (R + r * np.cos(s)) * np.cos(t)
+        Y[:, 1] = (R + r * np.cos(s)) * np.sin(t)
+        Y[:, 2] = r * np.sin(s)
 
         Z = np.zeros((N, 3))
-        Z[:, 0] = R2 + (R + r*np.cos(s))*np.cos(t)
-        Z[:, 1] = (R + r*np.cos(s))*np.sin(t)
-        Z[:, 2] = r*np.sin(s)
+        Z[:, 0] = R2 + (R + r * np.cos(s)) * np.cos(t)
+        Z[:, 1] = (R + r * np.cos(s)) * np.sin(t)
+        Z[:, 2] = r * np.sin(s)
 
+        Y = Y[(Y[:, 0] <= 4.5)]
+        Z = Z[(Z[:, 0] >= 4.5)]
 
-        Y = Y[(Y[:,0] <= 4.5)]
-        Z = Z[(Z[:,0] >= 4.5)]
+        return np.concatenate((Y, Z), axis=0)
 
-        return np.concatenate((Y,Z), axis = 0)
+    @staticmethod
+    def trefoil(n_samples=2500, horizontal_width=6, noisy=True):
+        """
+        Samples on a trefoil in 3D
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of random samples.
+
+        Returns
+        -------
+        X: ndarray(n_samples, 3)
+            3D trefoil samples
+
+        """
+
+        if noisy:
+            np.random.seed(0)
+            u = 4 * np.pi * np.random.rand(n_samples)
+            v = 2 * np.pi * np.random.rand(n_samples)
+            X = np.zeros((n_samples, 3))
+            X[:, 0] = np.cos(u) * np.cos(v) + horizontal_width * np.cos(u) * (
+                1.5 + np.sin(1.5 * u) / 2
+            )
+            X[:, 1] = np.sin(u) * np.cos(v) + horizontal_width * np.sin(u) * (
+                1.5 + np.sin(1.5 * u) / 2
+            )
+            X[:, 2] = np.sin(v) + 4 * np.cos(1.5 * u)
+        else:
+            np.random.seed(0)
+            u = 4 * np.pi * np.linspace(0, 1, n_samples, endpoint=False)
+            X = np.zeros((n_samples, 3))
+            X[:, 0] = np.cos(u) + horizontal_width * np.cos(u) * (
+                1.5 + np.sin(1.5 * u) / 2
+            )
+            X[:, 1] = np.sin(u) + horizontal_width * np.sin(u) * (
+                1.5 + np.sin(1.5 * u) / 2
+            )
+            X[:, 2] = 4 * np.cos(1.5 * u)
+
+        return X
+
+    @staticmethod
+    def bullseye():
+        """
+        Samples on three concentric noisy circles in 2D.
+
+        Returns
+        -------
+        X: ndarray(n_samples, 2)
+            2D circles samples
+
+        """
+
+        N = 200
+        sample_interval = np.linspace(0, 2 * np.pi, N, endpoint=False)
+        c1 = np.array([np.sin(sample_interval), np.cos(sample_interval)]).T
+        c2 = np.array([2 * np.sin(sample_interval), 2 * np.cos(sample_interval)]).T
+        c3 = np.array([3 * np.sin(sample_interval), 3 * np.cos(sample_interval)]).T
+        X = np.vstack((c1, c2, c3))
+
+        np.random.seed(0)
+        eps = 0.3
+        X += (np.random.random(X.shape) - 0.5) * eps
+
+        return X
 
 
 """#########################################
         Matplotlib Plotting Utilities
 #########################################"""
+
+
 class PlotUtils:
     @staticmethod
     def imscatter(X, P, dim, zoom=1):
         """
         Plot patches in specified locations in R2
-        
+
         Parameters
         ----------
         X : ndarray (N, 2)
@@ -525,17 +605,18 @@ class PlotUtils:
             An array of all of the patches
         dim : int
             The dimension of each patch
-        
+
         """
-        #https://stackoverflow.com/questions/22566284/matplotlib-how-to-plot-images-instead-of-points
+        # https://stackoverflow.com/questions/22566284/matplotlib-how-to-plot-images-instead-of-points
         from matplotlib.offsetbox import OffsetImage, AnnotationBbox
         import matplotlib.pyplot as plt
+
         ax = plt.gca()
         for i in range(P.shape[0]):
             patch = np.reshape(P[i, :], (dim, dim))
             x, y = X[i, :]
-            im = OffsetImage(patch, zoom=zoom, cmap = 'gray')
-            ab = AnnotationBbox(im, (x, y), xycoords='data', frameon=False)
+            im = OffsetImage(patch, zoom=zoom, cmap="gray")
+            ab = AnnotationBbox(im, (x, y), xycoords="data", frameon=False)
             ax.add_artist(ab)
         ax.update_datalim(X)
         ax.autoscale()
@@ -543,7 +624,7 @@ class PlotUtils:
         ax.set_yticks([])
 
     @staticmethod
-    def plot_patches(P, zoom = 1):
+    def plot_patches(P, zoom=1):
         """
         Plot patches in a best fitting rectangular grid
         """
@@ -563,12 +644,25 @@ class PlotUtils:
         Depict the boundary of RP2 on the unit circle
         """
         import matplotlib.pyplot as plt
-        t = np.linspace(0, 2*np.pi, 200)
-        plt.plot(np.cos(t), np.sin(t), 'c')
-        plt.axis('equal')
+
+        t = np.linspace(0, 2 * np.pi, 200)
+        plt.plot(np.cos(t), np.sin(t), "c")
+        plt.axis("equal")
         ax = plt.gca()
-        ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
-        ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = 'c', ec = 'c', width = 0)
+        ax.arrow(
+            -0.1, 1, 0.001, 0, head_width=0.15, head_length=0.2, fc="c", ec="c", width=0
+        )
+        ax.arrow(
+            0.1,
+            -1,
+            -0.001,
+            0,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
         ax.set_facecolor((0.35, 0.35, 0.35))
 
     @staticmethod
@@ -595,14 +689,16 @@ class PlotUtils:
 
         # The plot bounding box is a sphere in the sense of the infinity
         # norm, hence I call half the max range the plot radius.
-        plot_radius = 0.5*max([x_range, y_range, z_range])
+        plot_radius = 0.5 * max([x_range, y_range, z_range])
 
         ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
     @staticmethod
-    def plot_2d_scatter_with_different_colorings(X, colorings = [], cmap="viridis", width=10, point_size=2):
+    def plot_2d_scatter_with_different_colorings(
+        X, colorings=[], cmap="viridis", width=10, point_size=2
+    ):
         """
         Plot a 2D point cloud as many times as the number of colorings given.
 
@@ -621,22 +717,22 @@ class PlotUtils:
         import matplotlib.pyplot as plt
 
         if len(colorings) == 0:
-            plt.figure(figsize=(4,4))
-            plt.scatter(X[:,0], X[:,1], s=point_size)
+            plt.figure(figsize=(4, 4))
+            plt.scatter(X[:, 0], X[:, 1], s=point_size)
             plt.axis("equal")
             plt.axis("off")
         elif len(colorings) == 1:
-            plt.figure(figsize=(4,4))
-            plt.scatter(X[:,0], X[:,1], s=point_size, c=colorings[0], cmap=cmap)
+            plt.figure(figsize=(4, 4))
+            plt.scatter(X[:, 0], X[:, 1], s=point_size, c=colorings[0], cmap=cmap)
             plt.axis("equal")
             plt.axis("off")
         else:
             num_colorings = len(colorings)
             fig, axs = plt.subplots(1, num_colorings)
             fig.set_figwidth(width)
-    
+
             for i, c in enumerate(colorings):
-                axs[i].scatter(X[:,0],X[:,1], s=point_size, c=c, cmap=cmap)
+                axs[i].scatter(X[:, 0], X[:, 1], s=point_size, c=c, cmap=cmap)
                 axs[i].set_aspect("equal")
                 axs[i].axis("off")
 
@@ -644,8 +740,9 @@ class PlotUtils:
 """#########################################
         Matplotlib Plotting Utilities
 #########################################"""
-class CircleMapUtils:
 
+
+class CircleMapUtils:
     @staticmethod
     def offset(circle_map, offset):
         """
@@ -658,7 +755,7 @@ class CircleMapUtils:
 
         offset: float
             A number between 0 and 2pi representing a rotational offset.
-        
+
         Returns
         -------
         ndarray
@@ -688,25 +785,29 @@ class CircleMapUtils:
         Returns
         -------
         ndarray(l, n, dtype=float)
-            A numpy array with rows containing n points in the circle representing 
+            A numpy array with rows containing n points in the circle representing
             the l linear combinations of the given k circle-valued maps.
         """
 
         assert isinstance(circle_maps, np.ndarray)
         assert len(circle_maps.shape) == 2
         assert isinstance(linear_combination_matrix, np.ndarray)
-        assert len(linear_combination_matrix.shape) == 2 or len(linear_combination_matrix.shape) == 1
+        assert (
+            len(linear_combination_matrix.shape) == 2
+            or len(linear_combination_matrix.shape) == 1
+        )
 
         if len(linear_combination_matrix.shape) == 2:
             assert circle_maps.shape[0] == linear_combination_matrix.shape[1]
             return (linear_combination_matrix @ circle_maps) % (2 * np.pi)
-        else: 
+        else:
             assert circle_maps.shape[0] == linear_combination_matrix.shape[0]
-            return ((np.array([linear_combination_matrix]) @ circle_maps) % (2 * np.pi))[0]
-
+            return (
+                (np.array([linear_combination_matrix]) @ circle_maps) % (2 * np.pi)
+            )[0]
 
     @staticmethod
-    def levelset_coloring(circle_map, n_levelsets = 4, smoothing = 0.25):
+    def levelset_coloring(circle_map, n_levelsets=4, smoothing=0.25):
         """
         Given points on the circle and a number of levelsets subdivide the
         circle into the given number of levelsets and return a smoothened
@@ -734,15 +835,18 @@ class CircleMapUtils:
         assert isinstance(n_levelsets, int)
         assert n_levelsets > 0
         n_levelsets *= 2
-        colors = circle_map/(2 * np.pi)
+        colors = circle_map / (2 * np.pi)
         # transition should be between 0 (very fast) and 1 (slow)
         if smoothing == 0:
-            return np.array([ np.floor(c*n_levelsets)%2 for c in colors ])
+            return np.array([np.floor(c * n_levelsets) % 2 for c in colors])
         k = smoothing
+
         def sigmoid(x):
-            x = (x-0.5) * 2
-            s = 1 / (1 + np.exp(-x / k)) 
+            x = (x - 0.5) * 2
+            s = 1 / (1 + np.exp(-x / k))
             return s
+
         def triangle(y):
             return y if y < 1 else 2 - y
-        return np.array([ sigmoid(triangle((c*n_levelsets)%2)) for c in colors ])
+
+        return np.array([sigmoid(triangle((c * n_levelsets) % 2)) for c in colors])

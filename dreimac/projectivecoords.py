@@ -294,8 +294,8 @@ class ProjectiveCoords(EMCoords):
         ## Step 1: Come up with the representative cocycle as a formal sum
         ## of the chosen cocycles
         cohomdeath, cohombirth, cocycle = self.get_representative_one_cocycle(cocycle_idx)
-        cohombirth /= 2.
-        cohomdeath /= 2.
+        #cohombirth /= 2.
+        #cohomdeath /= 2.
 
         ## Step 2: Determine radius for balls
         r_cover = EMCoords.get_cover_radius(self, perc, cohomdeath, cohombirth)
