@@ -32,9 +32,9 @@ class ToroidalCoords(EMCoords):
     def get_coordinates(
         self,
         perc=0.99,
-        cohomology_classes=[0],
+        cocycle_idxs=[0],
         partunity_fn=PartUnity.linear,
-        inner_product="uniform",
+        standard_range=True,
         check_and_fix_cocycle_condition=True,
     ):
         """
@@ -45,25 +45,27 @@ class ToroidalCoords(EMCoords):
         ----------
         perc : float
             Percent coverage
-        inner_product : string
-            Either 'uniform' or 'exponential'
-        cohomology_classes : list of integers
+        cocycle_idxs : list of integers
             TODO: explain
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
-        inner_product: TODO
+        standard_range : bool
+            TODO: explain
+        check_and_fix_cocycle_condition : bool
+            TODO: explain
 
         Returns
         -------
-        thetas: ndarray(n, N)
+        thetas : ndarray(n, N)
             List of circular coordinates, with n the length of cocycle_idxs
         """
 
         # get representative cocycles and the intersection of their supports
+        homological_dimension = 1
         cohomdeaths, cohombirths, cocycles = zip(
             *[
-                self.get_representative_one_cocycle(cohomology_class)
-                for cohomology_class in cohomology_classes
+                self.get_representative_cocycle(cohomology_class, homological_dimension)
+                for cohomology_class in cocycle_idxs
             ]
         )
 
@@ -77,62 +79,49 @@ class ToroidalCoords(EMCoords):
             )
 
         # determine radius for balls
-        USE_CECH = True
-        if USE_CECH:
-            r_cover = EMCoords.get_cover_radius(
-                self, perc, cohomdeath_rips, cohombirth_rips
-            )
-            threshold = 2 * r_cover
-        else:
-            r_cover = EMCoords.get_cover_radius(
-                self, perc, cohomdeath_rips, cohombirth_rips * 2
-            )
-            threshold = r_cover
-
-        self.threshold_ = threshold
+        r_cover, rips_threshold = EMCoords.get_cover_radius(
+            self, perc, cohomdeath_rips, cohombirth_rips, standard_range
+        )
 
         # compute partition of unity and choose a cover element for each data point
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
         # compute boundary matrix
         dist_land_land = self.dist_land_land_
-        delta0, edge_pair_to_row_index = _make_delta0(dist_land_land, threshold)
+        delta0, edge_pair_to_row_index = CohomologyUtils.make_delta0(
+            dist_land_land, rips_threshold
+        )
 
         # lift to integer cocycles
         integer_cocycles = [
-            CohomologyUtils.lift_to_integer_cocycle(cocycle, prime=self.prime_) for cocycle in cocycles
+            CohomologyUtils.lift_to_integer_cocycle(cocycle, prime=self.prime_)
+            for cocycle in cocycles
         ]
-
 
         # go from sparse to dense representation of cocycles
         integer_cocycles_as_vectors = [
-            _sparse_cocycle_to_vector(sparse_cocycle, edge_pair_to_row_index, int)
+            CohomologyUtils.sparse_cocycle_to_vector(
+                sparse_cocycle, edge_pair_to_row_index, int
+            )
             for sparse_cocycle in integer_cocycles
         ]
 
         if check_and_fix_cocycle_condition:
-            delta1 = _make_delta1(dist_land_land, edge_pair_to_row_index, threshold)
+            delta1, _ = CohomologyUtils.make_delta1(
+                dist_land_land, edge_pair_to_row_index, rips_threshold
+            )
 
             fixed_cocycles = []
 
-            cohomology_classes_ = []
-            for i in range(len(integer_cocycles)):
-                cohomology_classes_.append(
-                    cohomology_classes[i % len(cohomology_classes)]
-                )
-            cohomology_classes = cohomology_classes_
-
             n_edges = len(edge_pair_to_row_index)
-            for cohomology_idx, cocycle_as_vector in zip(
-                cohomology_classes, integer_cocycles_as_vectors
-            ):
+            for class_idx, cocycle_as_vector in enumerate(integer_cocycles_as_vectors):
                 # compute delta1 of the cocycle to see if it is indeed an integer-valued cocycle
                 d1cocycle = delta1 @ cocycle_as_vector.T
                 # we perform exact comparison since delta1 and cocycle_as_vector are vectors of ints
                 if np.linalg.norm(d1cocycle) == 0:
                     fixed_cocycles.append(cocycle_as_vector)
                 else:
-                    print("failure:", np.linalg.norm(delta1 @ cocycle_as_vector))
+                    #print("failure:", np.linalg.norm(delta1 @ cocycle_as_vector))
                     y = d1cocycle // self.prime_
                     constraints = LinearConstraint(delta1, y, y, keep_feasible=True)
                     objective = np.zeros((n_edges), dtype=int)
@@ -143,7 +132,7 @@ class ToroidalCoords(EMCoords):
                     if not optimizer_solution["success"]:
                         raise Exception(
                             "The cohomology class at index "
-                            + str(cohomology_idx)
+                            + str(class_idx)
                             + " does not have an integral lift."
                         )
                     else:
@@ -152,17 +141,17 @@ class ToroidalCoords(EMCoords):
                             cocycle_as_vector
                             - self.prime_ * np.array(np.rint(solution), dtype=int)
                         )
-                        print(
-                            "fixed failure:",
-                            np.linalg.norm(delta1 @ new_cocycle_as_vector),
-                        )
+                        #print(
+                        #    "fixed failure:",
+                        #    np.linalg.norm(delta1 @ new_cocycle_as_vector),
+                        #)
 
                         fixed_cocycles.append(new_cocycle_as_vector)
             integer_cocycles_as_vectors = fixed_cocycles
 
         # compute inner product matrix for cocycles
         inner_product_matrix, sqrt_inner_product_matrix = _make_inner_product(
-            dist_land_land, threshold, edge_pair_to_row_index, inner_product
+            dist_land_land, rips_threshold, edge_pair_to_row_index, "uniform"
         )
 
         # compute harmonic representatives of cocycles and their circle-valued integrals
@@ -201,23 +190,6 @@ class ToroidalCoords(EMCoords):
             self.change_basis_ = change_basis
 
         return circ_coords
-
-
-def _sparse_cocycle_to_vector(sparse_cocycle, edge_pair_to_row_index, dtype):
-    n_edges = len(edge_pair_to_row_index)
-    cocycle_as_vector = np.zeros((n_edges,), dtype=dtype)
-    for i, j, val in sparse_cocycle:
-        # if the cocycle takes a non-zero value on an edge (i,j) with i < j
-        # then record that value in cocycle_as_vector at the index corresponding to (i,j)
-        if (i, j) in edge_pair_to_row_index:
-            cocycle_as_vector[edge_pair_to_row_index[(i, j)]] = val
-        # if the cocycle takes a non-zero value on an edge (i,j) with j < i
-        # then record *minus* that value in cocycle_as_vector at the index
-        # corresponding to (j,i)
-        if (j, i) in edge_pair_to_row_index:
-            cocycle_as_vector[edge_pair_to_row_index[(j, i)]] = -val
-    return cocycle_as_vector
-
 
 
 def _integrate_harmonic_representative(cocycle, boundary_matrix, sqrt_inner_product):
@@ -271,73 +243,6 @@ def _make_inner_product(dist_matrix, threshold, edge_pair_to_row_index, kind):
     return W, WSqrt
 
 
-def _make_delta0(dist_mat, threshold):
-    n_points = dist_mat.shape[0]
-    edge_pair_to_row_index = {}
-    row_index = []
-    col_index = []
-    value = []
-    n_edges = 0
-    for i in range(n_points):
-        for j in range(i + 1, n_points):
-            if dist_mat[i, j] < threshold:
-                edge_pair_to_row_index[(i, j)] = n_edges
-
-                row_index.append(n_edges)
-                col_index.append(i)
-                value.append(-1)
-
-                row_index.append(n_edges)
-                col_index.append(j)
-                value.append(1)
-
-                n_edges += 1
-
-    delta0 = sparse.coo_matrix(
-        (value, (row_index, col_index)), shape=(n_edges, n_points)
-    ).tocsr()
-    return delta0, edge_pair_to_row_index
-
-
-def _make_delta1(dist_land_land, edge_pair_to_row_index, threshold):
-    n_points = dist_land_land.shape[0]
-    n_edges = len(edge_pair_to_row_index)
-    face_triple_to_row_index = {}
-    row_index = []
-    col_index = []
-    value = []
-    n_faces = 0
-    for i in range(n_points):
-        for j in range(i + 1, n_points):
-            if dist_land_land[i, j] < threshold:
-                for k in range(j + 1, n_points):
-                    if (
-                        dist_land_land[i, k] < threshold
-                        and dist_land_land[j, k] < threshold
-                    ):
-                        face_triple_to_row_index[(i, j, k)] = n_faces
-
-                        row_index.append(n_faces)
-                        col_index.append(edge_pair_to_row_index[(i, j)])
-                        value.append(1)
-
-                        row_index.append(n_faces)
-                        col_index.append(edge_pair_to_row_index[(j, k)])
-                        value.append(1)
-
-                        row_index.append(n_faces)
-                        col_index.append(edge_pair_to_row_index[(i, k)])
-                        value.append(-1)
-
-                        n_faces += 1
-
-    delta1 = sparse.coo_matrix(
-        (value, (row_index, col_index)), shape=(n_faces, n_edges), dtype=int
-    )
-    print("number of faces: ", n_faces)
-    return delta1
-
-
 def _sparse_integrate(
     harm_rep, integral, part_unity, membership_function, edge_pair_to_row_index
 ):
@@ -346,8 +251,7 @@ def _sparse_integrate(
     # compute all transition functions
     theta_matrix = np.zeros((n, n))
 
-    for pl in edge_pair_to_row_index.items():
-        p, l = pl
+    for p, l in edge_pair_to_row_index.items():
         i, j = p
         theta_matrix[i, j] = harm_rep[l]
     class_map = -integral[membership_function].copy()

@@ -44,9 +44,9 @@ class CircularCoords(ToroidalCoords):
     def get_coordinates(
         self,
         perc=0.99,
-        cohomology_class=0,
+        cocycle_idx=0,
         partunity_fn=PartUnity.linear,
-        inner_product="uniform",
+        standard_range=True,
         check_and_fix_cocycle_condition=True,
     ):
         """
@@ -56,24 +56,26 @@ class CircularCoords(ToroidalCoords):
         ----------
         perc : float
             Percent coverage
-        do_weighted : boolean
-            Whether to make a weighted cocycle on the representatives
-        cocycle_idx : list
+        cocycle_idx : integer
             TODO: explain
-        partunity_fn: (dist_land_data, r_cover) -> phi
+        partunity_fn : (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
+        standard_range : bool
+            TODO: explain
+        check_and_fix_cocycle_condition : bool
+            TODO: explain
 
         Returns
         -------
-        thetas: ndarray(N)
+        thetas : ndarray(N)
             Circular coordinates
         """
 
         return ToroidalCoords.get_coordinates(
             self,
             perc,
-            [cohomology_class],
+            [cocycle_idx],
             partunity_fn,
-            inner_product,
+            standard_range,
             check_and_fix_cocycle_condition,
         )[0]

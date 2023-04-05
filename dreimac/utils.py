@@ -208,110 +208,110 @@ class CohomologyUtils:
             for c in ck:
                 c[:, 0:-1] = idx_map[c[:, 0:-1]]
 
+    @staticmethod
+    def parity(permutation):
+        """ Compute the parity of a permutation """
+        permutation_length = len(permutation)
+        elements_seen = [False for _ in range(permutation_length)]
+        cycles = 0
+        for index, already_seen in enumerate(elements_seen):
+            if already_seen:
+                continue
+            cycles += 1
+            current = index
+            while not elements_seen[current]:
+                elements_seen[current] = True
+                current = permutation[current]
+        return 1 if (permutation_length-cycles) % 2 == 0 else -1
+
+    @staticmethod
+    def order_simplex(unordered_simplex):
+        ordering_permutation = np.argsort(unordered_simplex)
+        sign = CohomologyUtils.parity(ordering_permutation)
+        simplex = tuple(unordered_simplex[ordering_permutation])
+        return simplex, sign
 
 
-#def linear_combination_one_cocycles(
-#    cocycles, coefficients, characteristic=0, real=False
-#):
-#    """
-#    Compute a linear combination of cocycles
-#
-#    Parameters
-#    ----------
-#    cocycles : list of triples [vertex index, vertex index, value]
-#        List representing a list of cocycles
-#
-#    coefficients: list of numbers
-#        Numbers representing the coefficient of each cocycle in the linear combination
-#
-#    characteristic : integer, optional
-#        Integer representing the characteristic to mod out after performing linear combination.
-#        If zero, then no mod operation is performed.
-#
-#    real : boolean, optional
-#        Whether to treat the values in the cocycles as floats or as ints.
-#    """
-#    assert len(cocycles) == len(coefficients)
-#    assert len(cocycles) > 0
-#    assert isinstance(characteristic, int)
-#    assert (not real) or (characteristic == 0)
-#
-#    res_as_dict = {}
-#    for cocycle, coefficient in zip(cocycles, coefficients):
-#        for i, j, v in cocycle:
-#            i, j = min(i, j), max(i, j)
-#            if not (i, j) in res_as_dict:
-#                res_as_dict[(i, j)] = v * coefficient
-#            else:
-#                res_as_dict[(i, j)] += v * coefficient
-#
-#    dtype = np.float32 if real else np.int
-#    res_as_list = list(res_as_dict.items())
-#    res = np.zeros((len(res_as_dict), 3), dtype=dtype)
-#    res[:, 0:2] = np.array([ij for ij, _ in res_as_list])
-#    res[:, 2] = np.array([v for _, v in res_as_list])
-#    if characteristic > 0:
-#        res[:, 2] = np.mod(res[:, 2], characteristic)
-#    return res
-#
-#
-#def add_cocycles(c1, c2, p=0, real=False):
-#    """
-#    Add two cocycles together under a field
-#
-#    Parameters
-#    ----------
-#    c1: ndarray(N)
-#        First cocycle
-#    c2: ndarray(N)
-#        Second cocycle
-#    p: int
-#        Field
-#    real: bool
-#        Whether this is meant to be a real cocycle
-#    """
-#    return linear_combination_one_cocycles(
-#        [c1, c2], [1, 1], characteristic=p, real=real
-#    )
+    @staticmethod
+    def sparse_cocycle_to_vector(sparse_cocycle, simplex_to_vector_index, dtype):
+        n_simplices = len(simplex_to_vector_index)
+        cocycle_as_vector = np.zeros((n_simplices,), dtype=dtype)
+        for entry in sparse_cocycle:
+            value = entry[-1]
+            unordered_simplex = np.array(entry[:-1], dtype=int)
+            ordered_simplex, sign = CohomologyUtils.order_simplex(unordered_simplex)
+            # if the cocycle takes a non-zero value on a simplex
+            # then record that value in cocycle_as_vector at the index corresponding to the simplex
+            if ordered_simplex in simplex_to_vector_index:
+                cocycle_as_vector[simplex_to_vector_index[ordered_simplex]] = value * sign
+        return cocycle_as_vector
+
+    @staticmethod
+    def make_delta0(dist_mat, threshold):
+        n_points = dist_mat.shape[0]
+        edge_pair_to_row_index = {}
+        row_index = []
+        col_index = []
+        value = []
+        n_edges = 0
+        for i in range(n_points):
+            for j in range(i + 1, n_points):
+                if dist_mat[i, j] < threshold:
+                    edge_pair_to_row_index[(i, j)] = n_edges
+
+                    row_index.append(n_edges)
+                    col_index.append(i)
+                    value.append(-1)
+
+                    row_index.append(n_edges)
+                    col_index.append(j)
+                    value.append(1)
+
+                    n_edges += 1
+
+        delta0 = sparse.coo_matrix(
+            (value, (row_index, col_index)), shape=(n_edges, n_points)
+        ).tocsr()
+        return delta0, edge_pair_to_row_index
 
 
+    @staticmethod
+    def make_delta1(dist_mat, edge_pair_to_row_index, threshold):
+        n_points = dist_mat.shape[0]
+        n_edges = len(edge_pair_to_row_index)
+        face_triple_to_row_index = {}
+        row_index = []
+        col_index = []
+        value = []
+        n_faces = 0
+        for i in range(n_points):
+            for j in range(i + 1, n_points):
+                if dist_mat[i, j] < threshold:
+                    for k in range(j + 1, n_points):
+                        if (
+                            dist_mat[i, k] < threshold
+                            and dist_mat[j, k] < threshold
+                        ):
+                            face_triple_to_row_index[(i, j, k)] = n_faces
 
+                            row_index.append(n_faces)
+                            col_index.append(edge_pair_to_row_index[(i, j)])
+                            value.append(1)
 
-#def _make_delta0(R):
-#    """
-#    Return the delta0 coboundary matrix
-#
-#    Parameters
-#    ----------
-#    R: ndarray(n_edges, 2, dtype=int)
-#        A matrix specifying edges, where orientation
-#        is taken from the first column to the second column
-#        R specifies the "natural orientation" of the edges, with the
-#        understanding that the ranking will be specified later
-#        It is assumed that there is at least one edge incident
-#        on every vertex
-#
-#    Returns
-#    -------
-#    scipy.sparse.csr_matrix((n_edges, n_vertices))
-#        The coboundary 0 matrix
-#    """
-#    n_vertices = int(np.max(R) + 1)
-#    n_edges = R.shape[0]
-#    # Two entries per edge
-#    I = np.zeros((n_edges, 2))
-#    I[:, 0] = np.arange(n_edges)
-#    I[:, 1] = np.arange(n_edges)
-#    I = I.flatten()
-#    J = R[:, 0:2].flatten()
-#    V = np.zeros((n_edges, 2))
-#    V[:, 0] = -1
-#    V[:, 1] = 1
-#    V = V.flatten()
-#    I = np.array(I, dtype=int)
-#    J = np.array(J, dtype=int)
-#    Delta = sparse.coo_matrix((V, (I, J)), shape=(n_edges, n_vertices)).tocsr()
-#    return Delta
+                            row_index.append(n_faces)
+                            col_index.append(edge_pair_to_row_index[(j, k)])
+                            value.append(1)
+
+                            row_index.append(n_faces)
+                            col_index.append(edge_pair_to_row_index[(i, k)])
+                            value.append(-1)
+
+                            n_faces += 1
+
+        delta1 = sparse.coo_matrix(
+            (value, (row_index, col_index)), shape=(n_faces, n_edges), dtype=int
+        )
+        return delta1, face_triple_to_row_index
 
 
 
@@ -378,7 +378,6 @@ class PartUnity:
 #########################################"""
 
 ## TODO: These probably belong in tdasets, but I'll keep them here for now
-
 
 class GeometryExamples:
     @staticmethod
@@ -810,7 +809,7 @@ class CircleMapUtils:
             the rotation of the given points by the given offset.
         """
 
-        return (circle_map + offset) % (2 * np.pi)
+        return (circle_map + offset * (2 * np.pi)) % (2 * np.pi)
 
     @staticmethod
     def linear_combination(circle_maps, linear_combination_matrix):
@@ -821,11 +820,11 @@ class CircleMapUtils:
 
         Parameters
         ----------
-        circle_maps: ndarray(k, n, dtype=float)
+        circle_maps: list or ndarray(k, n, dtype=float)
             A numpy array with rows containing n points in the circle represented as
             floats between 0 and 2pi.
 
-        linear_combination_matrix: ndarray(l, k, dtype=int)
+        linear_combination_matrix: list or ndarray(l, k, dtype=int)
             A numpy array encoding l integer linear combinations of the given k
             circle-valued maps.
 
@@ -836,9 +835,11 @@ class CircleMapUtils:
             the l linear combinations of the given k circle-valued maps.
         """
 
-        assert isinstance(circle_maps, np.ndarray)
+        if not isinstance(circle_maps, np.ndarray):
+            circle_maps = np.array(circle_maps)
         assert len(circle_maps.shape) == 2
-        assert isinstance(linear_combination_matrix, np.ndarray)
+        if not isinstance(linear_combination_matrix, np.ndarray):
+            linear_combination_matrix = np.array(linear_combination_matrix)
         assert (
             len(linear_combination_matrix.shape) == 2
             or len(linear_combination_matrix.shape) == 1

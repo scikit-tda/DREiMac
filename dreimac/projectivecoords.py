@@ -266,7 +266,7 @@ class ProjectiveCoords(EMCoords):
         self.selected = set([])
         self.u = np.array([0, 0, 1])
 
-    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear):
+    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear, standard_range=True):
         """
         Perform multiscale projective coordinates via persistent cohomology of 
         sparse filtrations (Jose Perea 2018)
@@ -280,6 +280,8 @@ class ProjectiveCoords(EMCoords):
             Dimension down to which to project the data
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
+        standard_range : bool
+            TODO: explain
         
         Returns
         -------
@@ -293,12 +295,14 @@ class ProjectiveCoords(EMCoords):
         n_data = self.X_.shape[0]
         ## Step 1: Come up with the representative cocycle as a formal sum
         ## of the chosen cocycles
-        cohomdeath, cohombirth, cocycle = self.get_representative_one_cocycle(cocycle_idx)
-        #cohombirth /= 2.
-        #cohomdeath /= 2.
+        homological_dimension = 1
+        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(cocycle_idx, homological_dimension)
 
         ## Step 2: Determine radius for balls
-        r_cover = EMCoords.get_cover_radius(self, perc, cohomdeath, cohombirth)
+        r_cover, _ = EMCoords.get_cover_radius(
+            self, perc, cohomdeath_rips, cohombirth_rips, standard_range
+        )
+
 
         ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)

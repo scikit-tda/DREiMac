@@ -64,14 +64,14 @@ class EMCoords(object):
         self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
 
-    def get_representative_one_cocycle(self, cohomology_class, prime_index=0):
+    def get_representative_cocycle(self, cohomology_class, homological_dimension):
         """
         Compute the representative cocycle, given a list of cohomology classes
 
         Parameters
         ----------
-        cohomology_class : integer or dictionary { cocycle_index : integer_coefficient }
-            Uses the linear combination specified by the dictionary or the given cocycle index
+        cohomology_class : integer
+            TODO
 
         Returns
         -------
@@ -86,15 +86,15 @@ class EMCoords(object):
 
         assert isinstance(cohomology_class, int)
 
-        dgm = self.dgms_[1]
-        cocycles = self.cocycles_[1]
+        dgm = self.dgms_[homological_dimension]
+        cocycles = self.cocycles_[homological_dimension]
         return (
             dgm[cohomology_class, 0],
             dgm[cohomology_class, 1],
             cocycles[cohomology_class],
         )
 
-    def get_cover_radius(self, perc, cohomdeath_rips, cohombirth_rips):
+    def get_cover_radius(self, perc, cohomdeath_rips, cohombirth_rips, standard_range):
         """
         Determine radius for covering balls
 
@@ -106,18 +106,30 @@ class EMCoords(object):
             Cohomological death
         cohombirth: float
             Cohomological birth
+        standard_range: float
+            Whether or not to use the range that guarantees that the cohomology class selected
+            is a non-trivial cohomology class in the Cech complex. If False, the class is only
+            guaranteed to be non-trivial in the Rips complex.
 
         Returns
         -------
-        float: Covering radius
-        """
-        if (cohombirth_rips / 2) < cohomdeath_rips:
-            raise Exception("The cohomology class selected is too short.")
+        r_cover : float
+        rips_threshold : float
 
-        r_cover = (1 - perc) * cohomdeath_rips + perc * (cohombirth_rips / 2)
-        if self.verbose:
-            print("r_cover = %.3g" % r_cover)
-        return r_cover
+        """
+        start = cohomdeath_rips
+        end = cohombirth_rips/2 if standard_range else cohombirth_rips
+        if start > end:
+            raise Exception(
+                "The cohomology class selected is too short, try setting standard_range to False."
+            )
+
+        r_cover = (1 - perc) * start + perc * end
+        self.r_cover_ = r_cover
+        rips_threshold = 2 * r_cover if standard_range else r_cover
+        self.rips_threshold_ = rips_threshold
+
+        return r_cover, rips_threshold
 
     def get_covering_partition(self, r_cover, partunity_fn):
         """
