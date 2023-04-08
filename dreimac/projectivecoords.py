@@ -270,10 +270,11 @@ class ProjectiveCoords(EMCoords):
         """
         Perform multiscale projective coordinates via persistent cohomology of 
         sparse filtrations (Jose Perea 2018)
+
         Parameters
         ----------
         perc : float
-            Percent coverage
+            Percent coverage. Must be between 0 and 1.
         cocycle_idx : list
             Add the cocycles together, sorted from most to least persistent
         proj_dim : integer
@@ -281,8 +282,9 @@ class ProjectiveCoords(EMCoords):
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
         standard_range : bool
-            TODO: explain
-        
+            Whether to use the parameter perc to choose a filtration parameter that guarantees
+            that the selected cohomology class represents a class in the Cech complex.
+       
         Returns
         -------
         {'variance': ndarray(N-1)

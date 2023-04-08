@@ -29,6 +29,8 @@ class CircularCoords(ToroidalCoords):
         maxdim : int
             Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
             but it may be of interest to see other dimensions (e.g. for a torus)
+        verbose : bool
+            Print debug information.
         """
         ToroidalCoords.__init__(
             self,
@@ -52,18 +54,23 @@ class CircularCoords(ToroidalCoords):
         """
         Perform circular coordinates via persistent cohomology of
         sparse filtrations (Jose Perea 2018)
+
         Parameters
         ----------
         perc : float
-            Percent coverage
+            Percent coverage. Must be between 0 and 1.
         cocycle_idx : integer
-            TODO: explain
+            Integer representing the index of the persistent cohomology class
+            used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+            classes are ordered by persistence, from largest to smallest.
         partunity_fn : (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
         standard_range : bool
-            TODO: explain
+            Whether to use the parameter perc to choose a filtration parameter that guarantees
+            that the selected cohomology class represents a class in the Cech complex.
         check_and_fix_cocycle_condition : bool
-            TODO: explain
+            Whether to check, and fix if necessary, that the integer cocycle constructed
+            using finite field coefficients satisfies the cocycle condition.
 
         Returns
         -------

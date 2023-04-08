@@ -44,15 +44,19 @@ class ToroidalCoords(EMCoords):
         Parameters
         ----------
         perc : float
-            Percent coverage
-        cocycle_idxs : list of integers
-            TODO: explain
-        partunity_fn: (dist_land_data, r_cover) -> phi
+            Percent coverage. Must be between 0 and 1.
+        cocycle_idx : integer
+            Integer representing the index of the persistent cohomology class
+            used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+            classes are ordered by persistence, from largest to smallest.
+        partunity_fn : (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
         standard_range : bool
-            TODO: explain
+            Whether to use the parameter perc to choose a filtration parameter that guarantees
+            that the selected cohomology class represents a class in the Cech complex.
         check_and_fix_cocycle_condition : bool
-            TODO: explain
+            Whether to check, and fix if necessary, that the integer cocycle constructed
+            using finite field coefficients satisfies the cocycle condition.
 
         Returns
         -------
@@ -149,9 +153,10 @@ class ToroidalCoords(EMCoords):
                         fixed_cocycles.append(new_cocycle_as_vector)
             integer_cocycles_as_vectors = fixed_cocycles
 
+        inner_product = "uniform"
         # compute inner product matrix for cocycles
         inner_product_matrix, sqrt_inner_product_matrix = _make_inner_product(
-            dist_land_land, rips_threshold, edge_pair_to_row_index, "uniform"
+            dist_land_land, rips_threshold, edge_pair_to_row_index, inner_product
         )
 
         # compute harmonic representatives of cocycles and their circle-valued integrals
@@ -201,8 +206,8 @@ def _integrate_harmonic_representative(cocycle, boundary_matrix, sqrt_inner_prod
 
 
 def _make_inner_product(dist_matrix, threshold, edge_pair_to_row_index, kind):
-    # n_edges = dist_matrix.shape[0] ** 2
     n_edges = len(edge_pair_to_row_index)
+    print(kind)
     if kind == "uniform":
         row_index = []
         col_index = []
@@ -217,6 +222,24 @@ def _make_inner_product(dist_matrix, threshold, edge_pair_to_row_index, kind):
         W = scipy.sparse.coo_matrix(
             (value, (row_index, col_index)), shape=(n_edges, n_edges)
         ).tocsr()
+    elif kind == "linear":
+        row_index = []
+        col_index = []
+        value = []
+        sqrt_value = []
+        for p, l in edge_pair_to_row_index.items():
+            i, j = p
+            val = threshold - dist_matrix[i, j]
+            row_index.append(l)
+            col_index.append(l)
+            value.append(val)
+            sqrt_value.append(np.sqrt(val))
+        W = scipy.sparse.coo_matrix(
+            (value, (row_index, col_index)), shape=(n_edges, n_edges)
+        ).tocsr()
+        WSqrt = scipy.sparse.coo_matrix(
+            (sqrt_value, (row_index, col_index)), shape=(n_edges, n_edges)
+        ).tocsr()
     elif kind == "exponential":
         row_index = []
         col_index = []
@@ -224,8 +247,7 @@ def _make_inner_product(dist_matrix, threshold, edge_pair_to_row_index, kind):
         sqrt_value = []
         # sigma = threshold * dist_matrix.shape[0]
         sigma = threshold
-        for pl in edge_pair_to_row_index.items():
-            p, l = pl
+        for p, l in edge_pair_to_row_index.items():
             i, j = p
             val = np.exp(-((dist_matrix[i, j] / sigma) ** 2))
             row_index.append(l)
