@@ -623,13 +623,27 @@ class GeometryExamples:
 
         Returns
         -------
-        X: ndarray(n_samples, 2)
-            2D circles samples
+        X: ndarray(n_samples, 3)
+            3D sphere samples
 
         """
         np.random.seed(0)
         data = 2 * np.random.random_sample((n_samples, 3)) - 1
         return data / np.linalg.norm(data, axis=1)[:, np.newaxis]
+
+    @staticmethod
+    def noisy_circle(n_samples):
+        """
+        Samples on a circle in 2D.
+
+        Returns
+        -------
+        X: ndarray(n_samples, 2)
+            2D circle samples
+
+        """
+        X = np.random.random((n_samples,2)) - 0.5
+        return X / np.linalg.norm(X,axis=1).reshape((n_samples,1)) + (np.random.random((n_samples,2)) - 0.5) * 0.2
 
 
 """#########################################

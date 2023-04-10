@@ -207,7 +207,7 @@ def _integrate_harmonic_representative(cocycle, boundary_matrix, sqrt_inner_prod
 
 def _make_inner_product(dist_matrix, threshold, edge_pair_to_row_index, kind):
     n_edges = len(edge_pair_to_row_index)
-    print(kind)
+    #print(kind)
     if kind == "uniform":
         row_index = []
         col_index = []
