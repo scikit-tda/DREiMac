@@ -71,7 +71,8 @@ class EMCoords(object):
         Parameters
         ----------
         cohomology_class : integer
-            TODO
+            Integer representing the index of the persistent cohomology class.
+            Persistent cohomology classes are ordered by persistence, from largest to smallest.
 
         Returns
         -------
@@ -79,9 +80,9 @@ class EMCoords(object):
             Cohomological death of the linear combination or single cocycle
         cohombirth: float
             Cohomological birth of the linear combination or single cocycle
-        cocycle: ndarray(K, 3, dtype=int)
-            Representative cocycle.  First two columns are vertex indices,
-            and third column is value in field of prime self.prime_
+        cocycle: ndarray(K, homological_dimension+2, dtype=int)
+            Representative cocycle. First homological_dimension+1 columns are vertex indices,
+            and last column takes values in finite field corresponding to self.prime_
         """
 
         assert isinstance(cohomology_class, int)

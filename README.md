@@ -43,6 +43,22 @@ DREiMac depends on the following python packages, which will be installed automa
 pip install dreimac
 ~~~~~
 
+## Documentation and support
+
+You can find the documentation at TODO.
+If you have further questions, please [open an issue](https://github.com/scikit-tda/DREiMac/issues/new) [TODO] and we will do our best to help you.
+Please include as much information as possible, including your system's information, warnings, logs, screenshots, and anything else you think may be of use.
+
+## Running the tests
+
+You can run the tests by running the following commands from the root directory of a clone of this repository.
+
+```bash
+pip install pytest
+pip install -r requirements.txt
+pytest .
+```
+
 ## Details about the theory
 
 DREiMac is based on [cohomology](https://en.wikipedia.org/wiki/Cohomology) and [Eilenberg-MacLane spaces](https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology), and turns persistent cohomology computations into topology-preserving coordinates for data.

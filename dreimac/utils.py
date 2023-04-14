@@ -1,5 +1,5 @@
 """
-Programmer: Chris Tralie (ctralie@alumni.princeton.edu)
+Programmer: Chris Tralie (ctralie@alumni.princeton.edu) and Luis Scoccola
 Purpose: To provide a number of utility functions, including
 - Quickly computing all pairs self-similarity and cross-similarity matrices
 - Doing "greedy permutations" 
@@ -9,19 +9,12 @@ Purpose: To provide a number of utility functions, including
 """
 import numpy as np
 import scipy.sparse as sparse
-
-
-"""#########################################
-            Geometry Utilities
-#########################################"""
+import matplotlib.pyplot as plt
 
 
 class GeometryUtils:
 
-    """#########################################
-        Self-Similarity And Cross-Similarity
-    #########################################"""
-
+    # Self-Similarity And Cross-Similarity
     @staticmethod
     def get_csm(X, Y):
         """
@@ -34,10 +27,12 @@ class GeometryUtils:
             A matrix holding the coordinates of M points
         Y : ndarray (N, d)
             A matrix holding the coordinates of N points
+
         Returns
         ------
         D : ndarray (M, N)
             An MxN Euclidean cross-similarity matrix
+
         """
         C = np.sum(X**2, 1)[:, None] + np.sum(Y**2, 1)[None, :] - 2 * X.dot(Y.T)
         C[C < 0] = 0
@@ -48,16 +43,19 @@ class GeometryUtils:
         """
         Return the projective arc length cross-similarity between two point
         clouds specified as points on the sphere
+
         Parameters
         ----------
         X : ndarray (M, d)
             A matrix holding the coordinates of M points on RP^{d-1}
         Y : ndarray (N, d)
             A matrix holding the coordinates of N points on RP^{d-1}
+
         Returns
         ------
         D : ndarray (M, N)
             An MxN  cross-similarity matrix
+
         """
         D = np.abs(X.dot(Y.T))
         D[D < -1] = -1
@@ -69,10 +67,7 @@ class GeometryUtils:
     def get_ssm(X):
         return GeometryUtils.get_csm(X, X)
 
-    """#########################################
-            Greedy Permutations
-    #########################################"""
-
+    # Greedy Permutations
     @staticmethod
     def get_greedy_perm_pc(X, M, verbose=False, csm_fn=get_csm.__func__):
         """
@@ -99,6 +94,7 @@ class GeometryUtils:
             'perm': An array of indices into X of the greedy permutation
             'lambdas': Insertion radii of the landmarks
             'D': An MxN array of distances from landmarks to points in X}
+
         """
         # By default, takes the first point in the permutation to be the
         # first point in the point cloud, but could be random
@@ -139,6 +135,7 @@ class GeometryUtils:
             {'perm': An array of indices into X of the greedy permutation
             'lambdas': Insertion radii of the landmarks
             'DLandmarks': An MxN array of distances from landmarks to points in the point cloud}
+
         """
         # By default, takes the first point in the permutation to be the
         # first point in the point cloud, but could be random
@@ -153,14 +150,6 @@ class GeometryUtils:
             ds = np.minimum(ds, D[idx, :])
         DLandmarks = D[perm, :]
         return {"perm": perm, "lambdas": lambdas, "DLandmarks": DLandmarks}
-
-
-
-
-
-"""#########################################
-        Cohomology Utility Functions
-#########################################"""
 
 
 class CohomologyUtils:
@@ -183,6 +172,7 @@ class CohomologyUtils:
         -------
         cocycle : ndarray(K, n, dtype=int)
             Cocycle with same support as input cocycle and integer coefficients.
+
         """
         cocycle[cocycle[:, -1] > (prime - 1) / 2, -1] -= prime
         return cocycle
@@ -192,6 +182,7 @@ class CohomologyUtils:
         """
         Convert the indices of a set of cocycles to be relative
         to a list of indices in a greedy permutation
+
         Parameters
         ----------
         cocycles: list of list of ndarray
@@ -201,6 +192,7 @@ class CohomologyUtils:
             respect to all points
         N: int
             Number of total points
+
         """
         idx_map = -1 * np.ones(N, dtype=int)
         idx_map[idx_land] = np.arange(idx_land.size)
@@ -230,7 +222,6 @@ class CohomologyUtils:
         sign = CohomologyUtils.parity(ordering_permutation)
         simplex = tuple(unordered_simplex[ordering_permutation])
         return simplex, sign
-
 
     @staticmethod
     def sparse_cocycle_to_vector(sparse_cocycle, simplex_to_vector_index, dtype):
@@ -274,7 +265,6 @@ class CohomologyUtils:
         ).tocsr()
         return delta0, edge_pair_to_row_index
 
-
     @staticmethod
     def make_delta1(dist_mat, edge_pair_to_row_index, threshold):
         n_points = dist_mat.shape[0]
@@ -314,16 +304,18 @@ class CohomologyUtils:
         return delta1, face_triple_to_row_index
 
 
-
-"""#########################################
-        Partition of Unity Functions
-#########################################"""
-
-
 class PartUnity:
+    """
+    Partitions of unity subordinate to open ball covers using
+    standard bump functions.
+
+    """
+
     @staticmethod
     def linear(ds, r_cover):
         """
+        Linear partition of unity.
+
         Parameters
         ----------
         ds: ndarray(n)
@@ -331,16 +323,20 @@ class PartUnity:
             data points
         r_cover: float
             Covering radius
+
         Returns
         -------
         varphi: ndarray(n)
             The bump function
+
         """
         return r_cover - ds
 
     @staticmethod
     def quadratic(ds, r_cover):
         """
+        Quadratic partition of unity.
+
         Parameters
         ----------
         ds: ndarray(n)
@@ -348,16 +344,20 @@ class PartUnity:
             data points
         r_cover: float
             Covering radius
+
         Returns
         -------
         varphi: ndarray(n)
             The bump function
+
         """
         return (r_cover - ds) ** 2
 
     @staticmethod
     def exp(ds, r_cover):
         """
+        Exponential partition of unity.
+
         Parameters
         ----------
         ds: ndarray(n)
@@ -373,17 +373,18 @@ class PartUnity:
         return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
 
-"""#########################################
-            Geometry Examples
-#########################################"""
-
 ## TODO: These probably belong in tdasets, but I'll keep them here for now
-
 class GeometryExamples:
+    """
+    Finite samples from topologically nontrivial spaces.
+
+    """
+
     @staticmethod
     def line_patches(dim, n_angles, n_offsets, sigma):
         """
         Sample a set of line segments, as witnessed by square patches
+
         Parameters
         ----------
         dim: int
@@ -399,6 +400,7 @@ class GeometryExamples:
         -------
         ndarray(n_angles*n_offsets, dim*dim)
             An array of all of the patches raveled into dim*dim dimensional Euclidean space
+
         """
         N = n_angles * n_offsets
         P = np.zeros((N, dim * dim))
@@ -437,6 +439,7 @@ class GeometryExamples:
             Original points on the sphere
         ndarray(n_samples, n_samples)
             Distance matrix of rp2
+
         """
         if seed is None:
             seed = n_samples
@@ -465,6 +468,7 @@ class GeometryExamples:
         -------
         X: ndarray(n_samples, 4)
             3D torus samples
+
         """
         if seed is None:
             seed = n_samples
@@ -497,6 +501,7 @@ class GeometryExamples:
         -------
         X: ndarray(n_samples, 4)
             4D klein bottle samples
+
         """
         if seed is None:
             seed = n_samples
@@ -646,12 +651,12 @@ class GeometryExamples:
         return X / np.linalg.norm(X,axis=1).reshape((n_samples,1)) + (np.random.random((n_samples,2)) - 0.5) * 0.2
 
 
-"""#########################################
-        Matplotlib Plotting Utilities
-#########################################"""
-
-
 class PlotUtils:
+    """
+    Plotting utilities for DREiMac's output.
+
+    """
+
     @staticmethod
     def imscatter(X, P, dim, zoom=1):
         """
@@ -728,11 +733,13 @@ class PlotUtils:
     @staticmethod
     def set_axes_equal(ax):
         # taken from https://stackoverflow.com/a/31364297/2171328
-        """Make axes of 3D plot have equal scale so that spheres appear as spheres,
+        """
+        Make axes of 3D plot have equal scale so that spheres appear as spheres,
         cubes as cubes, etc..  This is one possible solution to Matplotlib's
         ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
 
-        Input
+        Parameters
+        ----------
           ax: a matplotlib axis, e.g., as output from plt.gca().
         """
 
@@ -773,8 +780,8 @@ class PlotUtils:
             Matplotlib colormap to use
         width : int
             The width of the final plot
+
         """
-        import matplotlib.pyplot as plt
 
         if len(colorings) == 0:
             plt.figure(figsize=(4, 4))
@@ -797,12 +804,12 @@ class PlotUtils:
                 axs[i].axis("off")
 
 
-"""#########################################
-        Matplotlib Plotting Utilities
-#########################################"""
-
-
 class CircleMapUtils:
+    """
+    Utilities for adding, rotating, and plotting circle-valued maps.
+
+    """
+
     @staticmethod
     def offset(circle_map, offset):
         """

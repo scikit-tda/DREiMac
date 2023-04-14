@@ -4,28 +4,32 @@ import scipy.sparse as sparse
 from scipy.sparse.linalg import lsqr
 from scipy.optimize import LinearConstraint, milp
 from .utils import PartUnity, CircleMapUtils, CohomologyUtils
-from .emcoords import *
+from .emcoords import EMCoords
 
 
 class ToroidalCoords(EMCoords):
+    """
+    Object that performs sparse toroidal coordinates via persistent cohomology as in
+    (L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, J. Perea 2022)
+
+    Parameters
+    ----------
+    X: ndarray(N, d)
+        A point cloud with N points in d dimensions
+    n_landmarks: int
+        Number of landmarks to use
+    distance_matrix: boolean
+        If true, treat X as a distance matrix instead of a point cloud
+    prime : int
+        Field coefficient with which to compute rips on landmarks
+    maxdim : int
+        Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+        but it may be of interest to see other dimensions (e.g. for a torus)
+    """
+
     def __init__(
         self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False
     ):
-        """
-        Parameters
-        ----------
-        X: ndarray(N, d)
-            A point cloud with N points in d dimensions
-        n_landmarks: int
-            Number of landmarks to use
-        distance_matrix: boolean
-            If true, treat X as a distance matrix instead of a point cloud
-        prime : int
-            Field coefficient with which to compute rips on landmarks
-        maxdim : int
-            Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
-            but it may be of interest to see other dimensions (e.g. for a torus)
-        """
         EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
         self.type_ = "toroidal"
 
@@ -38,8 +42,7 @@ class ToroidalCoords(EMCoords):
         check_and_fix_cocycle_condition=True,
     ):
         """
-        Perform sparse toroidal coordinates via persistent cohomology as in
-        (L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, J. Perea 2022)
+        Get toroidal coordinates.
 
         Parameters
         ----------

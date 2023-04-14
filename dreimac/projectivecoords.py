@@ -3,17 +3,95 @@ import numpy.linalg as linalg
 import matplotlib.pyplot as plt 
 import time
 import warnings
-from .utils import *
-from .emcoords import *
+from .utils import PartUnity
+from .emcoords import EMCoords
 
 class ProjectiveCoords(EMCoords):
-    """#########################################
-        Projective Coordinates Utilities
-    #########################################"""
+    """
+    Object that performs multiscale real projective coordinates via
+    persistent cohomology of sparse filtrations (Jose Perea 2018).
+
+    Parameters
+    ----------
+    X: ndarray(N, d)
+        A point cloud with N points in d dimensions
+    n_landmarks: int
+        Number of landmarks to use
+    distance_matrix: boolean
+        If true, treat X as a distance matrix instead of a point cloud
+    maxdim : int
+        Maximum dimension of homology. Only dimension 1 is needed for circular coordinates,
+        but it may be of interest to see other dimensions (e.g. for a torus)
+    partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
+        A partition of unity function
+
+    """
+    def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
+        EMCoords.__init__(self, X=X, n_landmarks=n_landmarks, distance_matrix=distance_matrix, prime=2, maxdim=maxdim, verbose=verbose)
+        self.type_ = "proj"
+        # GUI variables
+        self.selected = set([])
+        self.u = np.array([0, 0, 1])
+
+    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear, standard_range=True):
+        """
+        Get real projective coordinates.
+
+        Parameters
+        ----------
+        perc : float
+            Percent coverage. Must be between 0 and 1.
+        cocycle_idx : list
+            Add the cocycles together, sorted from most to least persistent
+        proj_dim : integer
+            Dimension down to which to project the data
+        partunity_fn: (dist_land_data, r_cover) -> phi
+            A function from the distances of each landmark to a bump function
+        standard_range : bool
+            Whether to use the parameter perc to choose a filtration parameter that guarantees
+            that the selected cohomology class represents a class in the Cech complex.
+       
+        Returns
+        -------
+        {'variance': ndarray(N-1)
+            The variance captured by each dimension
+        'X': ndarray(N, proj_dim+1)
+            The projective coordinates
+        }
+
+        """
+        n_landmarks = self.n_landmarks_
+        n_data = self.X_.shape[0]
+        ## Step 1: Come up with the representative cocycle as a formal sum
+        ## of the chosen cocycles
+        homological_dimension = 1
+        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(cocycle_idx, homological_dimension)
+
+        ## Step 2: Determine radius for balls
+        r_cover, _ = EMCoords.get_cover_radius(
+            self, perc, cohomdeath_rips, cohombirth_rips, standard_range
+        )
+
+
+        ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
+        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
+
+        ## Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
+        # compute all transition functions
+        cocycle_matrix = np.ones((n_landmarks, n_landmarks))
+        cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
+        cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
+        class_map = np.sqrt(varphi.T)
+        for i in range(n_data):
+            class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
+        res = ProjectiveCoords.ppca(class_map, proj_dim, self.verbose)
+        return res
+
     @staticmethod
     def ppca(class_map, proj_dim, verbose=False):
         """
         Principal Projective Component Analysis (Jose Perea 2017)
+
         Parameters
         ----------
         class_map : ndarray (N, d)
@@ -23,6 +101,7 @@ class ProjectiveCoords(EMCoords):
             The dimension of the projective space onto which to project
         verbose : boolean
             Whether to print information during iterations
+
         Returns
         -------
         {'variance': ndarray(N-1)
@@ -30,6 +109,7 @@ class ProjectiveCoords(EMCoords):
         'X': ndarray(N, proj_dim+1)
             The projective coordinates
         }
+
         """
         if verbose:
             print("Doing ppca on %i points in %i dimensions down to %i dimensions"%\
@@ -73,6 +153,7 @@ class ProjectiveCoords(EMCoords):
         b : ndarray(d)
             A d-dimensional vector that shoudl end up residing at 
             the north pole (0,0,...,0,1)
+
         """
         if (len(a.shape) > 1 and np.min(a.shape) > 1)\
             or (len(b.shape) > 1 and np.min(b.shape) > 1):
@@ -105,6 +186,7 @@ class ProjectiveCoords(EMCoords):
     def get_stereo_proj_codim1(pX, u=np.array([])):
         """
         Do a projective stereographic projection
+
         Parameters
         ----------
         pX: ndarray(N, d)
@@ -112,10 +194,12 @@ class ProjectiveCoords(EMCoords):
         u: ndarray(d)
             A unit vector representing the north pole
             for the stereographic projection
+
         Returns
         -------
         S: ndarray(N, d-1)
             The stereographically projected coordinates
+
         """
         X = pX.T
         # Put points all on the same hemisphere
@@ -135,6 +219,7 @@ class ProjectiveCoords(EMCoords):
         Plot a circle with arrows showing the identifications for RP2.
         Set an equal aspect ratio and get rid of the axis ticks, since
         they are clear from the circle
+
         Parameters
         ----------
         ax: matplotlib axis
@@ -147,6 +232,7 @@ class ProjectiveCoords(EMCoords):
             Whether to draw the arrows
         pad: float
             The dimensions of the window around the unit square
+
         """
         t = np.linspace(0, 2*np.pi, 200)
         ax.plot(np.cos(t), np.sin(t), c=arrowcolor)
@@ -165,12 +251,14 @@ class ProjectiveCoords(EMCoords):
     def plot_rp2_stereo(S, f, arrowcolor='c', facecolor=(0.15, 0.15, 0.15)):
         """
         Plot a 2D Stereographic Projection
+
         Parameters
         ----------
         S : ndarray (N, 2)
             An Nx2 array of N points to plot on RP2
         f : ndarray (N) or ndarray (N, 3)
             A function with which to color the points, or a list of colors
+
         """
         if not (S.shape[1] == 2):
             warnings.warn("Plotting stereographic RP2 projection, but points are not 2 dimensional")
@@ -195,6 +283,7 @@ class ProjectiveCoords(EMCoords):
             A function with which to color the points, or a list of colors
         draw_sphere : boolean
             Whether to draw the 2-sphere
+
         """
         if not (S.shape[1] == 3):
             warnings.warn("Plotting stereographic RP3 projection, but points are not 4 dimensional")
@@ -220,16 +309,19 @@ class ProjectiveCoords(EMCoords):
         """
         Convert a point selected on the circle to a 3D
         unit vector on the upper hemisphere
+
         Parameters
         ----------
         x: ndarray(2)
             Selected point in the circle
+
         Returns
         -------
         x: ndarray(2)
             Selected point in the circle (possibly clipped to the circle)
         u: ndarray(3)
             Unit vector on the upper hemisphere
+
         """
         magSqr = np.sum(x**2)
         if magSqr > 1:
@@ -239,83 +331,3 @@ class ProjectiveCoords(EMCoords):
         u[0:2] = x
         u[2] = np.sqrt(1-magSqr)
         return x, u
-
-
-    """#########################################
-     Main Projective Coordinates Functionality
-    #########################################"""
-    def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
-        """
-        Parameters
-        ----------
-        X: ndarray(N, d)
-            A point cloud with N points in d dimensions
-        n_landmarks: int
-            Number of landmarks to use
-        distance_matrix: boolean
-            If true, treat X as a distance matrix instead of a point cloud
-        maxdim : int
-            Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
-            but it may be of interest to see other dimensions (e.g. for a torus)
-        partunity_fn: ndarray(n_landmarks, N) -> ndarray(n_landmarks, N)
-            A partition of unity function
-        """
-        EMCoords.__init__(self, X=X, n_landmarks=n_landmarks, distance_matrix=distance_matrix, prime=2, maxdim=maxdim, verbose=verbose)
-        self.type_ = "proj"
-        # GUI variables
-        self.selected = set([])
-        self.u = np.array([0, 0, 1])
-
-    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear, standard_range=True):
-        """
-        Perform multiscale projective coordinates via persistent cohomology of 
-        sparse filtrations (Jose Perea 2018)
-
-        Parameters
-        ----------
-        perc : float
-            Percent coverage. Must be between 0 and 1.
-        cocycle_idx : list
-            Add the cocycles together, sorted from most to least persistent
-        proj_dim : integer
-            Dimension down to which to project the data
-        partunity_fn: (dist_land_data, r_cover) -> phi
-            A function from the distances of each landmark to a bump function
-        standard_range : bool
-            Whether to use the parameter perc to choose a filtration parameter that guarantees
-            that the selected cohomology class represents a class in the Cech complex.
-       
-        Returns
-        -------
-        {'variance': ndarray(N-1)
-            The variance captured by each dimension
-        'X': ndarray(N, proj_dim+1)
-            The projective coordinates
-        }
-        """
-        n_landmarks = self.n_landmarks_
-        n_data = self.X_.shape[0]
-        ## Step 1: Come up with the representative cocycle as a formal sum
-        ## of the chosen cocycles
-        homological_dimension = 1
-        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(cocycle_idx, homological_dimension)
-
-        ## Step 2: Determine radius for balls
-        r_cover, _ = EMCoords.get_cover_radius(
-            self, perc, cohomdeath_rips, cohombirth_rips, standard_range
-        )
-
-
-        ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
-        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
-
-        ## Step 4: From U_1 to U_{s+1} - (U_1 \cup ... \cup U_s), apply classifying map
-        # compute all transition functions
-        cocycle_matrix = np.ones((n_landmarks, n_landmarks))
-        cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = -1
-        cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = -1
-        class_map = np.sqrt(varphi.T)
-        for i in range(n_data):
-            class_map[i, :] *= cocycle_matrix[ball_indx[i], :]
-        res = ProjectiveCoords.ppca(class_map, proj_dim, self.verbose)
-        return res

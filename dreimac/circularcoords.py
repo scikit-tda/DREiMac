@@ -1,8 +1,4 @@
-import numpy as np
-import scipy
-from scipy.sparse.linalg import lsqr
-from .utils import *
-from .emcoords import *
+from .utils import PartUnity
 from .toroidalcoords import ToroidalCoords
 
 
@@ -12,26 +8,30 @@ from .toroidalcoords import ToroidalCoords
 
 
 class CircularCoords(ToroidalCoords):
+    """
+    Object that performs circular coordinates via persistent cohomology of
+    sparse filtrations (Jose Perea 2020).
+
+    Parameters
+    ----------
+    X: ndarray(N, d)
+        A point cloud with N points in d dimensions
+    n_landmarks: int
+        Number of landmarks to use
+    distance_matrix: boolean
+        If true, treat X as a distance matrix instead of a point cloud
+    prime : int
+        Field coefficient with which to compute rips on landmarks
+    maxdim : int
+        Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+        but it may be of interest to see other dimensions (e.g. for a torus)
+    verbose : bool
+        Print debug information.
+    """
+
     def __init__(
         self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False
     ):
-        """
-        Parameters
-        ----------
-        X: ndarray(N, d)
-            A point cloud with N points in d dimensions
-        n_landmarks: int
-            Number of landmarks to use
-        distance_matrix: boolean
-            If true, treat X as a distance matrix instead of a point cloud
-        prime : int
-            Field coefficient with which to compute rips on landmarks
-        maxdim : int
-            Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
-            but it may be of interest to see other dimensions (e.g. for a torus)
-        verbose : bool
-            Print debug information.
-        """
         ToroidalCoords.__init__(
             self,
             X=X,
@@ -52,8 +52,8 @@ class CircularCoords(ToroidalCoords):
         check_and_fix_cocycle_condition=True,
     ):
         """
-        Perform circular coordinates via persistent cohomology of
-        sparse filtrations (Jose Perea 2018)
+        Get circular coordinates.
+
 
         Parameters
         ----------
