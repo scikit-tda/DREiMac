@@ -39,7 +39,7 @@ class ToroidalCoords(EMCoords):
         cocycle_idxs=[0],
         partunity_fn=PartUnity.linear,
         standard_range=True,
-        check_and_fix_cocycle_condition=True,
+        check_cocycle_condition=True,
     ):
         """
         Get toroidal coordinates.
@@ -57,7 +57,7 @@ class ToroidalCoords(EMCoords):
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
             that the selected cohomology class represents a class in the Cech complex.
-        check_and_fix_cocycle_condition : bool
+        check_cocycle_condition : bool
             Whether to check, and fix if necessary, that the integer cocycle constructed
             using finite field coefficients satisfies the cocycle condition.
 
@@ -65,6 +65,7 @@ class ToroidalCoords(EMCoords):
         -------
         thetas : ndarray(n, N)
             List of circular coordinates, with n the length of cocycle_idxs
+
         """
 
         # get representative cocycles and the intersection of their supports
@@ -113,7 +114,7 @@ class ToroidalCoords(EMCoords):
             for sparse_cocycle in integer_cocycles
         ]
 
-        if check_and_fix_cocycle_condition:
+        if check_cocycle_condition:
             delta1, _ = CohomologyUtils.make_delta1(
                 dist_land_land, edge_pair_to_row_index, rips_threshold
             )

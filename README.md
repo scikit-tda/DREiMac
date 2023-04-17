@@ -11,22 +11,31 @@ Here is a simple example; please check the Jupyter notebooks in the `notebooks` 
 # basic imports
 from dreimac import CircularCoords, GeometryExamples, PlotUtils
 from persim import plot_diagrams
+import matplotlib.pyplot as plt
+
+# prepar plot with 4 subplots
+f, (a0, a1, a2, a3) = plt.subplots(1, 4, width_ratios=[1, 1, 1, 0.2], figsize=(14,3))
 
 # 200 samples from a noisy circle
 X = GeometryExamples.noisy_circle(200)
-PlotUtils.plot_2d_scatter_with_different_colorings(X, point_size=10)
+a0.set_title("Input point cloud")
+PlotUtils.plot_2d_scatter_with_different_colorings(X, point_size=10, ax=a0)
 
 # the persistence diagram, showing a single prominent class
 cc = CircularCoords(X, n_landmarks=200)
-plot_diagrams(cc.dgms_)
+plot_diagrams(cc.dgms_, title="Persistence diagram", ax=a1)
 
 # the data colored by the circle-valued map constructed by DREiMac
 circular_coordinates = cc.get_coordinates()
-PlotUtils.plot_2d_scatter_with_different_colorings(X, [circular_coordinates], point_size=10, cmap="hsv")
+a2.set_title("Input colored by circular coordinate")
+ax = PlotUtils.plot_2d_scatter_with_different_colorings(X, [circular_coordinates], point_size=10, cmap="viridis", ax=a2)
+
+# colorbar
+img = a3.imshow([[0,1]], cmap="viridis"); a3.set_visible(False)
+cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0","$\pi$","2$\pi$"])
 ```
 
-<img src="https://user-images.githubusercontent.com/1679929/230939790-c52e742e-14c4-41dc-9521-8336ff12a85a.png" width="250" height="250"> <img src="https://user-images.githubusercontent.com/1679929/230939814-24da9a0d-497f-474b-ac9a-8406a8ea2c58.png" width="250" height="250"> <img src="https://user-images.githubusercontent.com/1679929/230939822-67b76137-56d6-48d1-9e23-0fc86ecce1ef.png" width="250" height="250">
-
+![output](https://user-images.githubusercontent.com/1679929/232109124-bf2653e5-6f91-409d-b972-7104b96b3430.png)
 
 ## Installing
 
@@ -45,8 +54,8 @@ pip install dreimac
 
 ## Documentation and support
 
-You can find the documentation at TODO.
-If you have further questions, please [open an issue](https://github.com/scikit-tda/DREiMac/issues/new) [TODO] and we will do our best to help you.
+You can find the documentation [here](https://scikit-tda.org/DREiMac/docs), including the [API reference](https://scikit-tda.org/DREiMac/docs/api).
+If you have further questions, please [open an issue](https://github.com/scikit-tda/DREiMac/issues/new) and we will do our best to help you.
 Please include as much information as possible, including your system's information, warnings, logs, screenshots, and anything else you think may be of use.
 
 ## Running the tests

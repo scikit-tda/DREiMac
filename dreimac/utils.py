@@ -10,10 +10,10 @@ Purpose: To provide a number of utility functions, including
 import numpy as np
 import scipy.sparse as sparse
 import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 
 class GeometryUtils:
-
     # Self-Similarity And Cross-Similarity
     @staticmethod
     def get_csm(X, Y):
@@ -69,7 +69,7 @@ class GeometryUtils:
 
     # Greedy Permutations
     @staticmethod
-    def get_greedy_perm_pc(X, M, verbose=False, csm_fn=get_csm.__func__):
+    def get_greedy_perm_pc(X, M, csm_fn=get_csm.__func__):
         """
         A Naive O(NM) algorithm to do furthest points sampling, assuming
         the input is a point cloud specified in Euclidean space.  This saves
@@ -82,8 +82,6 @@ class GeometryUtils:
             An Nxd Euclidean point cloud
         M : integer
             Number of landmarks to compute
-        verbose: boolean
-            Whether to print progress
         csm_fn: function X, Y -> D
             Cross-similarity function (Euclidean by default)
 
@@ -115,7 +113,7 @@ class GeometryUtils:
         return {"Y": Y, "perm": perm, "lambdas": lambdas, "D": D}
 
     @staticmethod
-    def get_greedy_perm_dm(D, M, verbose=False):
+    def get_greedy_perm_dm(D, M):
         """
         A Naive O(NM) algorithm to do furthest points sampling, assuming
         the input is a N x N distance matrix
@@ -126,8 +124,6 @@ class GeometryUtils:
             An N x N distance matrix
         M : integer
             Number of landmarks to compute
-        verbose: boolean
-            Whether to print progress
 
         Return
         ------
@@ -139,7 +135,6 @@ class GeometryUtils:
         """
         # By default, takes the first point in the permutation to be the
         # first point in the point cloud, but could be random
-        N = D.shape[0]
         perm = np.zeros(M, dtype=np.int64)
         lambdas = np.zeros(M)
         ds = D[0, :]
@@ -153,7 +148,6 @@ class GeometryUtils:
 
 
 class CohomologyUtils:
-
     @staticmethod
     def lift_to_integer_cocycle(cocycle, prime):
         """
@@ -202,7 +196,7 @@ class CohomologyUtils:
 
     @staticmethod
     def parity(permutation):
-        """ Compute the parity of a permutation """
+        """Compute the parity of a permutation"""
         permutation_length = len(permutation)
         elements_seen = [False for _ in range(permutation_length)]
         cycles = 0
@@ -214,7 +208,7 @@ class CohomologyUtils:
             while not elements_seen[current]:
                 elements_seen[current] = True
                 current = permutation[current]
-        return 1 if (permutation_length-cycles) % 2 == 0 else -1
+        return 1 if (permutation_length - cycles) % 2 == 0 else -1
 
     @staticmethod
     def order_simplex(unordered_simplex):
@@ -234,7 +228,9 @@ class CohomologyUtils:
             # if the cocycle takes a non-zero value on a simplex
             # then record that value in cocycle_as_vector at the index corresponding to the simplex
             if ordered_simplex in simplex_to_vector_index:
-                cocycle_as_vector[simplex_to_vector_index[ordered_simplex]] = value * sign
+                cocycle_as_vector[simplex_to_vector_index[ordered_simplex]] = (
+                    value * sign
+                )
         return cocycle_as_vector
 
     @staticmethod
@@ -278,10 +274,7 @@ class CohomologyUtils:
             for j in range(i + 1, n_points):
                 if dist_mat[i, j] < threshold:
                     for k in range(j + 1, n_points):
-                        if (
-                            dist_mat[i, k] < threshold
-                            and dist_mat[j, k] < threshold
-                        ):
+                        if dist_mat[i, k] < threshold and dist_mat[j, k] < threshold:
                             face_triple_to_row_index[(i, j, k)] = n_faces
 
                             row_index.append(n_faces)
@@ -373,7 +366,7 @@ class PartUnity:
         return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
 
-## TODO: These probably belong in tdasets, but I'll keep them here for now
+# TODO: These probably belong in tdasets, but I'll keep them here for now
 class GeometryExamples:
     """
     Finite samples from topologically nontrivial spaces.
@@ -616,10 +609,37 @@ class GeometryExamples:
         X = np.vstack((c1, c2, c3))
 
         np.random.seed(0)
+        eps = 0.1
+        X += (np.random.random(X.shape) - 0.5) * eps
+
+        return X
+
+    @staticmethod
+    def three_circles():
+        """
+        Samples on two circles of different radii in 2D.
+
+        Returns
+        -------
+        X: ndarray(n_samples, 2)
+            2D circles samples
+
+        """
+
+        sample_interval_small_circle = np.linspace(0, 2 * np.pi, 50, endpoint=False)
+        small_circle = np.array([np.sin(sample_interval_small_circle), np.cos(sample_interval_small_circle)]).T
+        sample_interval_big_circle = np.linspace(0, 2 * np.pi, 500, endpoint=False)
+        big_circle1 = np.array([2 * np.sin(sample_interval_big_circle), 2 * np.cos(sample_interval_big_circle)]).T + np.array([4,0])
+        big_circle2 = np.array([2.5 * np.sin(sample_interval_big_circle), 2.5 * np.cos(sample_interval_big_circle)]).T + np.array([-4,0])
+        X = np.vstack((small_circle, big_circle1, big_circle2))
+
+        np.random.seed(0)
         eps = 0.3
         X += (np.random.random(X.shape) - 0.5) * eps
 
         return X
+
+
 
     @staticmethod
     def sphere(n_samples):
@@ -637,7 +657,7 @@ class GeometryExamples:
         return data / np.linalg.norm(data, axis=1)[:, np.newaxis]
 
     @staticmethod
-    def noisy_circle(n_samples):
+    def noisy_circle(n_samples, seed=0):
         """
         Samples on a circle in 2D.
 
@@ -647,8 +667,12 @@ class GeometryExamples:
             2D circle samples
 
         """
-        X = np.random.random((n_samples,2)) - 0.5
-        return X / np.linalg.norm(X,axis=1).reshape((n_samples,1)) + (np.random.random((n_samples,2)) - 0.5) * 0.2
+        np.random.seed(seed)
+        X = np.random.random((n_samples, 2)) - 0.5
+        return (
+            X / np.linalg.norm(X, axis=1).reshape((n_samples, 1))
+            + (np.random.random((n_samples, 2)) - 0.5) * 0.2
+        )
 
 
 class PlotUtils:
@@ -658,7 +682,7 @@ class PlotUtils:
     """
 
     @staticmethod
-    def imscatter(X, P, dim, zoom=1):
+    def imscatter(X, P, dim, zoom=1, ax=None):
         """
         Plot patches in specified locations in R2
 
@@ -670,13 +694,14 @@ class PlotUtils:
             An array of all of the patches
         dim : int
             The dimension of each patch
+        ax : matplotlib axes, optional
+            If given, plot on those axes, otherwise plot
+            on current axes by calling gca()
 
         """
         # https://stackoverflow.com/questions/22566284/matplotlib-how-to-plot-images-instead-of-points
-        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-        import matplotlib.pyplot as plt
 
-        ax = plt.gca()
+        ax = ax or plt.gca()
         for i in range(P.shape[0]):
             patch = np.reshape(P[i, :], (dim, dim))
             x, y = X[i, :]
@@ -687,11 +712,19 @@ class PlotUtils:
         ax.autoscale()
         ax.set_xticks([])
         ax.set_yticks([])
+        return ax
 
     @staticmethod
-    def plot_patches(P, zoom=1):
+    def plot_patches(P, zoom=1, ax=None):
         """
         Plot patches in a best fitting rectangular grid
+
+        Parameters
+        ----------
+        ax : matplotlib axes, optional
+            If given, plot on those axes, otherwise plot
+            on current axes by calling gca()
+
         """
         N = P.shape[0]
         d = int(np.sqrt(P.shape[1]))
@@ -701,19 +734,25 @@ class PlotUtils:
         X = np.zeros((N, 2))
         X[:, 0] = x.flatten()[0:N]
         X[:, 1] = y.flatten()[0:N]
-        PlotUtils.imscatter(X, P, d, zoom)
+        return PlotUtils.imscatter(X, P, d, zoom, ax)
 
     @staticmethod
-    def plot_proj_boundary():
+    def plot_proj_boundary(ax=None):
         """
-        Depict the boundary of RP2 on the unit circle
-        """
-        import matplotlib.pyplot as plt
+        Plot the boundary of RP2 on the unit circle
 
+        Parameters
+        ----------
+        ax : matplotlib axes, optional
+            If given, plot on those axes, otherwise plot
+            on current axes by calling gca()
+
+        """
+
+        ax = ax or plt.gca()
         t = np.linspace(0, 2 * np.pi, 200)
-        plt.plot(np.cos(t), np.sin(t), "c")
-        plt.axis("equal")
-        ax = plt.gca()
+        ax.plot(np.cos(t), np.sin(t), "c")
+        ax.axis("equal")
         ax.arrow(
             -0.1, 1, 0.001, 0, head_width=0.15, head_length=0.2, fc="c", ec="c", width=0
         )
@@ -729,6 +768,7 @@ class PlotUtils:
             width=0,
         )
         ax.set_facecolor((0.35, 0.35, 0.35))
+        return ax
 
     @staticmethod
     def set_axes_equal(ax):
@@ -741,6 +781,7 @@ class PlotUtils:
         Parameters
         ----------
           ax: a matplotlib axis, e.g., as output from plt.gca().
+
         """
 
         x_limits = ax.get_xlim3d()
@@ -761,47 +802,7 @@ class PlotUtils:
         ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
-
-    @staticmethod
-    def plot_2d_scatter_with_different_colorings(
-        X, colorings=[], cmap="viridis", width=10, point_size=2
-    ):
-        """
-        Plot a 2D point cloud as many times as the number of colorings given.
-
-        Parameters
-        ----------
-        X : ndarray (N, 2)
-            A point cloud in 2D
-        colorings : ndarray (n, N) or list of lists
-            A list of n colorings, each one consisting of a list or array of N floats representing
-            the color of each data point
-        cmap : string
-            Matplotlib colormap to use
-        width : int
-            The width of the final plot
-
-        """
-
-        if len(colorings) == 0:
-            plt.figure(figsize=(4, 4))
-            plt.scatter(X[:, 0], X[:, 1], s=point_size)
-            plt.axis("equal")
-            plt.axis("off")
-        elif len(colorings) == 1:
-            plt.figure(figsize=(4, 4))
-            plt.scatter(X[:, 0], X[:, 1], s=point_size, c=colorings[0], cmap=cmap)
-            plt.axis("equal")
-            plt.axis("off")
-        else:
-            num_colorings = len(colorings)
-            fig, axs = plt.subplots(1, num_colorings)
-            fig.set_figwidth(width)
-
-            for i, c in enumerate(colorings):
-                axs[i].scatter(X[:, 0], X[:, 1], s=point_size, c=c, cmap=cmap)
-                axs[i].set_aspect("equal")
-                axs[i].axis("off")
+        return ax
 
 
 class CircleMapUtils:
@@ -809,6 +810,28 @@ class CircleMapUtils:
     Utilities for adding, rotating, and plotting circle-valued maps.
 
     """
+
+    @staticmethod
+    def center(circle_map):
+        """
+        Rotationally offset a circle-valued map so that most
+        of the points map to the center of the circle (i.e., pi).
+
+        ----------
+        circle_map: ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            points on the circle.
+
+        Returns
+        -------
+        ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            the rotation of the given points by the given offset.
+        """
+        bins=50
+        vals, ticks = np.histogram(circle_map,bins=bins)
+        centered = ((circle_map - ticks[np.argmax(vals)]) + 0.5 * np.pi) % np.pi
+        return centered
 
     @staticmethod
     def offset(circle_map, offset):
@@ -821,13 +844,14 @@ class CircleMapUtils:
             points on the circle.
 
         offset: float
-            A number between 0 and 2pi representing a rotational offset.
+            A number between 0 and 1 representing a rotational offset.
 
         Returns
         -------
         ndarray
             A numpy array of numbers between 0 and 2pi representing
             the rotation of the given points by the given offset.
+
         """
 
         return (circle_map + offset * (2 * np.pi)) % (2 * np.pi)

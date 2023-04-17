@@ -11,7 +11,6 @@ Installing
 Make sure you are using Python 3.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
-`numba`,
 `numpy`,
 `persim`,
 `ripser`, and

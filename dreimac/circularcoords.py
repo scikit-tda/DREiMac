@@ -49,7 +49,7 @@ class CircularCoords(ToroidalCoords):
         cocycle_idx=0,
         partunity_fn=PartUnity.linear,
         standard_range=True,
-        check_and_fix_cocycle_condition=True,
+        check_cocycle_condition=True,
     ):
         """
         Get circular coordinates.
@@ -68,7 +68,7 @@ class CircularCoords(ToroidalCoords):
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
             that the selected cohomology class represents a class in the Cech complex.
-        check_and_fix_cocycle_condition : bool
+        check_cocycle_condition : bool
             Whether to check, and fix if necessary, that the integer cocycle constructed
             using finite field coefficients satisfies the cocycle condition.
 
@@ -84,5 +84,5 @@ class CircularCoords(ToroidalCoords):
             [cocycle_idx],
             partunity_fn,
             standard_range,
-            check_and_fix_cocycle_condition,
+            check_cocycle_condition,
         )[0]

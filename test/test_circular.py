@@ -57,7 +57,7 @@ class TestCircular:
         perc = 0.1
         cocycle_idx_index = 0
         cc = CircularCoords(X, 500, prime=prime)
-        coords = cc.get_coordinates(perc=perc, cocycle_idx=cocycle_idx_index, check_and_fix_cocycle_condition =False)
+        coords = cc.get_coordinates(perc=perc, cocycle_idx=cocycle_idx_index, check_cocycle_condition =False)
 
         assert len(coords) == len(X)
 
@@ -67,7 +67,7 @@ class TestCircular:
         coords_large_perc_fixed = cc.get_coordinates(perc=large_perc, cocycle_idx=cocycle_idx_index)
         assert len(coords_large_perc_fixed) == len(X)
 
-        coords_large_perc_not_fixed = cc.get_coordinates(perc=large_perc, cocycle_idx=cocycle_idx_index, check_and_fix_cocycle_condition=False)
+        coords_large_perc_not_fixed = cc.get_coordinates(perc=large_perc, cocycle_idx=cocycle_idx_index, check_cocycle_condition=False)
 
         assert len(coords_large_perc_not_fixed) == len(X)
         
