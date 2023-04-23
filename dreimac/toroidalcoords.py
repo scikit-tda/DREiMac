@@ -35,7 +35,7 @@ class ToroidalCoords(EMCoords):
 
     def get_coordinates(
         self,
-        perc=0.99,
+        perc=0.5,
         cocycle_idxs=[0],
         partunity_fn=PartUnity.linear,
         standard_range=True,
@@ -56,7 +56,7 @@ class ToroidalCoords(EMCoords):
             A function from the distances of each landmark to a bump function
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
-            that the selected cohomology class represents a class in the Cech complex.
+            that the selected cohomology class represents a non-trivial class in the Cech complex.
         check_cocycle_condition : bool
             Whether to check, and fix if necessary, that the integer cocycle constructed
             using finite field coefficients satisfies the cocycle condition.

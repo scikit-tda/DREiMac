@@ -9,28 +9,34 @@ Here is a simple example; please check the Jupyter notebooks in the `notebooks` 
 
 ```python
 # basic imports
-from dreimac import CircularCoords, GeometryExamples, PlotUtils
+from dreimac import CircularCoords
 from persim import plot_diagrams
 import matplotlib.pyplot as plt
+import numpy as np
 
-# prepar plot with 4 subplots
+# prepare plot with 4 subplots
 f, (a0, a1, a2, a3) = plt.subplots(1, 4, width_ratios=[1, 1, 1, 0.2], figsize=(14,3))
 
 # 200 samples from a noisy circle
-X = GeometryExamples.noisy_circle(200)
-a0.set_title("Input point cloud")
-PlotUtils.plot_2d_scatter_with_different_colorings(X, point_size=10, ax=a0)
+n_samples = 200
+np.random.seed(0)
+Z = np.random.random((n_samples, 2)) - 0.5
+X = Z / np.linalg.norm(Z, axis=1).reshape((n_samples, 1)) + (np.random.random((n_samples, 2)) - 0.5) * 0.2
 
-# the persistence diagram, showing a single prominent class
+# plot point cloud
+a0.scatter(X[:,0], X[:,1], s=10)
+a0.set_title("Input point cloud") ; a0.axis("off") ; a0.set_aspect("equal")
+
+# plot the persistence diagram, showing a single prominent class
 cc = CircularCoords(X, n_landmarks=200)
 plot_diagrams(cc.dgms_, title="Persistence diagram", ax=a1)
 
-# the data colored by the circle-valued map constructed by DREiMac
+# plot the data colored by the circle-valued map constructed by DREiMac
 circular_coordinates = cc.get_coordinates()
-a2.set_title("Input colored by circular coordinate")
-ax = PlotUtils.plot_2d_scatter_with_different_colorings(X, [circular_coordinates], point_size=10, cmap="viridis", ax=a2)
+a2.scatter(X[:,0], X[:,1], c=circular_coordinates, s=10, cmap="viridis")
+a2.set_title("Input colored by circular coordinate") ; a2.axis("off") ; a2.set_aspect("equal")
 
-# colorbar
+# plot colorbar
 img = a3.imshow([[0,1]], cmap="viridis"); a3.set_visible(False)
 cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0","$\pi$","2$\pi$"])
 ```
@@ -73,6 +79,10 @@ pytest .
 DREiMac is based on [cohomology](https://en.wikipedia.org/wiki/Cohomology) and [Eilenberg-MacLane spaces](https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology), and turns persistent cohomology computations into topology-preserving coordinates for data.
 
 For more details see [[1]](#1) for the circular coordinates algorithm, [[2]](#2) for the toroidal coordinates algorithm, and [[3]](#3) for the projective coordinates algorithm.
+
+## Contributing
+
+To contribute, you can fork the project, make your changes, and submit a pull request.
 
 ## Authors
 

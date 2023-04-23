@@ -80,7 +80,6 @@ Index
     dreimac.PlotUtils.plot_patches
     dreimac.PlotUtils.plot_proj_boundary
     dreimac.PlotUtils.set_axes_equal
-    dreimac.PlotUtils.plot_2d_scatter_with_different_colorings
 
 .. rubric:: dreimac.CircleMapUtils
 

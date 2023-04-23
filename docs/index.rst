@@ -21,6 +21,12 @@ DREiMac depends on the following python packages, which will be installed automa
     pip install dreimac
 
 
+Authors
+-------
+
+Chris Tralie, Tom Mease, Jose Perea, Luis Scoccola
+
+
 Contents
 --------
 
@@ -28,3 +34,4 @@ Contents
     :maxdepth: 2
 
     api
+    faq

@@ -1,10 +1,11 @@
-import numpy as np 
+import numpy as np
 import numpy.linalg as linalg
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import time
 import warnings
 from .utils import PartUnity
 from .emcoords import EMCoords
+
 
 class ProjectiveCoords(EMCoords):
     """
@@ -26,14 +27,30 @@ class ProjectiveCoords(EMCoords):
         A partition of unity function
 
     """
+
     def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
-        EMCoords.__init__(self, X=X, n_landmarks=n_landmarks, distance_matrix=distance_matrix, prime=2, maxdim=maxdim, verbose=verbose)
+        EMCoords.__init__(
+            self,
+            X=X,
+            n_landmarks=n_landmarks,
+            distance_matrix=distance_matrix,
+            prime=2,
+            maxdim=maxdim,
+            verbose=verbose,
+        )
         self.type_ = "proj"
         # GUI variables
         self.selected = set([])
         self.u = np.array([0, 0, 1])
 
-    def get_coordinates(self, perc=0.99, cocycle_idx=0, proj_dim=2, partunity_fn=PartUnity.linear, standard_range=True):
+    def get_coordinates(
+        self,
+        perc=0.5,
+        cocycle_idx=0,
+        proj_dim=2,
+        partunity_fn=PartUnity.linear,
+        standard_range=True,
+    ):
         """
         Get real projective coordinates.
 
@@ -50,7 +67,7 @@ class ProjectiveCoords(EMCoords):
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
             that the selected cohomology class represents a class in the Cech complex.
-       
+
         Returns
         -------
         {'variance': ndarray(N-1)
@@ -65,13 +82,14 @@ class ProjectiveCoords(EMCoords):
         ## Step 1: Come up with the representative cocycle as a formal sum
         ## of the chosen cocycles
         homological_dimension = 1
-        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(cocycle_idx, homological_dimension)
+        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(
+            cocycle_idx, homological_dimension
+        )
 
         ## Step 2: Determine radius for balls
         r_cover, _ = EMCoords.get_cover_radius(
             self, perc, cohomdeath_rips, cohombirth_rips, standard_range
         )
-
 
         ## Step 3: Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
@@ -112,33 +130,37 @@ class ProjectiveCoords(EMCoords):
 
         """
         if verbose:
-            print("Doing ppca on %i points in %i dimensions down to %i dimensions"%\
-                    (class_map.shape[0], class_map.shape[1], proj_dim))
+            print(
+                "Doing ppca on %i points in %i dimensions down to %i dimensions"
+                % (class_map.shape[0], class_map.shape[1], proj_dim)
+            )
         X = class_map.T
-        variance = np.zeros(X.shape[0]-1)
+        variance = np.zeros(X.shape[0] - 1)
 
         n_dim = class_map.shape[1]
         tic = time.time()
         # Projective dimensionality reduction : Main Loop
         XRet = None
-        for i in range(n_dim-1):
+        for i in range(n_dim - 1):
             # Project onto an "equator"
             try:
                 _, U = linalg.eigh(X.dot(X.T))
                 U = np.fliplr(U)
             except:
                 U = np.eye(X.shape[0])
-            variance[-i-1] = np.mean((np.pi/2-np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X)))))**2)
+            variance[-i - 1] = np.mean(
+                (np.pi / 2 - np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X))))) ** 2
+            )
             Y = (U.T).dot(X)
             y = np.array(Y[-1, :])
             Y = Y[0:-1, :]
-            X = Y/np.sqrt(1-np.abs(y)**2)[None, :]
-            if i == n_dim-proj_dim-2:
+            X = Y / np.sqrt(1 - np.abs(y) ** 2)[None, :]
+            if i == n_dim - proj_dim - 2:
                 XRet = np.array(X)
         if verbose:
-            print("Elapsed time ppca: %.3g"%(time.time()-tic))
-        #Return the variance and the projective coordinates
-        return {'variance':variance, 'X':XRet.T}
+            print("Elapsed time ppca: %.3g" % (time.time() - tic))
+        # Return the variance and the projective coordinates
+        return {"variance": variance, "X": XRet.T}
 
     @staticmethod
     def rotmat(a, b=np.array([])):
@@ -151,35 +173,39 @@ class ProjectiveCoords(EMCoords):
         a : ndarray (d)
             A d-dimensional vector that should be rotated to b
         b : ndarray(d)
-            A d-dimensional vector that shoudl end up residing at 
+            A d-dimensional vector that shoudl end up residing at
             the north pole (0,0,...,0,1)
 
         """
-        if (len(a.shape) > 1 and np.min(a.shape) > 1)\
-            or (len(b.shape) > 1 and np.min(b.shape) > 1):
+        if (len(a.shape) > 1 and np.min(a.shape) > 1) or (
+            len(b.shape) > 1 and np.min(b.shape) > 1
+        ):
             print("Error: a and b need to be 1D vectors")
             return None
         a = a.flatten()
-        a = a/np.sqrt(np.sum(a**2))
+        a = a / np.sqrt(np.sum(a**2))
         d = a.size
 
         if b.size == 0:
             b = np.zeros(d)
             b[-1] = 1
-        b = b/np.sqrt(np.sum(b**2))
-        
-        c = a - np.sum(b*a)*b
+        b = b / np.sqrt(np.sum(b**2))
+
+        c = a - np.sum(b * a) * b
         # If a numerically coincides with b, don't rotate at all
         if np.sqrt(np.sum(c**2)) < 1e-15:
             return np.eye(d)
 
         # Otherwise, compute rotation matrix
-        c = c/np.sqrt(np.sum(c**2))
-        lam = np.sum(b*a)
-        beta = np.sqrt(1 - np.abs(lam)**2)
-        rot = np.eye(d) - (1-lam)*(c[:, None].dot(c[None, :])) \
-                        - (1-lam)*(b[:, None].dot(b[None, :])) \
-                        + beta*(b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
+        c = c / np.sqrt(np.sum(c**2))
+        lam = np.sum(b * a)
+        beta = np.sqrt(1 - np.abs(lam) ** 2)
+        rot = (
+            np.eye(d)
+            - (1 - lam) * (c[:, None].dot(c[None, :]))
+            - (1 - lam) * (b[:, None].dot(b[None, :]))
+            + beta * (b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
+        )
         return rot
 
     @staticmethod
@@ -210,11 +236,13 @@ class ProjectiveCoords(EMCoords):
         ind = XX[-1, :] < 0
         XX[:, ind] *= -1
         # Do stereographic projection
-        S = XX[0:-1, :]/(1+XX[-1, :])[None, :]
+        S = XX[0:-1, :] / (1 + XX[-1, :])[None, :]
         return S.T
-    
+
     @staticmethod
-    def plot_rp2_circle(ax, arrowcolor='c', facecolor=(0.15, 0.15, 0.15), do_arrows=True, pad=1.1):
+    def plot_rp2_circle(
+        ax, arrowcolor="c", facecolor=(0.15, 0.15, 0.15), do_arrows=True, pad=1.1
+    ):
         """
         Plot a circle with arrows showing the identifications for RP2.
         Set an equal aspect ratio and get rid of the axis ticks, since
@@ -234,21 +262,41 @@ class ProjectiveCoords(EMCoords):
             The dimensions of the window around the unit square
 
         """
-        t = np.linspace(0, 2*np.pi, 200)
+        t = np.linspace(0, 2 * np.pi, 200)
         ax.plot(np.cos(t), np.sin(t), c=arrowcolor)
-        ax.axis('equal')
+        ax.axis("equal")
         ax = plt.gca()
         if do_arrows:
-            ax.arrow(-0.1, 1, 0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
-            ax.arrow(0.1, -1, -0.001, 0, head_width = 0.15, head_length = 0.2, fc = arrowcolor, ec = arrowcolor, width = 0)
+            ax.arrow(
+                -0.1,
+                1,
+                0.001,
+                0,
+                head_width=0.15,
+                head_length=0.2,
+                fc=arrowcolor,
+                ec=arrowcolor,
+                width=0,
+            )
+            ax.arrow(
+                0.1,
+                -1,
+                -0.001,
+                0,
+                head_width=0.15,
+                head_length=0.2,
+                fc=arrowcolor,
+                ec=arrowcolor,
+                width=0,
+            )
         ax.set_facecolor(facecolor)
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlim([-pad, pad])
         ax.set_ylim([-pad, pad])
-    
+
     @staticmethod
-    def plot_rp2_stereo(S, f, arrowcolor='c', facecolor=(0.15, 0.15, 0.15)):
+    def plot_rp2_stereo(S, f, arrowcolor="c", facecolor=(0.15, 0.15, 0.15)):
         """
         Plot a 2D Stereographic Projection
 
@@ -261,12 +309,14 @@ class ProjectiveCoords(EMCoords):
 
         """
         if not (S.shape[1] == 2):
-            warnings.warn("Plotting stereographic RP2 projection, but points are not 2 dimensional")
+            warnings.warn(
+                "Plotting stereographic RP2 projection, but points are not 2 dimensional"
+            )
         plot_rp2_circle(plt.gca(), arrowcolor, facecolor)
         if f.size > S.shape[0]:
-            plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap='afmhot')
+            plt.scatter(S[:, 0], S[:, 1], 20, c=f, cmap="afmhot")
         else:
-            plt.scatter(S[:, 0], S[:, 1], 20, f, cmap='afmhot')
+            plt.scatter(S[:, 0], S[:, 1], 20, f, cmap="afmhot")
 
     @staticmethod
     def plot_rp3_stereo(ax, S, f, draw_sphere=False):
@@ -286,21 +336,23 @@ class ProjectiveCoords(EMCoords):
 
         """
         if not (S.shape[1] == 3):
-            warnings.warn("Plotting stereographic RP3 projection, but points are not 4 dimensional")
+            warnings.warn(
+                "Plotting stereographic RP3 projection, but points are not 4 dimensional"
+            )
         if f.size > S.shape[0]:
-            ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=f, cmap='afmhot')
+            ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=f, cmap="afmhot")
         else:
-            c = plt.get_cmap('afmhot')
+            c = plt.get_cmap("afmhot")
             C = f - np.min(f)
-            C = C/np.max(C)
-            C = c(np.array(np.round(C*255), dtype=np.int32))
+            C = C / np.max(C)
+            C = c(np.array(np.round(C * 255), dtype=np.int32))
             C = C[:, 0:3]
-            ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=C, cmap='afmhot')
+            ax.scatter(S[:, 0], S[:, 1], S[:, 2], c=C, cmap="afmhot")
         if draw_sphere:
-            u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:20j]
-            ax.set_aspect('equal')    
-            x = np.cos(u)*np.sin(v)
-            y = np.sin(u)*np.sin(v)
+            u, v = np.mgrid[0 : 2 * np.pi : 20j, 0 : np.pi : 20j]
+            ax.set_aspect("equal")
+            x = np.cos(u) * np.sin(v)
+            y = np.sin(u) * np.sin(v)
             z = np.cos(v)
             ax.plot_wireframe(x, y, z, color="k")
 
@@ -329,5 +381,5 @@ class ProjectiveCoords(EMCoords):
             magSqr = 1
         u = np.zeros(3)
         u[0:2] = x
-        u[2] = np.sqrt(1-magSqr)
+        u[2] = np.sqrt(1 - magSqr)
         return x, u

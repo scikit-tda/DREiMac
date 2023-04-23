@@ -118,19 +118,16 @@ class EMCoords(object):
         rips_threshold : float
 
         """
-        start = cohomdeath_rips
-        end = cohombirth_rips/2 if standard_range else cohombirth_rips
+        start = 2*cohomdeath_rips if standard_range else cohomdeath_rips
+        end = cohombirth_rips
         if start > end:
             raise Exception(
                 "The cohomology class selected is too short, try setting standard_range to False."
             )
+        self.rips_threshold_ = (1 - perc) * start + perc * end
+        self.r_cover_ = self.rips_threshold_ / 2
 
-        r_cover = (1 - perc) * start + perc * end
-        self.r_cover_ = r_cover
-        rips_threshold = 2 * r_cover if standard_range else r_cover
-        self.rips_threshold_ = rips_threshold
-
-        return r_cover, rips_threshold
+        return self.r_cover_, self.rips_threshold_
 
     def get_covering_partition(self, r_cover, partunity_fn):
         """
