@@ -3,7 +3,7 @@
 DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
 Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, and in the real projective space.
 
-## Usage
+## Basic usage
 
 Here is a simple example; please check the Jupyter notebooks in the `notebooks` directory for further examples.
 
@@ -43,6 +43,10 @@ cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0"
 
 ![output](https://user-images.githubusercontent.com/1679929/232109124-bf2653e5-6f91-409d-b972-7104b96b3430.png)
 
+## More examples
+
+For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/docs) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
+
 ## Installing
 
 Make sure you are using Python 3.
@@ -66,7 +70,7 @@ Please include as much information as possible, including your system's informat
 
 ## Running the tests
 
-You can run the tests by running the following commands from the root directory of a clone of this repository.
+If you want to check that your local installation is running properly, you may run the tests by running the following commands from the root directory of a clone of this repository.
 
 ```bash
 pip install pytest

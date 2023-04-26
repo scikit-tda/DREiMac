@@ -88,6 +88,7 @@ Index
 
     dreimac.CircleMapUtils.offset
     dreimac.CircleMapUtils.linear_combination
+    dreimac.CircleMapUtils.to_sinebow
     dreimac.CircleMapUtils.levelset_coloring
 
 

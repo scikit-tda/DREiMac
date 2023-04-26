@@ -16,6 +16,7 @@ author = "Chris Tralie, Tom Mease, Jose A. Perea, Luis Scoccola"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "nbsphinx"
 ]
 
 templates_path = ["_templates"]

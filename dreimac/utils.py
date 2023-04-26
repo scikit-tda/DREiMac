@@ -982,11 +982,34 @@ class CircleMapUtils:
     """
 
     @staticmethod
+    def to_sinebow(circle_map):
+        """
+        Given a circle map construct an array of the same shape that can be fed as color in a matplotlib
+        scatterplot to simulate the sinebow colormap.
+
+        Parameters
+        ----------
+        circle_map: ndarray
+            A numpy array of numbers between 0 and 2pi representing
+            points on the circle.
+
+        Returns
+        -------
+        ndarray
+            A numpy array of floats to be used as color in a matplotlib scatterplot.
+
+        """
+        h = np.mod(circle_map/(2*np.pi) + 0.5, 1)
+        f = lambda x : np.sin(np.pi * x)**2
+        return np.stack([f(3/6-h), f(5/6-h), f(7/6-h)], -1)
+
+    @staticmethod
     def center(circle_map):
         """
         Rotationally offset a circle-valued map so that most
         of the points map to the center of the circle (i.e., pi).
 
+        Parameters
         ----------
         circle_map: ndarray
             A numpy array of numbers between 0 and 2pi representing
@@ -1000,7 +1023,7 @@ class CircleMapUtils:
         """
         bins = 50
         vals, ticks = np.histogram(circle_map, bins=bins)
-        centered = ((circle_map - ticks[np.argmax(vals)]) + 0.5 * np.pi) % np.pi
+        centered = ((circle_map - ticks[np.argmax(vals)]) + np.pi) % (2 * np.pi)
         return centered
 
     @staticmethod
