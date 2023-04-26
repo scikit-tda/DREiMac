@@ -11,6 +11,13 @@ import numpy as np
 import scipy.sparse as sparse
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from numba import jit
+from .combinatorial import (
+    combinatorial_number_system_forward,
+    combinatorial_number_system_d1_forward,
+    combinatorial_number_system_d2_forward,
+    number_of_simplices_of_dimension,
+)
 
 
 class GeometryUtils:
@@ -218,83 +225,236 @@ class CohomologyUtils:
         return simplex, sign
 
     @staticmethod
-    def sparse_cocycle_to_vector(sparse_cocycle, simplex_to_vector_index, dtype):
-        n_simplices = len(simplex_to_vector_index)
+    def sparse_cocycle_to_vector(sparse_cocycle, lookup_table, n_vertices, dtype):
+        dimension = sparse_cocycle.shape[1] - 2
+        n_simplices = number_of_simplices_of_dimension(
+            dimension, n_vertices, lookup_table
+        )
         cocycle_as_vector = np.zeros((n_simplices,), dtype=dtype)
         for entry in sparse_cocycle:
             value = entry[-1]
             unordered_simplex = np.array(entry[:-1], dtype=int)
             ordered_simplex, sign = CohomologyUtils.order_simplex(unordered_simplex)
-            # if the cocycle takes a non-zero value on a simplex
-            # then record that value in cocycle_as_vector at the index corresponding to the simplex
-            if ordered_simplex in simplex_to_vector_index:
-                cocycle_as_vector[simplex_to_vector_index[ordered_simplex]] = (
-                    value * sign
-                )
+            simplex_index = combinatorial_number_system_forward(
+                ordered_simplex, lookup_table
+            )
+            cocycle_as_vector[simplex_index] = value * sign
         return cocycle_as_vector
 
     @staticmethod
-    def make_delta0(dist_mat, threshold):
+    def make_delta0(dist_mat: np.ndarray, threshold: float, lookup_table: np.ndarray):
         n_points = dist_mat.shape[0]
-        edge_pair_to_row_index = {}
-        row_index = []
-        col_index = []
-        value = []
-        n_edges = 0
-        for i in range(n_points):
-            for j in range(i + 1, n_points):
-                if dist_mat[i, j] < threshold:
-                    edge_pair_to_row_index[(i, j)] = n_edges
+        n_edges = (n_points * (n_points - 1)) // 2
 
-                    row_index.append(n_edges)
-                    col_index.append(i)
-                    value.append(-1)
+        max_n_entries = 2 * n_edges
+        rows = np.empty((max_n_entries,), dtype=int)
+        columns = np.empty((max_n_entries,), dtype=int)
+        values = np.empty((max_n_entries,), dtype=float)
 
-                    row_index.append(n_edges)
-                    col_index.append(j)
-                    value.append(1)
+        @jit(fastmath=True)
+        def _delta0_get_row_columns_values(
+            dist_mat: np.ndarray,
+            threshold: float,
+            lookup_table: np.ndarray,
+            n_points: int,
+            rows: np.ndarray,
+            columns: np.ndarray,
+            values: np.ndarray,
+        ):
+            n_entries = 0
+            for i in range(n_points):
+                for j in range(i + 1, n_points):
+                    if dist_mat[i, j] < threshold:
+                        row_index = combinatorial_number_system_d1_forward(
+                            i, j, lookup_table
+                        )
+                        rows[n_entries] = row_index
+                        columns[n_entries] = i
+                        values[n_entries] = 1
+                        n_entries += 1
 
-                    n_edges += 1
+                        rows[n_entries] = row_index
+                        columns[n_entries] = j
+                        values[n_entries] = -1
+                        n_entries += 1
+            return n_entries
 
-        delta0 = sparse.coo_matrix(
-            (value, (row_index, col_index)), shape=(n_edges, n_points)
-        ).tocsr()
-        return delta0, edge_pair_to_row_index
+        n_entries = _delta0_get_row_columns_values(
+            dist_mat, threshold, lookup_table, n_points, rows, columns, values
+        )
+
+        return sparse.csr_array(
+            (values[:n_entries], (rows[:n_entries], columns[:n_entries])),
+            shape=(n_edges, n_points),
+        )
 
     @staticmethod
-    def make_delta1(dist_mat, edge_pair_to_row_index, threshold):
+    def make_delta1(dist_mat: np.ndarray, threshold: float, lookup_table: np.ndarray):
         n_points = dist_mat.shape[0]
-        n_edges = len(edge_pair_to_row_index)
-        face_triple_to_row_index = {}
-        row_index = []
-        col_index = []
-        value = []
-        n_faces = 0
-        for i in range(n_points):
-            for j in range(i + 1, n_points):
-                if dist_mat[i, j] < threshold:
-                    for k in range(j + 1, n_points):
-                        if dist_mat[i, k] < threshold and dist_mat[j, k] < threshold:
-                            face_triple_to_row_index[(i, j, k)] = n_faces
+        n_edges = (n_points * (n_points - 1)) // 2
+        n_faces = number_of_simplices_of_dimension(2, n_points, lookup_table)
 
-                            row_index.append(n_faces)
-                            col_index.append(edge_pair_to_row_index[(i, j)])
-                            value.append(1)
+        max_n_entries = 3 * n_faces
+        rows = np.empty((max_n_entries,), dtype=int)
+        columns = np.empty((max_n_entries,), dtype=int)
+        values = np.empty((max_n_entries,), dtype=float)
 
-                            row_index.append(n_faces)
-                            col_index.append(edge_pair_to_row_index[(j, k)])
-                            value.append(1)
+        @jit(fastmath=True)
+        def _delta1_get_row_columns_values(
+            dist_mat: np.ndarray,
+            threshold: float,
+            lookup_table: np.ndarray,
+            n_points: int,
+            rows: np.ndarray,
+            columns: np.ndarray,
+            values: np.ndarray,
+        ):
+            n_entries = 0
+            for i in range(n_points):
+                for j in range(i + 1, n_points):
+                    if dist_mat[i, j] < threshold:
+                        for k in range(j + 1, n_points):
+                            if (
+                                dist_mat[i, k] < threshold
+                                and dist_mat[j, k] < threshold
+                            ):
+                                row_index = combinatorial_number_system_d2_forward(
+                                    i, j, k, lookup_table
+                                )
+                                column_index_ij = (
+                                    combinatorial_number_system_d1_forward(
+                                        i, j, lookup_table
+                                    )
+                                )
+                                column_index_jk = (
+                                    combinatorial_number_system_d1_forward(
+                                        j, k, lookup_table
+                                    )
+                                )
+                                column_index_ik = (
+                                    combinatorial_number_system_d1_forward(
+                                        i, k, lookup_table
+                                    )
+                                )
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_ij
+                                values[n_entries] = 1
+                                n_entries += 1
 
-                            row_index.append(n_faces)
-                            col_index.append(edge_pair_to_row_index[(i, k)])
-                            value.append(-1)
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_jk
+                                values[n_entries] = 1
+                                n_entries += 1
 
-                            n_faces += 1
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_ik
+                                values[n_entries] = -1
+                                n_entries += 1
 
-        delta1 = sparse.coo_matrix(
-            (value, (row_index, col_index)), shape=(n_faces, n_edges), dtype=int
+            return n_entries
+
+        n_entries = _delta1_get_row_columns_values(
+            dist_mat, threshold, lookup_table, n_points, rows, columns, values
         )
-        return delta1, face_triple_to_row_index
+
+        # print("delta 1")
+        # print(n_entries)
+        # print(max_n_entries)
+
+        return sparse.csr_array(
+            (values[:n_entries], (rows[:n_entries], columns[:n_entries])),
+            shape=(n_faces, n_edges),
+        )
+
+    @staticmethod
+    def make_delta1_compact(
+        dist_mat: np.ndarray, threshold: float, lookup_table: np.ndarray
+    ):
+        """
+        Like [make_delta1] but it does not use the combinatorial number system for the rows
+        (i.e., for the 2-simplices, and only has a row per 2-simplex *that exists in the filtration at that point*.
+        This is used to solve the integer linear problem since, in that case, we do not need to index the 2-simplices
+        so only having the ones that exist in the filtration at that point results in a matrix with potentially much
+        fewer rows.
+        """
+        n_points = dist_mat.shape[0]
+        n_edges = (n_points * (n_points - 1)) // 2
+        n_faces = number_of_simplices_of_dimension(2, n_points, lookup_table)
+
+        max_n_entries = 3 * n_faces
+        rows = np.empty((max_n_entries,), dtype=int)
+        columns = np.empty((max_n_entries,), dtype=int)
+        values = np.empty((max_n_entries,), dtype=float)
+
+        @jit(fastmath=True)
+        def _delta1_get_row_columns_values(
+            dist_mat: np.ndarray,
+            threshold: float,
+            lookup_table: np.ndarray,
+            n_points: int,
+            rows: np.ndarray,
+            columns: np.ndarray,
+            values: np.ndarray,
+        ):
+            n_entries = 0
+            n_actual_faces = 0
+            for i in range(n_points):
+                for j in range(i + 1, n_points):
+                    if dist_mat[i, j] < threshold:
+                        for k in range(j + 1, n_points):
+                            if (
+                                dist_mat[i, k] < threshold
+                                and dist_mat[j, k] < threshold
+                            ):
+                                # row_index = combinatorial_number_system_d2_forward(
+                                #    i, j, k, lookup_table
+                                # )
+                                row_index = n_actual_faces
+                                column_index_ij = (
+                                    combinatorial_number_system_d1_forward(
+                                        i, j, lookup_table
+                                    )
+                                )
+                                column_index_jk = (
+                                    combinatorial_number_system_d1_forward(
+                                        j, k, lookup_table
+                                    )
+                                )
+                                column_index_ik = (
+                                    combinatorial_number_system_d1_forward(
+                                        i, k, lookup_table
+                                    )
+                                )
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_ij
+                                values[n_entries] = 1
+                                n_entries += 1
+
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_jk
+                                values[n_entries] = 1
+                                n_entries += 1
+
+                                rows[n_entries] = row_index
+                                columns[n_entries] = column_index_ik
+                                values[n_entries] = -1
+                                n_entries += 1
+
+                                n_actual_faces += 1
+            return n_entries, n_actual_faces
+
+        n_entries, n_actual_faces = _delta1_get_row_columns_values(
+            dist_mat, threshold, lookup_table, n_points, rows, columns, values
+        )
+
+        # print("delta 1")
+        # print(n_entries)
+        # print(max_n_entries)
+
+        return sparse.csr_array(
+            (values[:n_entries], (rows[:n_entries], columns[:n_entries])),
+            shape=(n_actual_faces, n_edges),
+        )
 
 
 class PartUnity:
@@ -627,10 +787,22 @@ class GeometryExamples:
         """
 
         sample_interval_small_circle = np.linspace(0, 2 * np.pi, 50, endpoint=False)
-        small_circle = np.array([np.sin(sample_interval_small_circle), np.cos(sample_interval_small_circle)]).T
+        small_circle = np.array(
+            [np.sin(sample_interval_small_circle), np.cos(sample_interval_small_circle)]
+        ).T
         sample_interval_big_circle = np.linspace(0, 2 * np.pi, 500, endpoint=False)
-        big_circle1 = np.array([2 * np.sin(sample_interval_big_circle), 2 * np.cos(sample_interval_big_circle)]).T + np.array([4,0])
-        big_circle2 = np.array([2.5 * np.sin(sample_interval_big_circle), 2.5 * np.cos(sample_interval_big_circle)]).T + np.array([-4,0])
+        big_circle1 = np.array(
+            [
+                2 * np.sin(sample_interval_big_circle),
+                2 * np.cos(sample_interval_big_circle),
+            ]
+        ).T + np.array([4, 0])
+        big_circle2 = np.array(
+            [
+                2.5 * np.sin(sample_interval_big_circle),
+                2.5 * np.cos(sample_interval_big_circle),
+            ]
+        ).T + np.array([-4, 0])
         X = np.vstack((small_circle, big_circle1, big_circle2))
 
         np.random.seed(0)
@@ -638,8 +810,6 @@ class GeometryExamples:
         X += (np.random.random(X.shape) - 0.5) * eps
 
         return X
-
-
 
     @staticmethod
     def sphere(n_samples):
@@ -828,8 +998,8 @@ class CircleMapUtils:
             A numpy array of numbers between 0 and 2pi representing
             the rotation of the given points by the given offset.
         """
-        bins=50
-        vals, ticks = np.histogram(circle_map,bins=bins)
+        bins = 50
+        vals, ticks = np.histogram(circle_map, bins=bins)
         centered = ((circle_map - ticks[np.argmax(vals)]) + 0.5 * np.pi) % np.pi
         return centered
 
