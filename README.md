@@ -87,6 +87,12 @@ For more details see [[1]](#1) for the circular coordinates algorithm, [[2]](#2)
 ## Contributing
 
 To contribute, you can fork the project, make your changes, and submit a pull request.
+If you're looking for a way to contribute, you could consider:
+* adding documentation to existing functionality;
+* adding missing tests to improve coverage;
+* adding a Jupyter notebook with a tutorial or demo;
+* adding functionality and the corresponding documentation and tests;
+* responding to a bug or feature request in the Github issues.
 
 ## Authors
 
