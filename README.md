@@ -1,3 +1,8 @@
+[![PyPI version](https://badge.fury.io/py/dreimac.svg)](https://badge.fury.io/py/dreimac)
+[![Downloads](https://static.pepy.tech/badge/dreimac)](https://pepy.tech/project/dreimac)
+[![codecov](https://codecov.io/gh/scikit-tda/dreimac/branch/master/graph/badge.svg)](https://codecov.io/gh/scikit-tda/dreimac)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # DREiMac: Dimension Reduction with Eilenberg-MacLane Coordinates
 
 DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
@@ -49,7 +54,7 @@ For Jupyter notebooks with more examples, please check the [documentation](https
 
 ## Installing
 
-Make sure you are using Python 3.
+Make sure you are using Python 3.6-3.9.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
 `numba`,
