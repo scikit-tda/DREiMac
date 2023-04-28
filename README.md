@@ -90,7 +90,11 @@ To contribute, you can fork the project, make your changes, and submit a pull re
 
 ## Authors
 
-Chris Tralie, Tom Mease, Jose Perea, Luis Scoccola
+Jose A. Perea, Luis Scoccola, Chris Tralie
+
+## Acknowledgements
+
+We thank Tom Mease for contributions and discussions.
 
 ## References
 

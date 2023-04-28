@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "DREiMac"
-copyright = "2020, Christopher J. Tralie and Jose A. Perea"
-author = "Chris Tralie, Tom Mease, Jose A. Perea, Luis Scoccola"
+copyright = "2020, Jose A. Perea, Luis Scoccola, Chris Tralie"
+author = "Jose A. Perea, Luis Scoccola, Chris Tralie"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -24,7 +24,7 @@ DREiMac depends on the following python packages, which will be installed automa
 Authors
 -------
 
-Chris Tralie, Tom Mease, Jose Perea, Luis Scoccola
+Jose A. Perea, Luis Scoccola, Chris Tralie
 
 
 Contents
