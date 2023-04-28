@@ -30,8 +30,30 @@ Chris Tralie, Tom Mease, Jose Perea, Luis Scoccola
 Contents
 --------
 
+
 .. toctree::
     :maxdepth: 2
 
     api
     faq
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: Examples 
+
+    notebooks/coil20
+    notebooks/bullseye
+    notebooks/genusTwoSurface
+    notebooks/ImagePatches
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: Choosing parameters
+
+    notebooks/parameters_n_landmarks_and_cocycle_idx
+    notebooks/parameter_perc
+    notebooks/parameters_prime_and_check_cocycle_condition
+
+
