@@ -45,7 +45,7 @@ setup(
         ],
         'examples': []
     },
-    python_requires='==3.8,3.9',
+    python_requires='>=3.8, <3.10',
     classifiers=[
         'Intended Audience :: Science/Research',
         'Intended Audience :: Education',
