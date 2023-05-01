@@ -611,7 +611,7 @@ class GeometryExamples:
         Parameters
         ----------
         n_samples : int
-            Number of random samples on the projective plane
+            Number of random samples on the torus
         R: float
             Outer radius
         r: float
