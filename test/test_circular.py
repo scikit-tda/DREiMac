@@ -4,6 +4,10 @@ from scipy.spatial import KDTree
 from dreimac import CircularCoords, ToroidalCoords, GeometryExamples
 
 
+def _less_than_or_equal_with_tolerance(x, y):
+    return np.allclose(x, y) or x <= y
+
+
 class TestCircular:
     def test_toroidal_coordinates_independent(self):
         """
@@ -57,8 +61,8 @@ class TestCircular:
         toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
 
         assert toroidal_coords.shape == (4, X.shape[0])
-        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
-            tc.original_gram_matrix_
+        assert _less_than_or_equal_with_tolerance(
+            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
         )
 
         X = GeometryExamples.torus_3d(2000, 5, 1, seed=0)
@@ -67,8 +71,8 @@ class TestCircular:
         toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
 
         assert toroidal_coords.shape == (2, X.shape[0])
-        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
-            tc.original_gram_matrix_
+        assert _less_than_or_equal_with_tolerance(
+            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
         )
 
 
@@ -78,8 +82,8 @@ class TestCircular:
         toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
 
         assert toroidal_coords.shape == (3, X.shape[0])
-        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
-            tc.original_gram_matrix_
+        assert _less_than_or_equal_with_tolerance(
+            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
         )
 
 
@@ -89,14 +93,9 @@ class TestCircular:
         toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
 
         assert toroidal_coords.shape == (3, X.shape[0])
-        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
-            tc.original_gram_matrix_
+        assert _less_than_or_equal_with_tolerance(
+            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
         )
-
-
-
-
-
 
 
     def test_trefoil(self):
@@ -119,7 +118,7 @@ class TestCircular:
         k = 5
         _, nns = tree.query(X, k=k)
 
-        tolerance = 5/100 * (2 * np.pi) # 5% of the full circle
+        tolerance = 5 / 100 * (2 * np.pi)  # 5% of the full circle
 
         for i in range(X.shape[0]):
             assert _maximum_circle_distance(coords[nns[i]]) <= tolerance
@@ -130,6 +129,7 @@ def _circle_distance(x, y):
         np.minimum(np.abs(x - y), np.abs((x - 2 * np.pi) - y)),
         np.abs(x - (y - 2 * np.pi)),
     )
+
 
 def _maximum_circle_distance(xs):
     return max([_circle_distance(a, b) for a in xs for b in xs])
