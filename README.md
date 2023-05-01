@@ -54,7 +54,7 @@ For Jupyter notebooks with more examples, please check the [documentation](https
 
 ## Installing
 
-Make sure you are using Python 3.6-3.9.
+Make sure you are using Python 3.8 or 3.9.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
 `numba`,

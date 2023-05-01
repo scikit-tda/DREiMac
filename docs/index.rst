@@ -8,7 +8,7 @@ Currently, DREiMac is able to find topology-preserving representations of point 
 Installing
 ----------
 
-Make sure you are using Python 3.
+Make sure you are using Python 3.8 or 3.9.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
 `numpy`,
