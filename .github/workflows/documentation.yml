@@ -10,20 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: conda-incubator/setup-miniconda@v2
         with:
+          auto-update-conda: true
           python-version: "3.9"
+          activate-environment: test
+          channels: conda-forge, defaults
       - name: Install dependencies
-        run: |
+        shell: bash -l {0}
+        run: |    
+          conda install sphinx sphinx_rtd_theme nbsphinx pandoc
           python -m pip install --upgrade pip
-          pip install sphinx sphinx_rtd_theme nbsphinx
           pip install .
       - name: Sphinx build
+        shell: bash -l {0}
         run: |
           sphinx-build docs _build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/deploy-docs' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
