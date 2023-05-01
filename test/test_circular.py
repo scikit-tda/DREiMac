@@ -61,6 +61,44 @@ class TestCircular:
             tc.original_gram_matrix_
         )
 
+        X = GeometryExamples.torus_3d(2000, 5, 1, seed=0)
+        tc = ToroidalCoords(X, n_landmarks=500)
+        cocycle_idxs = [0, 1]
+        toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
+
+        assert toroidal_coords.shape == (2, X.shape[0])
+        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
+            tc.original_gram_matrix_
+        )
+
+
+        X = GeometryExamples.bullseye()
+        tc = ToroidalCoords(X, n_landmarks=300)
+        cocycle_idxs = [0, 1, 2]
+        toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
+
+        assert toroidal_coords.shape == (3, X.shape[0])
+        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
+            tc.original_gram_matrix_
+        )
+
+
+        X = GeometryExamples.three_circles()
+        tc = ToroidalCoords(X, n_landmarks=300)
+        cocycle_idxs = [0, 1, 2]
+        toroidal_coords = tc.get_coordinates(cocycle_idxs=cocycle_idxs)
+
+        assert toroidal_coords.shape == (3, X.shape[0])
+        assert np.linalg.norm(tc.gram_matrix_) <= np.linalg.norm(
+            tc.original_gram_matrix_
+        )
+
+
+
+
+
+
+
     def test_trefoil(self):
         """Check that circular coordinates returns a continuous map, even when the lifted
         cochain may fail to be a cocycle and fix the cocycle using the integer linear system
