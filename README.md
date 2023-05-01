@@ -50,7 +50,7 @@ cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0"
 
 ## More examples
 
-For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/docs) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
+For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/index.html) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
 
 ## Installing
 
@@ -69,13 +69,13 @@ pip install dreimac
 
 ## Documentation and support
 
-You can find the documentation [here](https://scikit-tda.org/DREiMac/docs), including the [API reference](https://scikit-tda.org/DREiMac/docs/api).
+You can find the documentation [here](https://scikit-tda.org/DREiMac/index.html), including the [API reference](https://scikit-tda.org/DREiMac/api.html).
 If you have further questions, please [open an issue](https://github.com/scikit-tda/DREiMac/issues/new) and we will do our best to help you.
 Please include as much information as possible, including your system's information, warnings, logs, screenshots, and anything else you think may be of use.
 
 ## Running the tests
 
-If you want to check that your local installation is running properly, you may run the tests by running the following commands from the root directory of a clone of this repository.
+If you want to check that your machine is running DREiMac properly, you may run the tests by running the following commands from the root directory of a clone of this repository.
 
 ```bash
 pip install pytest
