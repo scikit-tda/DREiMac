@@ -3,14 +3,10 @@ Programmer: Chris Tralie (ctralie@alumni.princeton.edu) and Luis Scoccola
 Purpose: To provide a number of utility functions, including
 - Quickly computing all pairs self-similarity and cross-similarity matrices
 - Doing "greedy permutations" 
-- Dome topological operations like adding cocycles and creating partitions of unity
 - Some relevant geometric examples for tests
-- Some utilities for plotting
 """
 import numpy as np
 import scipy.sparse as sparse
-import matplotlib.pyplot as plt
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from numba import jit
 from .combinatorial import (
     combinatorial_number_system_forward,
@@ -21,7 +17,11 @@ from .combinatorial import (
 
 
 class GeometryUtils:
-    # Self-Similarity And Cross-Similarity
+    """
+    Utilities for subsampling from point clouds and distance matrices.
+
+    """
+
     @staticmethod
     def get_csm(X, Y):
         """
@@ -36,7 +36,7 @@ class GeometryUtils:
             A matrix holding the coordinates of N points
 
         Returns
-        ------
+        -------
         D : ndarray (M, N)
             An MxN Euclidean cross-similarity matrix
 
@@ -59,7 +59,7 @@ class GeometryUtils:
             A matrix holding the coordinates of N points on RP^{d-1}
 
         Returns
-        ------
+        -------
         D : ndarray (M, N)
             An MxN  cross-similarity matrix
 
@@ -518,20 +518,22 @@ class PartUnity:
             data points
         r_cover: float
             Covering radius
+
         Returns
         -------
         varphi: ndarray(n)
             The bump function
+
         """
         return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
 
-# TODO: These probably belong in tdasets, but I'll keep them here for now
 class GeometryExamples:
     """
     Finite samples from topologically nontrivial spaces.
 
     """
+    # TODO: These probably belong in tdasets, but I'll keep them here for now
 
     @staticmethod
     def line_patches(dim, n_angles, n_offsets, sigma):
@@ -845,138 +847,9 @@ class GeometryExamples:
         )
 
 
-class PlotUtils:
-    """
-    Plotting utilities for DREiMac's output.
-
-    """
-
-    @staticmethod
-    def imscatter(X, P, dim, zoom=1, ax=None):
-        """
-        Plot patches in specified locations in R2
-
-        Parameters
-        ----------
-        X : ndarray (N, 2)
-            The positions of each patch in R2
-        P : ndarray (N, dim*dim)
-            An array of all of the patches
-        dim : int
-            The dimension of each patch
-        ax : matplotlib axes, optional
-            If given, plot on those axes, otherwise plot
-            on current axes by calling gca()
-
-        """
-        # https://stackoverflow.com/questions/22566284/matplotlib-how-to-plot-images-instead-of-points
-
-        ax = ax or plt.gca()
-        for i in range(P.shape[0]):
-            patch = np.reshape(P[i, :], (dim, dim))
-            x, y = X[i, :]
-            im = OffsetImage(patch, zoom=zoom, cmap="gray")
-            ab = AnnotationBbox(im, (x, y), xycoords="data", frameon=False)
-            ax.add_artist(ab)
-        ax.update_datalim(X)
-        ax.autoscale()
-        ax.set_xticks([])
-        ax.set_yticks([])
-        return ax
-
-    @staticmethod
-    def plot_patches(P, zoom=1, ax=None):
-        """
-        Plot patches in a best fitting rectangular grid
-
-        Parameters
-        ----------
-        ax : matplotlib axes, optional
-            If given, plot on those axes, otherwise plot
-            on current axes by calling gca()
-
-        """
-        N = P.shape[0]
-        d = int(np.sqrt(P.shape[1]))
-        dgrid = int(np.ceil(np.sqrt(N)))
-        ex = np.arange(dgrid)
-        x, y = np.meshgrid(ex, ex)
-        X = np.zeros((N, 2))
-        X[:, 0] = x.flatten()[0:N]
-        X[:, 1] = y.flatten()[0:N]
-        return PlotUtils.imscatter(X, P, d, zoom, ax)
-
-    @staticmethod
-    def plot_proj_boundary(ax=None):
-        """
-        Plot the boundary of RP2 on the unit circle
-
-        Parameters
-        ----------
-        ax : matplotlib axes, optional
-            If given, plot on those axes, otherwise plot
-            on current axes by calling gca()
-
-        """
-
-        ax = ax or plt.gca()
-        t = np.linspace(0, 2 * np.pi, 200)
-        ax.plot(np.cos(t), np.sin(t), "c")
-        ax.axis("equal")
-        ax.arrow(
-            -0.1, 1, 0.001, 0, head_width=0.15, head_length=0.2, fc="c", ec="c", width=0
-        )
-        ax.arrow(
-            0.1,
-            -1,
-            -0.001,
-            0,
-            head_width=0.15,
-            head_length=0.2,
-            fc="c",
-            ec="c",
-            width=0,
-        )
-        ax.set_facecolor((0.35, 0.35, 0.35))
-        return ax
-
-    @staticmethod
-    def set_axes_equal(ax):
-        # taken from https://stackoverflow.com/a/31364297/2171328
-        """
-        Make axes of 3D plot have equal scale so that spheres appear as spheres,
-        cubes as cubes, etc..  This is one possible solution to Matplotlib's
-        ax.set_aspect('equal') and ax.axis('equal') not working for 3D.
-
-        Parameters
-        ----------
-          ax: a matplotlib axis, e.g., as output from plt.gca().
-
-        """
-
-        x_limits = ax.get_xlim3d()
-        y_limits = ax.get_ylim3d()
-        z_limits = ax.get_zlim3d()
-
-        x_range = abs(x_limits[1] - x_limits[0])
-        x_middle = np.mean(x_limits)
-        y_range = abs(y_limits[1] - y_limits[0])
-        y_middle = np.mean(y_limits)
-        z_range = abs(z_limits[1] - z_limits[0])
-        z_middle = np.mean(z_limits)
-
-        # The plot bounding box is a sphere in the sense of the infinity
-        # norm, hence I call half the max range the plot radius.
-        plot_radius = 0.5 * max([x_range, y_range, z_range])
-
-        ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-        ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-        ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
-        return ax
-
-
 class CircleMapUtils:
     """
+
     Utilities for adding, rotating, and plotting circle-valued maps.
 
     """
@@ -1136,3 +1009,115 @@ class CircleMapUtils:
             return y if y < 1 else 2 - y
 
         return np.array([sigmoid(triangle((c * n_levelsets) % 2)) for c in colors])
+
+
+class ProjectiveMapUtils:
+    """
+    Utilities for manipulating projective space-valued maps.
+
+    """
+
+    @staticmethod
+    def get_stereo_proj_codim1(pX, u=np.array([])):
+        """
+        Do a projective stereographic projection
+
+        Parameters
+        ----------
+        pX: ndarray(N, d)
+            A collection of N points in d dimensions
+        u: ndarray(d)
+            A unit vector representing the north pole
+            for the stereographic projection
+
+        Returns
+        -------
+        S: ndarray(N, d-1)
+            The stereographically projected coordinates
+
+        """
+        def _rotmat(a, b=np.array([])):
+            """
+            Construct a d x d rotation matrix that rotates
+            a vector a so that it coincides with a vector b
+
+            Parameters
+            ----------
+            a : ndarray (d)
+                A d-dimensional vector that should be rotated to b
+            b : ndarray(d)
+                A d-dimensional vector that shoudl end up residing at
+                the north pole (0,0,...,0,1)
+
+            """
+            if (len(a.shape) > 1 and np.min(a.shape) > 1) or (
+                len(b.shape) > 1 and np.min(b.shape) > 1
+            ):
+                print("Error: a and b need to be 1D vectors")
+                return None
+            a = a.flatten()
+            a = a / np.sqrt(np.sum(a**2))
+            d = a.size
+
+            if b.size == 0:
+                b = np.zeros(d)
+                b[-1] = 1
+            b = b / np.sqrt(np.sum(b**2))
+
+            c = a - np.sum(b * a) * b
+            # If a numerically coincides with b, don't rotate at all
+            if np.sqrt(np.sum(c**2)) < 1e-15:
+                return np.eye(d)
+
+            # Otherwise, compute rotation matrix
+            c = c / np.sqrt(np.sum(c**2))
+            lam = np.sum(b * a)
+            beta = np.sqrt(1 - np.abs(lam) ** 2)
+            rot = (
+                np.eye(d)
+                - (1 - lam) * (c[:, None].dot(c[None, :]))
+                - (1 - lam) * (b[:, None].dot(b[None, :]))
+                + beta * (b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
+            )
+            return rot
+
+        X = pX.T
+        # Put points all on the same hemisphere
+        if u.size == 0:
+            _, U = np.linalg.eigh(X.dot(X.T))
+            u = U[:, 0]
+        XX = _rotmat(u).dot(X)
+        ind = XX[-1, :] < 0
+        XX[:, ind] *= -1
+        # Do stereographic projection
+        S = XX[0:-1, :] / (1 + XX[-1, :])[None, :]
+        return S.T
+
+
+    @staticmethod
+    def circle_to_3dnorthpole(x):
+        """
+        Convert a point selected on the circle to a 3D
+        unit vector on the upper hemisphere
+
+        Parameters
+        ----------
+        x: ndarray(2)
+            Selected point in the circle
+
+        Returns
+        -------
+        x: ndarray(2)
+            Selected point in the circle (possibly clipped to the circle)
+        u: ndarray(3)
+            Unit vector on the upper hemisphere
+
+        """
+        magSqr = np.sum(x**2)
+        if magSqr > 1:
+            x /= np.sqrt(magSqr)
+            magSqr = 1
+        u = np.zeros(3)
+        u[0:2] = x
+        u[2] = np.sqrt(1 - magSqr)
+        return x, u

@@ -12,11 +12,13 @@ Index
     dreimac.CircularCoords
     dreimac.ToroidalCoords
     dreimac.ProjectiveCoords
-    dreimac.GeometryUtils
     dreimac.PartUnity
     dreimac.GeometryExamples
     dreimac.PlotUtils
     dreimac.CircleMapUtils
+    dreimac.ProjectiveMapUtils
+    dreimac.GeometryUtils
+
 
 .. rubric:: dreimac.CircularCoords methods
 
@@ -24,6 +26,7 @@ Index
     :nosignatures:
 
     dreimac.CircularCoords.get_coordinates
+
 
 .. rubric:: dreimac.ToroidalCoords methods
 
@@ -39,16 +42,9 @@ Index
     :nosignatures:
 
     dreimac.ProjectiveCoords.get_coordinates
-    dreimac.ProjectiveCoords.get_stereo_proj_codim1
 
-.. rubric:: dreimac.GeometryUtils methods
 
-.. autosummary::
-    :nosignatures:
-
-    dreimac.GeometryUtils.get_greedy_perm_pc
-
-.. rubric:: dreimac.PartUnity
+.. rubric:: dreimac.PartUnity methods
 
 .. autosummary::
     :nosignatures:
@@ -57,7 +53,8 @@ Index
     dreimac.PartUnity.quadratic
     dreimac.PartUnity.exp
 
-.. rubric:: dreimac.GeometryExamples
+
+.. rubric:: dreimac.GeometryExamples methods
 
 .. autosummary::
     :nosignatures:
@@ -72,7 +69,7 @@ Index
     dreimac.GeometryExamples.noisy_circle
 
 
-.. rubric:: dreimac.PlotUtils
+.. rubric:: dreimac.PlotUtils methods
 
 .. autosummary::
     :nosignatures:
@@ -81,7 +78,8 @@ Index
     dreimac.PlotUtils.plot_proj_boundary
     dreimac.PlotUtils.set_axes_equal
 
-.. rubric:: dreimac.CircleMapUtils
+
+.. rubric:: dreimac.CircleMapUtils methods
 
 .. autosummary::
     :nosignatures:
@@ -90,6 +88,23 @@ Index
     dreimac.CircleMapUtils.linear_combination
     dreimac.CircleMapUtils.to_sinebow
     dreimac.CircleMapUtils.levelset_coloring
+
+
+.. rubric:: dreimac.ProjectiveMapUtils methods
+
+.. autosummary::
+    :nosignatures:
+
+    dreimac.ProjectiveMapUtils.get_stereo_proj_codim1
+
+
+
+.. rubric:: dreimac.GeometryUtils methods
+
+.. autosummary::
+    :nosignatures:
+
+    dreimac.GeometryUtils.get_greedy_perm_pc
 
 
 Details
@@ -104,4 +119,28 @@ Details
 
 
 .. autoclass:: dreimac.ProjectiveCoords
+    :members:
+
+
+.. autoclass:: dreimac.PartUnity
+    :members:
+
+
+.. autoclass:: dreimac.GeometryExamples
+    :members:
+
+
+.. autoclass:: dreimac.PlotUtils
+    :members:
+
+
+.. autoclass:: dreimac.CircleMapUtils
+    :members:
+
+
+.. autoclass:: dreimac.ProjectiveMapUtils
+    :members:
+
+
+.. autoclass:: dreimac.GeometryUtils
     :members:
