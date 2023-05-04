@@ -1,12 +1,9 @@
-import sys
-import os
-import platform
-
 from setuptools import setup
 
 ## Get version information from _version.py
 import re
-VERSIONFILE="dreimac/_version.py"
+
+VERSIONFILE = "dreimac/_version.py"
 verstrline = open(VERSIONFILE, "rt").read()
 VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
 mo = re.search(VSRE, verstrline, re.M)
@@ -15,9 +12,15 @@ if mo:
 else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
-# Use README.md as the package long description  
-with open('README.md') as f:
+# Use README.md as the package long description
+with open("README.md") as f:
     long_description = f.read()
+
+
+# get requirements
+def requirements():
+    with open("requirements.txt") as f:
+        return [line.strip() for line in f if line.strip()]
 
 
 setup(
@@ -28,35 +31,23 @@ setup(
     long_description_content_type="text/markdown",
     author="Jose A. Perea, Luis Scoccola, Chris Tralie",
     author_email="ctralie@alumni.princeton.edu",
-    license='Apache2',
-    packages=['dreimac'],
-    setup_requires=[
-        'cython', 'numpy'
-    ],
-    install_requires=[
-        'cython', 'numpy', 'scipy', 'matplotlib', 'persim', 'ripser', 'numba'
-    ],
+    license="Apache2",
+    packages=["dreimac"],
+    install_requires=requirements(),
     extras_require={
-        'testing': [ # `pip install -e ".[testing]"``
-            'pytest'  
-        ],
-        'docs': [ # `pip install -e ".[docs]"`
-            'sktda_docs_config'
-        ],
-        'examples': []
+        "testing": ["pytest"],
+        "examples": [],
     },
-    python_requires='>=3.8, <3.10',
+    python_requires=">=3.8, <3.10",
     classifiers=[
-        'Intended Audience :: Science/Research',
-        'Intended Audience :: Education',
-        'Intended Audience :: Financial and Insurance Industry',
-        'Intended Audience :: Healthcare Industry',
-        'Topic :: Scientific/Engineering :: Information Analysis',
-        'Topic :: Scientific/Engineering :: Mathematics',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9'
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Education",
+        "Intended Audience :: Financial and Insurance Industry",
+        "Intended Audience :: Healthcare Industry",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
-    keywords='topological data analysis, dimension reduction'
+    keywords="topological data analysis, dimension reduction",
 )
