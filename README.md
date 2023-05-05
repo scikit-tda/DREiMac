@@ -8,6 +8,9 @@
 DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
 Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, and in the real projective space.
 
+In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent homology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, or a projective space), which preserves the given topological feature in a precise sense.
+For more information, please check the theory and examples in the [documentation](https://scikit-tda.org/DREiMac/index.html).
+
 ## Basic usage
 
 Here is a simple example; please check the Jupyter notebooks in the `notebooks` directory for further examples.
@@ -83,12 +86,6 @@ pip install -r requirements.txt
 pytest .
 ```
 
-## Details about the theory
-
-DREiMac is based on [cohomology](https://en.wikipedia.org/wiki/Cohomology) and [Eilenberg-MacLane spaces](https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology), and turns persistent cohomology computations into topology-preserving coordinates for data.
-
-For more details see [[1]](#1) for the circular coordinates algorithm, [[2]](#2) for the toroidal coordinates algorithm, and [[3]](#3) for the projective coordinates algorithm.
-
 ## Contributing
 
 To contribute, you can fork the project, make your changes, and submit a pull request.
@@ -106,17 +103,6 @@ Jose A. Perea, Luis Scoccola, Chris Tralie
 ## Acknowledgements
 
 We thank Tom Mease for contributions and discussions.
-
-## References
-
-<a id="1">[1]</a> 
-*Sparse Circular Coordinates via Principal Z-bundles*. J.A. Perea. The Abel Symposium (Book Series): Topological Data Analysis, vol. 15, no.1, pp. 435-458, 2020
-
-<a id="2">[2]</a> 
-*Toroidal Coordinates: Decorrelating Circular Coordinates With Lattice Reduction*. L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, and J. A. Perea. 39th International Symposium on Computational Geometry, 2023
-
-<a id="3">[3]</a> 
-*Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations*. J.A. Perea. Discrete Comput Geom 59, 175–225, 2018
 
 ## License
 

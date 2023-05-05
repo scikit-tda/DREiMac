@@ -16,6 +16,7 @@ author = "Jose A. Perea, Luis Scoccola, Chris Tralie"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.mathjax",
     "nbsphinx"
 ]
 
