@@ -1,0 +1,36 @@
+name: docs
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+    contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: "3.9"
+          activate-environment: test
+          channels: conda-forge, defaults
+      - name: Install dependencies
+        shell: bash -l {0}
+        run: |    
+          conda install sphinx sphinx_rtd_theme nbsphinx pandoc
+          python -m pip install --upgrade pip
+          pip install .
+      - name: Sphinx build
+        shell: bash -l {0}
+        run: |
+          sphinx-build docs _build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true

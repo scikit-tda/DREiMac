@@ -1,4 +1,5 @@
 [run]
 branch = True
 omit = 
-    dreimacjs/*
+    */test*
+    dreimac/plotting_utils.py
