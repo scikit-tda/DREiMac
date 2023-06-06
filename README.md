@@ -77,7 +77,7 @@ pip install dreimac
 To install from the experimental branch (this branch):
 
 ~~~~~ bash
-pip install git+https://github.com/scikit-tda/DREiMac.git
+pip install git+https://github.com/scikit-tda/DREiMac.git@experimental
 ~~~~~
 
 ## Documentation and support
