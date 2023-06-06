@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
+
 class PlotUtils:
     """
     Plotting utilities for DREiMac's output.
@@ -30,10 +31,13 @@ class PlotUtils:
         # https://stackoverflow.com/questions/22566284/matplotlib-how-to-plot-images-instead-of-points
 
         ax = ax or plt.gca()
+        min_color = np.min(P)
+        max_color = np.max(P)
         for i in range(P.shape[0]):
             patch = np.reshape(P[i, :], (dim, dim))
             x, y = X[i, :]
             im = OffsetImage(patch, zoom=zoom, cmap="gray")
+            im.get_children()[0].set_clim(vmin=min_color, vmax=max_color)
             ab = AnnotationBbox(im, (x, y), xycoords="data", frameon=False)
             ax.add_artist(ab)
         ax.update_datalim(X)
@@ -99,6 +103,118 @@ class PlotUtils:
         return ax
 
     @staticmethod
+    def plot_2sphere_boundary(ax=None):
+        """
+        Plot the boundary of two sphere hemispheres
+
+        Parameters
+        ----------
+        ax : matplotlib axes, optional
+            If given, plot on those axes, otherwise plot
+            on current axes by calling gca()
+
+        """
+
+        second_circle_offset = 2.5
+        ax = ax or plt.gca()
+        t = np.linspace(0, 2 * np.pi, 200)
+        ax.plot(np.cos(t), np.sin(t), "c")
+        ax.plot(np.cos(t) + second_circle_offset, np.sin(t), "c")
+        ax.axis("equal")
+
+        ax.arrow(
+            0, 0.9, 0, 0.001, head_width=0.15, head_length=0.2, fc="c", ec="c", width=0
+        )
+        ax.arrow(
+            second_circle_offset,
+            1.1,
+            0,
+            -0.001,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+
+        ax.arrow(
+            0,
+            -0.9,
+            0,
+            -0.001,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+        ax.arrow(
+            second_circle_offset,
+            -1.1,
+            0,
+            0.001,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+
+        ax.arrow(
+            0.9, 0, 0.001, 0, head_width=0.15, head_length=0.2, fc="c", ec="c", width=0
+        )
+        ax.arrow(
+            second_circle_offset + 1.1,
+            0,
+            -0.001,
+            0,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+
+        ax.arrow(
+            -0.9,
+            0,
+            -0.001,
+            0,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+        ax.arrow(
+            second_circle_offset - 1.1,
+            0,
+            0.001,
+            0,
+            head_width=0.15,
+            head_length=0.2,
+            fc="c",
+            ec="c",
+            width=0,
+        )
+
+        ax.set_facecolor((0.35, 0.35, 0.35))
+
+        return ax
+
+    @staticmethod
+    def plot_3sphere_mesh(n_parallels = 10, n_meridians = 20, alpha=0.1, ax=None):
+        # TODO: docstring
+
+        ax = ax or plt.gca()
+        u, v = np.mgrid[0 : 2 * np.pi : n_meridians * 1j, 0 : np.pi : n_parallels * 1j]
+        x = np.cos(u) * np.sin(v)
+        y = np.sin(u) * np.sin(v)
+        z = np.cos(v)
+        ax.plot_wireframe(x, y, z, color="black", alpha=alpha)
+        return ax
+
+    @staticmethod
     def set_axes_equal(ax):
         # taken from https://stackoverflow.com/a/31364297/2171328
         """
@@ -145,6 +261,7 @@ class PlotUtils:
             A function with which to color the points, or a list of colors
 
         """
+
         def _plot_rp2_circle(
             ax, arrowcolor="c", facecolor=(0.15, 0.15, 0.15), do_arrows=True, pad=1.1
         ):
@@ -247,4 +364,3 @@ class PlotUtils:
             y = np.sin(u) * np.sin(v)
             z = np.cos(v)
             ax.plot_wireframe(x, y, z, color="k")
-

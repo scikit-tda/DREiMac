@@ -2,11 +2,6 @@ from .utils import PartUnity
 from .toroidalcoords import ToroidalCoords
 
 
-"""#########################################
-        Main Circular Coordinates Class
-#########################################"""
-
-
 class CircularCoords(ToroidalCoords):
     """
     Object that performs circular coordinates via persistent cohomology of

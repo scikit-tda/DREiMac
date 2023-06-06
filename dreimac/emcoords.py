@@ -22,13 +22,15 @@ class EMCoords(object):
             A point cloud with N points in d dimensions
         n_landmarks: int
             Number of landmarks to use
+            TODO: describe None case
         distance_matrix: boolean
             If true, treat X as a distance matrix instead of a point cloud
+            TODO: describe non-square distance matrix case
         prime : int
             Field coefficient with which to compute rips on landmarks
         maxdim : int
-            Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
-            but it may be of interest to see other dimensions (e.g. for a torus)
+            Maximum dimension of homology. 
+
         """
         assert maxdim >= 1
         self.verbose = verbose
@@ -36,8 +38,14 @@ class EMCoords(object):
         if verbose:
             tic = time.time()
             print("Doing TDA...")
+        if distance_matrix is False:
+            ripser_metric_input = X 
+        elif X.shape[0] == X.shape[1]:
+            ripser_metric_input = X 
+        else:
+            ripser_metric_input = X[:,:X.shape[0]]
         res = ripser(
-            X,
+            ripser_metric_input,
             distance_matrix=distance_matrix,
             coeff=prime,
             maxdim=maxdim,
@@ -48,20 +56,27 @@ class EMCoords(object):
             print("Elapsed time persistence: %.3g seconds" % (time.time() - tic))
         self.prime_ = prime
         self.dgms_ = res["dgms"]
-        self.dist_land_data_ = res["dperm2all"]
-        self.coverage_ = np.max(np.min(self.dist_land_data_, 1))
         self.idx_land_ = res["idx_perm"]
+        self.n_landmarks_ = len(self.idx_land_)
+        #self.dist_land_data_ = res["dperm2all"]
+        if distance_matrix is False:
+            self.dist_land_data_ = res["dperm2all"]
+        elif X.shape[0] == X.shape[1]:
+            self.dist_land_data_ = res["dperm2all"]
+        else:
+            self.dist_land_data_ = X[self.idx_land_,:]
+        self.coverage_ = np.max(np.min(self.dist_land_data_, 1))
         self.dist_land_land_ = self.dist_land_data_[:, self.idx_land_]
         self.cocycles_ = res["cocycles"]
         # Sort persistence diagrams in descending order of persistence
-        idxs = np.argsort(self.dgms_[1][:, 0] - self.dgms_[1][:, 1])
-        self.dgms_[1] = self.dgms_[1][idxs, :]
-        self.dgm1_lifetime = np.array(self.dgms_[1])
-        self.dgm1_lifetime[:, 1] -= self.dgm1_lifetime[:, 0]
-        self.cocycles_[1] = [self.cocycles_[1][idx] for idx in idxs]
+        for i in range(1, maxdim+1):
+            idxs = np.argsort(self.dgms_[i][:, 0] - self.dgms_[i][:, 1])
+            self.dgms_[i] = self.dgms_[i][idxs, :]
+            dgm_lifetime = np.array(self.dgms_[i])
+            dgm_lifetime[:, 1] -= dgm_lifetime[:, 0]
+            self.cocycles_[i] = [self.cocycles_[i][idx] for idx in idxs]
         CohomologyUtils.reindex_cocycles(self.cocycles_, self.idx_land_, X.shape[0])
 
-        self.n_landmarks_ = n_landmarks
         self.type_ = "emcoords"
 
     def get_representative_cocycle(self, cohomology_class, homological_dimension):

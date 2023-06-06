@@ -5,8 +5,12 @@ Purpose: To provide a number of utility functions, including
 - Doing "greedy permutations" 
 - Some relevant geometric examples for tests
 """
+import time
 import numpy as np
 import scipy.sparse as sparse
+from scipy.spatial import KDTree
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import shortest_path
 from numba import jit
 from .combinatorial import (
     combinatorial_number_system_forward,
@@ -152,6 +156,39 @@ class GeometryUtils:
             ds = np.minimum(ds, D[idx, :])
         DLandmarks = D[perm, :]
         return {"perm": perm, "lambdas": lambdas, "DLandmarks": DLandmarks}
+
+
+    @staticmethod
+    def landmark_geodesic_distance(X, n_landmarks, n_neighbors):
+        spatial_tree = KDTree(X)
+        distances_nn, indices_nn = spatial_tree.query(X,k=n_neighbors)
+        # https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997
+        n_queries = X.shape[0]
+        n_nonzero = n_queries * n_neighbors
+        indptr = np.arange(0, n_nonzero + 1, n_neighbors)
+        kneighbors_graph = csr_matrix(
+            (distances_nn.ravel(), indices_nn.ravel(), indptr), shape=(n_queries, n_queries)
+        )
+
+        # furthest point sampling
+        n_points = X.shape[0]
+        perm = np.zeros(n_landmarks, dtype=np.int64)
+        lambdas = np.zeros(n_landmarks)
+        ds = shortest_path(kneighbors_graph, indices = 0, directed=False)
+        D = np.zeros((n_landmarks, n_points))
+        D[0, :] = ds
+        for i in range(1, n_landmarks):
+            idx = np.argmax(ds)
+            perm[i] = idx
+            lambdas[i] = ds[idx]
+            thisds  = shortest_path(kneighbors_graph, indices = idx, directed=False)
+            D[i, :] = thisds
+            ds = np.minimum(ds, thisds)
+
+        perm_rest_points = np.setdiff1d(np.arange(0,n_points, dtype=int), perm, assume_unique=True)
+        perm_all_points = np.concatenate((perm,perm_rest_points))
+
+        return D[:,perm_all_points], perm_all_points
 
 
 class CohomologyUtils:
@@ -456,6 +493,107 @@ class CohomologyUtils:
             shape=(n_actual_faces, n_edges),
         )
 
+    @staticmethod
+    def make_delta2_compact(
+        dist_mat: np.ndarray, threshold: float, lookup_table: np.ndarray
+    ):
+        """
+        Like [make_delta1_compact] but for delta2.
+        """
+        n_points = dist_mat.shape[0]
+        n_faces = number_of_simplices_of_dimension(2, n_points, lookup_table)
+        n_three_simplices = number_of_simplices_of_dimension(3, n_points, lookup_table)
+
+        max_n_entries = 4 * n_three_simplices
+        rows = np.empty((max_n_entries,), dtype=int)
+        columns = np.empty((max_n_entries,), dtype=int)
+        values = np.empty((max_n_entries,), dtype=float)
+
+        @jit(fastmath=True)
+        def _delta2_get_row_columns_values(
+            dist_mat: np.ndarray,
+            threshold: float,
+            lookup_table: np.ndarray,
+            n_points: int,
+            rows: np.ndarray,
+            columns: np.ndarray,
+            values: np.ndarray,
+        ):
+            n_entries = 0
+            n_actual_three_simplices = 0
+            for i in range(n_points):
+                for j in range(i + 1, n_points):
+                    if dist_mat[i, j] < threshold:
+                        for k in range(j + 1, n_points):
+                            if (
+                                dist_mat[i, k] < threshold
+                                and dist_mat[j, k] < threshold
+                            ):
+                                for l in range(k + 1, n_points):
+                                    if (
+                                        dist_mat[i, l] < threshold
+                                        and dist_mat[j, l] < threshold
+                                        and dist_mat[k, l] < threshold
+                                    ):
+                                        row_index = n_actual_three_simplices
+
+                                        column_index_ijk = (
+                                            combinatorial_number_system_d2_forward(
+                                                i, j, k, lookup_table
+                                            )
+                                        )
+                                        column_index_ijl = (
+                                            combinatorial_number_system_d2_forward(
+                                                i, j, l, lookup_table
+                                            )
+                                        )
+                                        column_index_ikl = (
+                                            combinatorial_number_system_d2_forward(
+                                                i, k, l, lookup_table
+                                            )
+                                        )
+                                        column_index_jkl = (
+                                            combinatorial_number_system_d2_forward(
+                                                j, k, l, lookup_table
+                                            )
+                                        )
+
+                                        rows[n_entries] = row_index
+                                        columns[n_entries] = column_index_ijk
+                                        values[n_entries] = 1
+                                        n_entries += 1
+
+                                        rows[n_entries] = row_index
+                                        columns[n_entries] = column_index_ijl
+                                        values[n_entries] = -1
+                                        n_entries += 1
+
+                                        rows[n_entries] = row_index
+                                        columns[n_entries] = column_index_ikl
+                                        values[n_entries] = 1
+                                        n_entries += 1
+
+                                        rows[n_entries] = row_index
+                                        columns[n_entries] = column_index_jkl
+                                        values[n_entries] = -1
+                                        n_entries += 1
+
+                                        n_actual_three_simplices += 1
+            return n_entries, n_actual_three_simplices
+
+        n_entries, n_actual_three_simplices = _delta2_get_row_columns_values(
+            dist_mat, threshold, lookup_table, n_points, rows, columns, values
+        )
+
+        # print("delta 1")
+        # print(n_entries)
+        # print(max_n_entries)
+
+        return sparse.csr_array(
+            (values[:n_entries], (rows[:n_entries], columns[:n_entries])),
+            shape=(n_actual_three_simplices, n_faces),
+        )
+
 
 class PartUnity:
     """
@@ -528,11 +666,104 @@ class PartUnity:
         return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
 
+class EquivariantPCA:
+    @staticmethod
+    def ppca(class_map, proj_dim, projective_dim_red_mode="one-by-one", verbose=False):
+        """
+        Principal Projective Component Analysis (Jose Perea 2017)
+
+        Parameters
+        ----------
+        class_map : ndarray (N, d)
+            For all N points of the dataset, membership weights to
+            d different classes are the coordinates
+        proj_dim : integer
+            The dimension of the projective space onto which to project
+        verbose : boolean
+            Whether to print information during iterations
+
+        Returns
+        -------
+        {'variance': ndarray(N-1)
+            The variance captured by each dimension
+        'X': ndarray(N, proj_dim+1)
+            The projective coordinates
+        }
+
+        """
+        if verbose:
+            print(
+                "Doing ppca on %i points in %i dimensions down to %i dimensions"
+                % (class_map.shape[0], class_map.shape[1], proj_dim)
+            )
+
+        X = class_map.T
+        variance = np.zeros(X.shape[0] - 1)
+        n_dim = class_map.shape[1]
+
+        def _one_step_linear_reduction(X, dims_to_keep):
+            try:
+                _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
+                U = np.fliplr(U)
+            except:
+                U = np.eye(X.shape[0])
+            Y = (np.conjugate(U).T).dot(X)
+            Y = Y[:dims_to_keep, :]
+            X = Y / np.linalg.norm(Y, axis=0)[None, :]
+            return X
+
+        total_dims_to_keep = proj_dim + 1
+
+        modes = ["direct", "exponential", "one-by-one"]
+        mode = projective_dim_red_mode
+        if mode == "direct":
+            XRet = _one_step_linear_reduction(X, total_dims_to_keep)
+        elif mode == "exponential":
+            to_keep_this_iter = (n_dim - total_dims_to_keep) // 2
+            while to_keep_this_iter > 0:
+                X = _one_step_linear_reduction(
+                    X, total_dims_to_keep + to_keep_this_iter
+                )
+                to_keep_this_iter = to_keep_this_iter // 2
+            if X.shape[0] > total_dims_to_keep:
+                X = _one_step_linear_reduction(X, total_dims_to_keep)
+            XRet = X
+
+        elif mode == "one-by-one":
+            tic = time.time()
+            # Projective dimensionality reduction : Main Loop
+            XRet = None
+            for i in range(n_dim - 1):
+                if i == n_dim - proj_dim - 1:
+                    XRet = X
+                try:
+                    _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
+                    U = np.fliplr(U)
+                    # U, _, _ = np.linalg.svd(X)
+                except:
+                    U = np.eye(X.shape[0])
+                variance[-i - 1] = np.mean(
+                    (np.pi / 2 - np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X)))))
+                    ** 2
+                )
+                Y = (np.conjugate(U).T).dot(X)
+                # y = np.array(Y[-1, :])
+                Y = Y[0:-1, :]
+                # X = Y / np.sqrt(1 - np.abs(y) ** 2)[None, :]
+                X = Y / np.linalg.norm(Y, axis=0)[None, :]
+            if verbose:
+                print("Elapsed time ppca: %.3g" % (time.time() - tic))
+
+        # Return the variance and the projective coordinates
+        return {"variance": variance, "X": XRet.T}
+
+
 class GeometryExamples:
     """
     Finite samples from topologically nontrivial spaces.
 
     """
+
     # TODO: These probably belong in tdasets, but I'll keep them here for now
 
     @staticmethod
@@ -572,6 +803,32 @@ class GeometryExamples:
                 patch = np.exp(-(patch**2) / sigma**2)
                 P[idx, :] = patch.flatten()
                 idx += 1
+        return P
+
+    @staticmethod
+    def moving_dot(sqrt_num_images, sigma=3):
+        """
+        TODO
+        """
+
+        def _gkern(l=5, mu=0, sig=1.0):
+            ax = np.linspace(-(l - 1) / 2.0, (l - 1) / 2.0, l)
+            gauss_x = np.exp(-0.5 * np.square(ax - mu[0]) / np.square(sig))
+            gauss_y = np.exp(-0.5 * np.square(ax - mu[1]) / np.square(sig))
+            kernel = np.outer(gauss_x, gauss_y)
+            return kernel
+
+        img_len = 10
+        P = np.zeros((sqrt_num_images**2, img_len * img_len))
+        bound = 15
+        xs = bound * np.power(np.linspace(-1, 1, sqrt_num_images), 3)
+        # xs = bound * np.linspace(-1,1,sqrt_num_images)
+        ys = -xs
+        i = 0
+        for x in xs:
+            for y in ys:
+                P[i] = _gkern(l=img_len, mu=np.array([x, y]), sig=sigma).flatten()
+                i += 1
         return P
 
     @staticmethod
@@ -846,6 +1103,44 @@ class GeometryExamples:
             + (np.random.random((n_samples, 2)) - 0.5) * 0.2
         )
 
+    @staticmethod
+    def moore_space_distance_matrix(rough_n_points=2000, prime=3):
+        np.random.seed(0)
+        X = (np.random.random((rough_n_points,2)) - 0.5) * 2
+        X = X[np.linalg.norm(X,axis=1)<= 1]
+        q = prime
+
+        def _rot_mat(theta):
+            c, s = np.cos(theta), np.sin(theta)
+            return np.array(((c, -s), (s, c)))
+
+        R = _rot_mat((2 * np.pi) / q)
+
+        n_points = X.shape[0]
+        dist_mat = np.zeros((n_points, n_points))
+
+        @jit
+        def _fill_dist_mat(X, dist_mat, rot_mat, prime):
+            for i, x in enumerate(X):
+                for j, y in enumerate(X):
+                    proj_x_to_boundary = x / np.linalg.norm(x)
+
+                    dist_mat[i, j] = min(
+                        # stay inside disk
+                        np.linalg.norm(x - y),
+                        # go to boundary and then to y
+                        np.linalg.norm(x - proj_x_to_boundary)
+                        + min(
+                            [
+                                np.linalg.norm(
+                                    np.linalg.matrix_power(rot_mat, i) @ proj_x_to_boundary - y
+                                )
+                                for i in range(prime)
+                            ]
+                        ),
+                    )
+        _fill_dist_mat(X, dist_mat, R, prime)
+        return dist_mat, X
 
 class CircleMapUtils:
     """
@@ -872,9 +1167,9 @@ class CircleMapUtils:
             A numpy array of floats to be used as color in a matplotlib scatterplot.
 
         """
-        h = np.mod(circle_map/(2*np.pi) + 0.5, 1)
-        f = lambda x : np.sin(np.pi * x)**2
-        return np.stack([f(3/6-h), f(5/6-h), f(7/6-h)], -1)
+        h = np.mod(circle_map / (2 * np.pi) + 0.5, 1)
+        f = lambda x: np.sin(np.pi * x) ** 2
+        return np.stack([f(3 / 6 - h), f(5 / 6 - h), f(7 / 6 - h)], -1)
 
     @staticmethod
     def center(circle_map):
@@ -1036,63 +1331,18 @@ class ProjectiveMapUtils:
             The stereographically projected coordinates
 
         """
-        def _rotmat(a, b=np.array([])):
-            """
-            Construct a d x d rotation matrix that rotates
-            a vector a so that it coincides with a vector b
-
-            Parameters
-            ----------
-            a : ndarray (d)
-                A d-dimensional vector that should be rotated to b
-            b : ndarray(d)
-                A d-dimensional vector that shoudl end up residing at
-                the north pole (0,0,...,0,1)
-
-            """
-            if (len(a.shape) > 1 and np.min(a.shape) > 1) or (
-                len(b.shape) > 1 and np.min(b.shape) > 1
-            ):
-                print("Error: a and b need to be 1D vectors")
-                return None
-            a = a.flatten()
-            a = a / np.sqrt(np.sum(a**2))
-            d = a.size
-
-            if b.size == 0:
-                b = np.zeros(d)
-                b[-1] = 1
-            b = b / np.sqrt(np.sum(b**2))
-
-            c = a - np.sum(b * a) * b
-            # If a numerically coincides with b, don't rotate at all
-            if np.sqrt(np.sum(c**2)) < 1e-15:
-                return np.eye(d)
-
-            # Otherwise, compute rotation matrix
-            c = c / np.sqrt(np.sum(c**2))
-            lam = np.sum(b * a)
-            beta = np.sqrt(1 - np.abs(lam) ** 2)
-            rot = (
-                np.eye(d)
-                - (1 - lam) * (c[:, None].dot(c[None, :]))
-                - (1 - lam) * (b[:, None].dot(b[None, :]))
-                + beta * (b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
-            )
-            return rot
 
         X = pX.T
         # Put points all on the same hemisphere
         if u.size == 0:
             _, U = np.linalg.eigh(X.dot(X.T))
             u = U[:, 0]
-        XX = _rotmat(u).dot(X)
+        XX = ProjectiveMapUtils.rotmat(u).dot(X)
         ind = XX[-1, :] < 0
         XX[:, ind] *= -1
         # Do stereographic projection
         S = XX[0:-1, :] / (1 + XX[-1, :])[None, :]
         return S.T
-
 
     @staticmethod
     def circle_to_3dnorthpole(x):
@@ -1121,3 +1371,116 @@ class ProjectiveMapUtils:
         u[0:2] = x
         u[2] = np.sqrt(1 - magSqr)
         return x, u
+
+    @staticmethod
+    def hopf_map(X):
+        """
+        TODO
+        """
+        Y = np.zeros((2 * X.shape[1], X.shape[0]))
+        Y[::2, :] = np.real(X).T
+        Y[1::2, :] = np.imag(X).T
+        return np.array(
+            [
+                2 * (np.prod(Y[[0, 2], :], axis=0) + np.prod(Y[[1, 3], :], axis=0)),
+                2 * (np.prod(Y[[1, 2], :], axis=0) - np.prod(Y[[0, 3], :], axis=0)),
+                np.sum(Y[[0, 1], :] ** 2, axis=0) - np.sum(Y[[2, 3], :] ** 2, axis=0),
+            ]
+        ).T
+
+    @staticmethod
+    def stereographic_projection_hemispheres(X, center_vector=None):
+        """
+        TODO
+        """
+
+        def _stereo(v):
+            return v[:, :-1] / (1 - v[:, -1])[:, None]
+
+        n = X.shape[1]
+        if center_vector is None:
+            center_vector = np.zeros((n))
+            center_vector[-1] = 1
+        centering_rotation = ProjectiveMapUtils.rotmat(center_vector)
+        X_ = X @ centering_rotation.T
+        e1 = np.zeros((n - 1))
+        e1[0] = 1
+        res = np.zeros((X_.shape[0], n - 1))
+        res[X_[:, -1] < 0, :] = _stereo(X_[X_[:, -1] < 0, :])
+        Y = X_[X_[:, -1] >= 0, :]
+        Y[:, -1] *= -1
+        res[X_[:, -1] >= 0, :] = _stereo(Y) + 2.5 * e1
+        return res
+
+    @staticmethod
+    def rotmat(a, b=np.array([])):
+        """
+        Construct a d x d rotation matrix that rotates
+        a vector a so that it coincides with a vector b
+
+        Parameters
+        ----------
+        a : ndarray (d)
+            A d-dimensional vector that should be rotated to b
+        b : ndarray(d)
+            A d-dimensional vector that should end up residing at
+            the north pole (0,0,...,0,1)
+
+        """
+        if (len(a.shape) > 1 and np.min(a.shape) > 1) or (
+            len(b.shape) > 1 and np.min(b.shape) > 1
+        ):
+            print("Error: a and b need to be 1D vectors")
+            return None
+        a = a.flatten()
+        a = a / np.sqrt(np.sum(a**2))
+        d = a.size
+
+        if b.size == 0:
+            b = np.zeros(d)
+            b[-1] = 1
+        b = b / np.sqrt(np.sum(b**2))
+
+        c = a - np.sum(b * a) * b
+        # If a numerically coincides with b, don't rotate at all
+        if np.sqrt(np.sum(c**2)) < 1e-15:
+            return np.eye(d)
+
+        # Otherwise, compute rotation matrix
+        c = c / np.sqrt(np.sum(c**2))
+        lam = np.sum(b * a)
+        beta = np.sqrt(1 - np.abs(lam) ** 2)
+        rot = (
+            np.eye(d)
+            - (1 - lam) * (c[:, None].dot(c[None, :]))
+            - (1 - lam) * (b[:, None].dot(b[None, :]))
+            + beta * (b[:, None].dot(c[None, :]) - c[:, None].dot(b[None, :]))
+        )
+        return rot
+
+
+class LensMapUtils:
+    # TODO: docstring
+
+    @staticmethod
+    def lens_3D_to_disk_3D(X,q):
+        # TODO: docstring
+        def _point_lens_to_sphere(p,q):
+            p1 = p[0]
+            p2 = p[1]
+            arg_z = np.mod(np.angle(p1), 2 * np.pi)
+            theta = np.mod(arg_z, 2 * np.pi / q)
+
+            k = np.floor((arg_z - theta) / (2 * np.pi / q))
+
+            phi = np.mod(np.angle(p2), 2 * np.pi) - 2 * k * np.pi / q
+
+            r = np.abs(p2)
+            x, y, z = (
+                r * np.cos(phi),
+                r * np.sin(phi),
+                (q / np.pi) * (theta - np.pi / q) * np.sqrt(1 - r**2),
+            )
+            return [x,y,z]
+
+        return np.array([_point_lens_to_sphere(p,q) for p in X])

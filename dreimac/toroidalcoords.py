@@ -3,7 +3,7 @@ import scipy
 from numba import jit
 import scipy.sparse as sparse
 from scipy.sparse.linalg import lsqr
-from scipy.optimize import LinearConstraint, milp, linprog
+from scipy.optimize import LinearConstraint, milp
 from .utils import PartUnity, CircleMapUtils, CohomologyUtils
 from .emcoords import EMCoords
 from .combinatorial import (
@@ -128,7 +128,7 @@ class ToroidalCoords(EMCoords):
             fixed_cocycles = []
 
             for class_idx, cocycle_as_vector in enumerate(integer_cocycles_as_vectors):
-                is_cocycle, _ = _is_cocycle(
+                is_cocycle, _ = _is_one_cocycle(
                     cocycle_as_vector,
                     dist_land_land,
                     rips_threshold,
@@ -310,7 +310,7 @@ def _sparse_integrate(
 
 
 @jit(fastmath=True)
-def _is_cocycle(
+def _is_one_cocycle(
     cochain: np.ndarray,
     dist_mat: np.ndarray,
     threshold: float,
