@@ -47,7 +47,7 @@ class LensCoords(EMCoords):
         lens_dim=2,
         partunity_fn=PartUnity.linear,
         standard_range=True,
-        projective_dim_red_mode="one-by-one"
+        projective_dim_red_mode="exponential"
     ):
         """
         Get lens coordinates.
@@ -65,6 +65,10 @@ class LensCoords(EMCoords):
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
             that the selected cohomology class represents a class in the Cech complex.
+        projective_dim_red_mode : string
+            Either "one-by-one", "exponential", or "direct". How to perform equivariant
+            dimensionality reduction. "exponential" seems to work best, being fast
+            without compromising quality.
 
         Returns
         -------
@@ -97,5 +101,6 @@ class LensCoords(EMCoords):
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
         epca = EquivariantPCA.ppca(class_map, lens_dim-1, projective_dim_red_mode, self.verbose)
+        self.variance_ = epca["variance"]
 
         return epca["X"]

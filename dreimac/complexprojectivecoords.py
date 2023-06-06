@@ -46,7 +46,7 @@ class ComplexProjectiveCoords(EMCoords):
         partunity_fn=PartUnity.linear,
         standard_range=True,
         check_cocycle_condition=True,
-        projective_dim_red_mode="one-by-one",
+        projective_dim_red_mode="exponential",
     ):
         """
         Get complex projective coordinates.
@@ -68,6 +68,10 @@ class ComplexProjectiveCoords(EMCoords):
         check_cocycle_condition : bool
             Whether to check, and fix if necessary, that the integer cocycle constructed
             using finite field coefficients satisfies the cocycle condition.
+        projective_dim_red_mode : string
+            Either "one-by-one", "exponential", or "direct". How to perform equivariant
+            dimensionality reduction. "exponential" seems to work best, being fast
+            without compromising quality.
 
         Returns
         -------
@@ -164,6 +168,7 @@ class ComplexProjectiveCoords(EMCoords):
             projective_dim_red_mode,
             self.verbose,
         )
+        self.variance_ = epca["variance"]
 
         return epca["X"]
 
