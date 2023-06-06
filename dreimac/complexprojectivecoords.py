@@ -71,7 +71,7 @@ class ComplexProjectiveCoords(EMCoords):
 
         Returns
         -------
-        thetas : ndarray(N)
+        ndarray(N)
             Complex projective coordinates
         """
 
@@ -164,7 +164,6 @@ class ComplexProjectiveCoords(EMCoords):
             projective_dim_red_mode,
             self.verbose,
         )
-        self.variance_ = epca["variance"]
 
         return epca["X"]
 

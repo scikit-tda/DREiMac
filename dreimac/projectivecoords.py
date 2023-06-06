@@ -1,10 +1,9 @@
 import numpy as np
 import time
 from .utils import PartUnity, EquivariantPCA
-from .lenscoords import LensCoords
+from .emcoords import EMCoords
 
-
-class ProjectiveCoords(LensCoords):
+class ProjectiveCoords(EMCoords):
     """
     Object that performs multiscale real projective coordinates via
     persistent cohomology of sparse filtrations (Jose Perea 2018).
@@ -27,7 +26,7 @@ class ProjectiveCoords(LensCoords):
 
     def __init__(self, X, n_landmarks, distance_matrix=False, maxdim=1, verbose=False):
         prime = 2
-        LensCoords.__init__(
+        EMCoords.__init__(
             self,
             X=X,
             n_landmarks=n_landmarks,
@@ -45,7 +44,7 @@ class ProjectiveCoords(LensCoords):
         proj_dim=2,
         partunity_fn=PartUnity.linear,
         standard_range=True,
-        projective_dim_red_mode="one-by-one"
+        projective_dim_red_mode="one-by-one",
     ):
         """
         Get real projective coordinates.
@@ -66,20 +65,34 @@ class ProjectiveCoords(LensCoords):
 
         Returns
         -------
-        {'variance': ndarray(N-1)
-            The variance captured by each dimension
-        'X': ndarray(N, proj_dim+1)
+        ndarray(N, proj_dim+1)
             The projective coordinates
-        }
 
         """
 
-        return LensCoords.get_coordinates(
-            self,
-            perc=perc,
-            cocycle_idx=cocycle_idx,
-            lens_dim=proj_dim+1,
-            partunity_fn=partunity_fn,
-            standard_range=standard_range,
-            projective_dim_red_mode=projective_dim_red_mode,
+        n_landmarks = self.n_landmarks_
+
+        homological_dimension = 1
+        cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(
+            cocycle_idx, homological_dimension
         )
+
+        r_cover, _ = EMCoords.get_cover_radius(
+            self, perc, cohomdeath_rips, cohombirth_rips, standard_range
+        )
+
+        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
+
+        root_of_unity = -1
+
+        cocycle_matrix = np.ones((n_landmarks, n_landmarks), dtype=float)
+        cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = root_of_unity ** cocycle[:, 2]
+        cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = (1 / root_of_unity) ** cocycle[:,2]
+
+        class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
+
+        epca = EquivariantPCA.ppca(
+            class_map, proj_dim, projective_dim_red_mode, self.verbose
+        )
+
+        return epca["X"]

@@ -86,7 +86,7 @@ class LensCoords(EMCoords):
 
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
-        root_of_unity = -1 if self.prime_ == 2 else np.exp(2 * np.pi * 1j / self.prime_)
+        root_of_unity = np.exp(2 * np.pi * 1j / self.prime_)
 
         cocycle_matrix = np.ones(
             (n_landmarks, n_landmarks), dtype=float if self.prime_ == 2 else np.complex_
@@ -97,6 +97,5 @@ class LensCoords(EMCoords):
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
         epca = EquivariantPCA.ppca(class_map, lens_dim-1, projective_dim_red_mode, self.verbose)
-        self.variance_ = epca["variance"]
 
         return epca["X"]
