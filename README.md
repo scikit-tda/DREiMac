@@ -55,7 +55,7 @@ cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0"
 
 ## More examples
 
-For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/index.html) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
+For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/index.html) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/experimental/docs/notebooks) directory.
 
 ## Installing
 
