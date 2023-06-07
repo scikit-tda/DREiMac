@@ -9,7 +9,7 @@ DREiMac is a library for topological data coordinatization, visualization, and d
 Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, and in the real projective space.
 
 In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, or a projective space), which preserves the given topological feature in a precise sense.
-For more information, please check the theory and examples in the [documentation](https://github.com/scikit-tda/DREiMac/tree/experimental).
+For more information, please check the theory and examples in the [documentation](https://scikit-tda.org/DREiMac/index.html).
 
 For an implementation of the complex projective coordinates algorithm and the lens coordinates algorithm, check out the [experimental branch](https://github.com/scikit-tda/DREiMac/tree/experimental)!
 
