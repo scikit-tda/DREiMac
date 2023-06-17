@@ -238,7 +238,7 @@ def _make_inner_product(dist_mat, threshold, lookup_table):
     columns = np.empty((max_n_entries,), dtype=int)
     values = np.empty((max_n_entries,), dtype=float)
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _make_inner_product_get_row_columns_values(
         dist_mat: np.ndarray,
         threshold: float,
@@ -287,7 +287,7 @@ def _sparse_integrate(
     n_points = integral.shape[0]
     theta_matrix = np.zeros((n_points, n_points))
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _cocycle_to_matrix(
         dist_mat: np.ndarray,
         threshold: float,
@@ -309,7 +309,7 @@ def _sparse_integrate(
     return np.mod(2 * np.pi * class_map, 2 * np.pi)
 
 
-@jit(fastmath=True)
+@jit(fastmath=True, nopython=True)
 def _is_one_cocycle(
     cochain: np.ndarray,
     dist_mat: np.ndarray,

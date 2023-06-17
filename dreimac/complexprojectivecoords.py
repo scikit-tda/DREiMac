@@ -184,7 +184,7 @@ def _two_cocycle_to_tensor(
 
     res = np.zeros((n_points, n_points, n_points))
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _get_res(
         cocycle: np.ndarray,
         dist_mat: np.ndarray,
@@ -230,7 +230,7 @@ def _one_cocycle_to_tensor(
 
     res = np.zeros((n_points, n_points))
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _get_res(
         cocycle: np.ndarray,
         dist_mat: np.ndarray,
@@ -274,7 +274,7 @@ def _sparse_integrate(
 
     class_map0 = np.zeros_like(part_unity.T)
 
-    @jit
+    @jit(nopython=True)
     def _assemble(
         class_map: np.ndarray,
         nu: np.ndarray,
@@ -302,7 +302,7 @@ def _sparse_integrate(
     )
 
 
-@jit(fastmath=True)
+@jit(fastmath=True, nopython=True)
 def _is_two_cocycle(
     cochain: np.ndarray,
     dist_mat: np.ndarray,

@@ -288,7 +288,7 @@ class CohomologyUtils:
         columns = np.empty((max_n_entries,), dtype=int)
         values = np.empty((max_n_entries,), dtype=float)
 
-        @jit(fastmath=True)
+        @jit(fastmath=True, nopython=True)
         def _delta0_get_row_columns_values(
             dist_mat: np.ndarray,
             threshold: float,
@@ -336,7 +336,7 @@ class CohomologyUtils:
         columns = np.empty((max_n_entries,), dtype=int)
         values = np.empty((max_n_entries,), dtype=float)
 
-        @jit(fastmath=True)
+        @jit(fastmath=True, nopython=True)
         def _delta1_get_row_columns_values(
             dist_mat: np.ndarray,
             threshold: float,
@@ -423,7 +423,7 @@ class CohomologyUtils:
         columns = np.empty((max_n_entries,), dtype=int)
         values = np.empty((max_n_entries,), dtype=float)
 
-        @jit(fastmath=True)
+        @jit(fastmath=True, nopython=True)
         def _delta1_get_row_columns_values(
             dist_mat: np.ndarray,
             threshold: float,
