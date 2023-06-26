@@ -204,7 +204,25 @@ class PlotUtils:
 
     @staticmethod
     def plot_3sphere_mesh(n_parallels = 10, n_meridians = 20, alpha=0.1, ax=None):
-        # TODO: docstring
+        """
+        Draw a spherical mesh in 3D around the unit sphere.
+
+        Parameters
+        ----------
+        n_parallels : int
+            How many parallels to draw.
+
+        n_meridians : int
+            How many meridians to draw.
+
+        alpha : float
+            Opacity of the mesh. Must be between 0 and 1.
+
+        ax : matplotlib axes, optional
+            If given, plot on those axes, otherwise plot
+            on current axes by calling gca()
+
+        """
 
         ax = ax or plt.gca()
         u, v = np.mgrid[0 : 2 * np.pi : n_meridians * 1j, 0 : np.pi : n_parallels * 1j]
@@ -216,7 +234,6 @@ class PlotUtils:
 
     @staticmethod
     def set_axes_equal(ax):
-        # taken from https://stackoverflow.com/a/31364297/2171328
         """
         Make axes of 3D plot have equal scale so that spheres appear as spheres,
         cubes as cubes, etc..  This is one possible solution to Matplotlib's
@@ -224,9 +241,10 @@ class PlotUtils:
 
         Parameters
         ----------
-          ax: a matplotlib axis, e.g., as output from plt.gca().
+        ax : a matplotlib axis, e.g., as output from plt.gca().
 
         """
+        # taken from https://stackoverflow.com/a/31364297/2171328
 
         x_limits = ax.get_xlim3d()
         y_limits = ax.get_ylim3d()

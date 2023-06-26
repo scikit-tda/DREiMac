@@ -157,38 +157,40 @@ class GeometryUtils:
         DLandmarks = D[perm, :]
         return {"perm": perm, "lambdas": lambdas, "DLandmarks": DLandmarks}
 
-
     @staticmethod
     def landmark_geodesic_distance(X, n_landmarks, n_neighbors):
         spatial_tree = KDTree(X)
-        distances_nn, indices_nn = spatial_tree.query(X,k=n_neighbors)
+        distances_nn, indices_nn = spatial_tree.query(X, k=n_neighbors)
         # https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997
         n_queries = X.shape[0]
         n_nonzero = n_queries * n_neighbors
         indptr = np.arange(0, n_nonzero + 1, n_neighbors)
         kneighbors_graph = csr_matrix(
-            (distances_nn.ravel(), indices_nn.ravel(), indptr), shape=(n_queries, n_queries)
+            (distances_nn.ravel(), indices_nn.ravel(), indptr),
+            shape=(n_queries, n_queries),
         )
 
         # furthest point sampling
         n_points = X.shape[0]
         perm = np.zeros(n_landmarks, dtype=np.int64)
         lambdas = np.zeros(n_landmarks)
-        ds = shortest_path(kneighbors_graph, indices = 0, directed=False)
+        ds = shortest_path(kneighbors_graph, indices=0, directed=False)
         D = np.zeros((n_landmarks, n_points))
         D[0, :] = ds
         for i in range(1, n_landmarks):
             idx = np.argmax(ds)
             perm[i] = idx
             lambdas[i] = ds[idx]
-            thisds  = shortest_path(kneighbors_graph, indices = idx, directed=False)
+            thisds = shortest_path(kneighbors_graph, indices=idx, directed=False)
             D[i, :] = thisds
             ds = np.minimum(ds, thisds)
 
-        perm_rest_points = np.setdiff1d(np.arange(0,n_points, dtype=int), perm, assume_unique=True)
-        perm_all_points = np.concatenate((perm,perm_rest_points))
+        perm_rest_points = np.setdiff1d(
+            np.arange(0, n_points, dtype=int), perm, assume_unique=True
+        )
+        perm_all_points = np.concatenate((perm, perm_rest_points))
 
-        return D[:,perm_all_points], perm_all_points
+        return D[:, perm_all_points], perm_all_points
 
 
 class CohomologyUtils:
@@ -764,7 +766,7 @@ class GeometryExamples:
 
     """
 
-    # TODO: These probably belong in tdasets, but I'll keep them here for now
+    # TODO: These could belong to tdasets, but we'll keep them here for now
 
     @staticmethod
     def line_patches(dim, n_angles, n_offsets, sigma):
@@ -806,9 +808,26 @@ class GeometryExamples:
         return P
 
     @staticmethod
-    def moving_dot(sqrt_num_images, sigma=3):
+    def moving_dot(sqrt_num_images, sigma=3, dim=10):
         """
-        TODO
+        Sample a set of (smoothened) dots on the plane, as witnessed by square patches
+
+        Parameters
+        ----------
+        sqrt_num_images : int
+            The output will consist of sqrt_num_images**2 patches.
+
+        sigma : float
+            The blur parameter. Higher sigma is more blur. Default is 3.
+
+        dim : int
+            Patches will be dim x dim. Default is 10.
+
+        Returns
+        -------
+        ndarray(sqrt_num_images*sqrt_num_images, dim*dim)
+            An array of all of the patches raveled into dim*dim dimensional Euclidean space
+
         """
 
         def _gkern(l=5, mu=0, sig=1.0):
@@ -818,8 +837,8 @@ class GeometryExamples:
             kernel = np.outer(gauss_x, gauss_y)
             return kernel
 
-        img_len = 10
-        P = np.zeros((sqrt_num_images**2, img_len * img_len))
+        dim = 10
+        P = np.zeros((sqrt_num_images**2, dim * dim))
         bound = 15
         xs = bound * np.power(np.linspace(-1, 1, sqrt_num_images), 3)
         # xs = bound * np.linspace(-1,1,sqrt_num_images)
@@ -827,7 +846,7 @@ class GeometryExamples:
         i = 0
         for x in xs:
             for y in ys:
-                P[i] = _gkern(l=img_len, mu=np.array([x, y]), sig=sigma).flatten()
+                P[i] = _gkern(l=dim, mu=np.array([x, y]), sig=sigma).flatten()
                 i += 1
         return P
 
@@ -1106,8 +1125,8 @@ class GeometryExamples:
     @staticmethod
     def moore_space_distance_matrix(rough_n_points=2000, prime=3):
         np.random.seed(0)
-        X = (np.random.random((rough_n_points,2)) - 0.5) * 2
-        X = X[np.linalg.norm(X,axis=1)<= 1]
+        X = (np.random.random((rough_n_points, 2)) - 0.5) * 2
+        X = X[np.linalg.norm(X, axis=1) <= 1]
         q = prime
 
         def _rot_mat(theta):
@@ -1133,14 +1152,18 @@ class GeometryExamples:
                         + min(
                             [
                                 np.linalg.norm(
-                                    np.linalg.matrix_power(rot_mat, i) @ proj_x_to_boundary - y
+                                    np.linalg.matrix_power(rot_mat, i)
+                                    @ proj_x_to_boundary
+                                    - y
                                 )
                                 for i in range(prime)
                             ]
                         ),
                     )
+
         _fill_dist_mat(X, dist_mat, R, prime)
         return dist_mat, X
+
 
 class CircleMapUtils:
     """
@@ -1375,7 +1398,18 @@ class ProjectiveMapUtils:
     @staticmethod
     def hopf_map(X):
         """
-        TODO
+        Use the Hopf map to project points on the unit sphere in C^2 representing points in CP^1 to points on the unit sphere in R^3.
+
+        Parameters
+        ----------
+        X : complex ndarray(n,2)
+            Points on the unit sphere in C^2.
+
+        Returns
+        -------
+        real ndarray(n,3)
+            Points on the unit sphere in R^3.
+
         """
         Y = np.zeros((2 * X.shape[1], X.shape[0]))
         Y[::2, :] = np.real(X).T
@@ -1391,7 +1425,17 @@ class ProjectiveMapUtils:
     @staticmethod
     def stereographic_projection_hemispheres(X, center_vector=None):
         """
-        TODO
+        Project points on the unit sphere in 3D to two disks in 2D corresponding to each hemisphere.
+
+        Parameters
+        ----------
+        X : ndarray(n,3)
+            Points on the unit sphere in 3D
+
+        Returns
+        -------
+        ndarray(n,2)
+
         """
 
         def _stereo(v):
@@ -1460,12 +1504,34 @@ class ProjectiveMapUtils:
 
 
 class LensMapUtils:
-    # TODO: docstring
+    """
+    Utilities for manipulating lens space-valued maps.
+
+    """
 
     @staticmethod
-    def lens_3D_to_disk_3D(X,q):
-        # TODO: docstring
-        def _point_lens_to_sphere(p,q):
+    def lens_3D_to_disk_3D(X, q):
+        """
+        Project points on the unit sphere in C^2 representing points in the 3-dimensional
+        lens space corresponding to the prime q to points on the unit disk in R^3.
+
+        Parameters
+        ----------
+        X : complex ndarray(n,2)
+            Points on the unit sphere in C^2.
+
+        q : int
+            Prime number such that X represents points in the 3-dimensional lens space
+            corresponding to this prime.
+
+        Returns
+        -------
+        real ndarray(n,3)
+            Points on the unit disk in R^3.
+
+        """
+
+        def _point_lens_to_sphere(p, q):
             p1 = p[0]
             p2 = p[1]
             arg_z = np.mod(np.angle(p1), 2 * np.pi)
@@ -1481,6 +1547,6 @@ class LensMapUtils:
                 r * np.sin(phi),
                 (q / np.pi) * (theta - np.pi / q) * np.sqrt(1 - r**2),
             )
-            return [x,y,z]
+            return [x, y, z]
 
-        return np.array([_point_lens_to_sphere(p,q) for p in X])
+        return np.array([_point_lens_to_sphere(p, q) for p in X])
