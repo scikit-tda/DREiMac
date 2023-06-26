@@ -13,24 +13,29 @@ from .combinatorial import (
 
 
 class ComplexProjectiveCoords(EMCoords):
+    """
+    Object that performs multiscale complex projective coordinates via
+    persistent cohomology of sparse filtrations (Perea 2018).
+
+
+    Parameters
+    ----------
+    X: ndarray(N, d)
+        A point cloud with N points in d dimensions
+    n_landmarks: int
+        Number of landmarks to use
+    distance_matrix: boolean
+        If true, treat X as a distance matrix instead of a point cloud
+    prime : int
+        Field coefficient with which to compute rips on landmarks
+    maxdim : int
+        Maximum dimension of homology.  Only dimension 2 is needed for complex projective coordinates,
+        but it may be of interest to see other dimensions
+    """
+
     def __init__(
         self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=2, verbose=False
     ):
-        """
-        Parameters
-        ----------
-        X: ndarray(N, d)
-            A point cloud with N points in d dimensions
-        n_landmarks: int
-            Number of landmarks to use
-        distance_matrix: boolean
-            If true, treat X as a distance matrix instead of a point cloud
-        prime : int
-            Field coefficient with which to compute rips on landmarks
-        maxdim : int
-            Maximum dimension of homology.  Only dimension 2 is needed for complex projective coordinates,
-            but it may be of interest to see other dimensions
-        """
         EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
         simplicial_complex_dimension = 3
         self.cns_lookup_table_ = combinatorial_number_system_table(

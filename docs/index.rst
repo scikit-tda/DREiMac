@@ -10,9 +10,10 @@ You can check the :ref:`theory section <theory>` for details and or the examples
 Installing
 ----------
 
-Make sure you are using Python 3.8 or 3.9.
+Make sure you are using Python 3.8 or newer.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
+`numba`,
 `numpy`,
 `persim`,
 `ripser`, and
@@ -54,6 +55,10 @@ Contents
     notebooks/bullseye
     notebooks/genusTwoSurface
     notebooks/ImagePatches
+    notebooks/twoSphere
+    notebooks/movingDot
+    notebooks/circleLensCoordinates
+    notebooks/MooreSpace
 
 Authors
 =======

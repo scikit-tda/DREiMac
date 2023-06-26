@@ -543,7 +543,7 @@ class CohomologyUtils:
         columns = np.empty((max_n_entries,), dtype=np.int32)
         values = np.empty((max_n_entries,), dtype=float)
 
-        @jit(fastmath=True)
+        @jit(fastmath=True, nopython=True)
         def _delta2_get_row_columns_values(
             dist_mat: np.ndarray,
             threshold: float,
@@ -1156,6 +1156,23 @@ class GeometryExamples:
 
     @staticmethod
     def moore_space_distance_matrix(rough_n_points=2000, prime=3):
+        """
+        Distance matrix of a sample of the Moore space M(1,Z/prime).
+
+        Parameters
+        ----------
+        rough_n_samples : int
+            The function returns a distance matrix with approximately n = rough_n_points * (pi/4) points.
+
+        prime : int
+            The prime associated with the Moore space.
+
+        Returns
+        -------
+        ndarray(n, n)
+            Distance matrix of points on the Moore space M(1,Z/prime).
+
+        """
         np.random.seed(0)
         X = (np.random.random((rough_n_points, 2)) - 0.5) * 2
         X = X[np.linalg.norm(X, axis=1) <= 1]
@@ -1170,7 +1187,7 @@ class GeometryExamples:
         n_points = X.shape[0]
         dist_mat = np.zeros((n_points, n_points))
 
-        @jit
+        @jit(fastmath=True, nopython=True)
         def _fill_dist_mat(X, dist_mat, rot_mat, prime):
             for i, x in enumerate(X):
                 for j, y in enumerate(X):
