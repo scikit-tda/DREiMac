@@ -19,13 +19,18 @@ class EMCoords(object):
         Parameters
         ----------
         X: ndarray(N, d)
-            A point cloud with N points in d dimensions
+            A point cloud with N points in d dimensions, or a matrix of distances from N points to d points.
+            See distance_matrix, below, for a description of the second scenario.
         n_landmarks: int
             Number of landmarks to use
-            TODO: describe None case
         distance_matrix: boolean
-            If true, treat X as a distance matrix instead of a point cloud
-            TODO: describe non-square distance matrix case
+            If true, treat X as a distance matrix instead of a point cloud.
+            If X is square, then the i-th row should represent the same point as the i-th column, meaning
+            that the matrix should be symmetric.
+            If X is not square, then it should have more columns than rows (i.e., N > d).
+            Moreover, if i < N, the i-th row should represent the same point as the i-th column.
+            When X is not square, the rows of X are interpreted as a subsample and the columns as all available points; thus
+            X represents the distance from the points in the subsample to all available points.
         prime : int
             Field coefficient with which to compute rips on landmarks
         maxdim : int
