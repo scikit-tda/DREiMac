@@ -146,9 +146,11 @@ class ToroidalCoords(EMCoords):
                     )
                     d1cocycle = delta1 @ cocycle_as_vector.T
 
-                    y = d1cocycle // self.prime_
+                    y = np.array(d1cocycle // self.prime_, dtype=np.int32)
 
-                    constraints = LinearConstraint(delta1, y, y, keep_feasible=True)
+                    constraints = LinearConstraint(
+                        delta1.astype(np.int32), y, y, keep_feasible=True
+                    )
                     n_edges = delta1.shape[1]
                     objective = np.zeros((n_edges), dtype=np.int32)
                     integrality = np.ones((n_edges), dtype=np.int32)
@@ -323,10 +325,7 @@ def _is_one_cocycle(
         for j in range(i + 1, n_points):
             if dist_mat[i, j] < threshold:
                 for k in range(j + 1, n_points):
-                    if (
-                        dist_mat[i, k] < threshold
-                        and dist_mat[j, k] < threshold
-                    ):
+                    if dist_mat[i, k] < threshold and dist_mat[j, k] < threshold:
                         index_ij = combinatorial_number_system_d1_forward(
                             i, j, lookup_table
                         )
@@ -338,9 +337,7 @@ def _is_one_cocycle(
                         )
 
                         if (
-                            cochain[index_ij]
-                            + cochain[index_jk]
-                            - cochain[index_ik]
+                            cochain[index_ij] + cochain[index_jk] - cochain[index_ik]
                             != 0
                         ):
                             is_cocycle = False
