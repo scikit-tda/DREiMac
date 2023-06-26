@@ -159,6 +159,10 @@ class GeometryUtils:
 
     @staticmethod
     def landmark_geodesic_distance(X, n_landmarks, n_neighbors):
+        """
+        TODO
+
+        """
         spatial_tree = KDTree(X)
         distances_nn, indices_nn = spatial_tree.query(X, k=n_neighbors)
         # https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997
@@ -286,8 +290,8 @@ class CohomologyUtils:
         n_edges = (n_points * (n_points - 1)) // 2
 
         max_n_entries = 2 * n_edges
-        rows = np.empty((max_n_entries,), dtype=int)
-        columns = np.empty((max_n_entries,), dtype=int)
+        rows = np.empty((max_n_entries,), dtype=np.int32)
+        columns = np.empty((max_n_entries,), dtype=np.int32)
         values = np.empty((max_n_entries,), dtype=float)
 
         @jit(fastmath=True, nopython=True)
@@ -334,8 +338,8 @@ class CohomologyUtils:
         n_faces = number_of_simplices_of_dimension(2, n_points, lookup_table)
 
         max_n_entries = 3 * n_faces
-        rows = np.empty((max_n_entries,), dtype=int)
-        columns = np.empty((max_n_entries,), dtype=int)
+        rows = np.empty((max_n_entries,), dtype=np.int32)
+        columns = np.empty((max_n_entries,), dtype=np.int32)
         values = np.empty((max_n_entries,), dtype=float)
 
         @jit(fastmath=True, nopython=True)
@@ -421,8 +425,8 @@ class CohomologyUtils:
         n_faces = number_of_simplices_of_dimension(2, n_points, lookup_table)
 
         max_n_entries = 3 * n_faces
-        rows = np.empty((max_n_entries,), dtype=int)
-        columns = np.empty((max_n_entries,), dtype=int)
+        rows = np.empty((max_n_entries,), dtype=np.int32)
+        columns = np.empty((max_n_entries,), dtype=np.int32)
         values = np.empty((max_n_entries,), dtype=float)
 
         @jit(fastmath=True, nopython=True)
@@ -507,8 +511,8 @@ class CohomologyUtils:
         n_three_simplices = number_of_simplices_of_dimension(3, n_points, lookup_table)
 
         max_n_entries = 4 * n_three_simplices
-        rows = np.empty((max_n_entries,), dtype=int)
-        columns = np.empty((max_n_entries,), dtype=int)
+        rows = np.empty((max_n_entries,), dtype=np.int32)
+        columns = np.empty((max_n_entries,), dtype=np.int32)
         values = np.empty((max_n_entries,), dtype=float)
 
         @jit(fastmath=True)
