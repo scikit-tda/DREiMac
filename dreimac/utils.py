@@ -160,9 +160,35 @@ class GeometryUtils:
     @staticmethod
     def landmark_geodesic_distance(X, n_landmarks, n_neighbors):
         """
-        TODO
+        Get a minmax sample of Euclidean point cloud using an approximation of the geodesic distance.
+        Return the geodesic distance from the sample (landmarks) to the rest of the points.
+
+        Parameters
+        ----------
+        X : ndarray(n,d)
+            Point cloud of n points in d-dimensional Euclidean space.
+        n_landmarks : int
+            How many landmarks to sample.
+        n_neighbors : int
+            How many neighbors to use to compute the nearest neighbors graph used to approximate
+            the geodesic distance.
+
+        Return
+        ------
+        dist_landmarks_points : ndarray(n_landmarks,n)
+            Geodesic distance from landmarks to the rest of the points.
+            The first n_landmarks columns represent the landmarks, and are in the same order as landmarks.
+            The rest of the columns represent the rest of the data points.
+            The permutation that reorders the rows of X to correspond to the columns of dist_landmarks_points is
+            given by perm_all_points.
+
+        perm_all_points : ndarray(n)
+            Permutation of [0, ..., n-1] which makes the rows of X correspond to the columns of dist_landmarks_points.
 
         """
+        assert n_landmarks <= X.shape[0]
+        assert n_neighbors <= X.shape[0]
+
         spatial_tree = KDTree(X)
         distances_nn, indices_nn = spatial_tree.query(X, k=n_neighbors)
         # https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997
@@ -194,7 +220,9 @@ class GeometryUtils:
         )
         perm_all_points = np.concatenate((perm, perm_rest_points))
 
-        return D[:, perm_all_points], perm_all_points
+        dist_landmarks_points = D[:, perm_all_points]
+
+        return dist_landmarks_points, perm_all_points
 
 
 class CohomologyUtils:
