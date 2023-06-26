@@ -150,8 +150,8 @@ class ToroidalCoords(EMCoords):
 
                     constraints = LinearConstraint(delta1, y, y, keep_feasible=True)
                     n_edges = delta1.shape[1]
-                    objective = np.zeros((n_edges), dtype=int)
-                    integrality = np.ones((n_edges), dtype=int)
+                    objective = np.zeros((n_edges), dtype=np.int32)
+                    integrality = np.ones((n_edges), dtype=np.int32)
                     optimizer_solution = milp(
                         objective,
                         integrality=integrality,
