@@ -44,6 +44,7 @@ Contents
 
     notebooks/parameters_n_landmarks_and_cocycle_idx
     notebooks/parameter_perc
+    notebooks/parameter_standard_range
     notebooks/parameters_prime_and_check_cocycle_condition
 
 
