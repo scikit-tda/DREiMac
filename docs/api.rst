@@ -12,11 +12,14 @@ Index
     dreimac.CircularCoords
     dreimac.ToroidalCoords
     dreimac.ProjectiveCoords
+    dreimac.ComplexProjectiveCoords
+    dreimac.LensCoords
     dreimac.PartUnity
     dreimac.GeometryExamples
     dreimac.PlotUtils
     dreimac.CircleMapUtils
     dreimac.ProjectiveMapUtils
+    dreimac.LensMapUtils
     dreimac.GeometryUtils
 
 
@@ -44,6 +47,22 @@ Index
     dreimac.ProjectiveCoords.get_coordinates
 
 
+.. rubric:: dreimac.ComplexProjectiveCoords methods
+
+.. autosummary::
+    :nosignatures:
+
+    dreimac.ComplexProjectiveCoords.get_coordinates
+
+
+.. rubric:: dreimac.LensCoords methods
+
+.. autosummary::
+    :nosignatures:
+
+    dreimac.LensCoords.get_coordinates
+
+
 .. rubric:: dreimac.PartUnity methods
 
 .. autosummary::
@@ -60,6 +79,7 @@ Index
     :nosignatures:
 
     dreimac.GeometryExamples.line_patches
+    dreimac.GeometryExamples.moving_dot
     dreimac.GeometryExamples.torus_3d
     dreimac.GeometryExamples.klein_bottle_4d
     dreimac.GeometryExamples.genus_two_surface
@@ -67,6 +87,7 @@ Index
     dreimac.GeometryExamples.bullseye
     dreimac.GeometryExamples.sphere
     dreimac.GeometryExamples.noisy_circle
+    dreimac.GeometryExamples.moore_space_distance_matrix
 
 
 .. rubric:: dreimac.PlotUtils methods
@@ -76,6 +97,8 @@ Index
 
     dreimac.PlotUtils.plot_patches
     dreimac.PlotUtils.plot_proj_boundary
+    dreimac.PlotUtils.plot_2sphere_boundary
+    dreimac.PlotUtils.plot_3sphere_mesh
     dreimac.PlotUtils.set_axes_equal
 
 
@@ -98,6 +121,13 @@ Index
     dreimac.ProjectiveMapUtils.get_stereo_proj_codim1
 
 
+.. rubric:: dreimac.LensMapUtils methods
+
+.. autosummary::
+    :nosignatures:
+
+    dreimac.LensMapUtils.lens_3D_to_disk_3D
+
 
 .. rubric:: dreimac.GeometryUtils methods
 
@@ -105,6 +135,7 @@ Index
     :nosignatures:
 
     dreimac.GeometryUtils.get_greedy_perm_pc
+    dreimac.GeometryUtils.landmark_geodesic_distance
 
 
 Details
@@ -119,6 +150,14 @@ Details
 
 
 .. autoclass:: dreimac.ProjectiveCoords
+    :members:
+
+
+.. autoclass:: dreimac.ComplexProjectiveCoords
+    :members:
+
+
+.. autoclass:: dreimac.LensCoords
     :members:
 
 
@@ -139,6 +178,10 @@ Details
 
 
 .. autoclass:: dreimac.ProjectiveMapUtils
+    :members:
+
+
+.. autoclass:: dreimac.LensMapUtils
     :members:
 
 

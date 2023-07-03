@@ -17,7 +17,7 @@ def combinatorial_number_system_table(maximum_number_vertices, maximum_dimension
 def number_of_simplices_of_dimension(dimension, n_vertices, lookup_table):
     return lookup_table[n_vertices,dimension+1]
 
-@jit
+@jit(nopython=True)
 def combinatorial_number_system_forward(
     oriented_simplex: np.ndarray, lookup_table: np.ndarray
 ):
@@ -28,12 +28,12 @@ def combinatorial_number_system_forward(
     return res
 
 
-@jit
+@jit(nopython=True)
 def combinatorial_number_system_d1_forward(v0: int, v1: int, lookup_table: np.ndarray):
     return lookup_table[v0, 1] + lookup_table[v1, 2]
 
 
-@jit
+@jit(nopython=True)
 def combinatorial_number_system_d2_forward(
     v0: int, v1: int, v2: int, lookup_table: np.ndarray
 ):

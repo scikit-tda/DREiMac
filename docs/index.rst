@@ -10,9 +10,10 @@ You can check the :ref:`theory section <theory>` for details and or the examples
 Installing
 ----------
 
-Make sure you are using Python 3.8 or 3.9.
+Make sure you are using Python 3.8 or newer.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
+`numba`,
 `numpy`,
 `persim`,
 `ripser`, and
@@ -43,17 +44,45 @@ Contents
 
     notebooks/parameters_n_landmarks_and_cocycle_idx
     notebooks/parameter_perc
+    notebooks/parameter_standard_range
     notebooks/parameters_prime_and_check_cocycle_condition
+
+Further examples
+----------------
 
 
 .. toctree::
     :maxdepth: 2
-    :caption: Examples
+    :caption: Circular coordinates
 
     notebooks/coil20
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Toroidal coordinates
+
     notebooks/bullseye
     notebooks/genusTwoSurface
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Real projective coordinates
+
     notebooks/ImagePatches
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Complex projective coordinates
+
+    notebooks/twoSphere
+    notebooks/movingDot
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Lens coordinates
+
+    notebooks/circleLensCoordinates
+    notebooks/MooreSpace
 
 Authors
 =======

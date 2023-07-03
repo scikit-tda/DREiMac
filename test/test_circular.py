@@ -102,26 +102,27 @@ class TestCircular:
         """Check that circular coordinates returns a continuous map, even when the lifted
         cochain may fail to be a cocycle and fix the cocycle using the integer linear system
         """
-        X = GeometryExamples.trefoil(n_samples=2500, horizontal_width=10)
+        for noisy in [True, False]:
+            X = GeometryExamples.trefoil(n_samples=2500, horizontal_width=10, noisy=noisy)
 
-        prime = 3
-        large_perc = 0.8
-        cc = CircularCoords(X, 300, prime=prime)
-        coords = cc.get_coordinates(
-            perc=large_perc,
-            cocycle_idx=0,
-            check_cocycle_condition=True,
-        )
-        assert len(coords) == len(X)
+            prime = 3
+            large_perc = 0.8
+            cc = CircularCoords(X, 300, prime=prime)
+            coords = cc.get_coordinates(
+                perc=large_perc,
+                cocycle_idx=0,
+                check_cocycle_condition=True,
+            )
+            assert len(coords) == len(X)
 
-        tree = KDTree(X)
-        k = 5
-        _, nns = tree.query(X, k=k)
+            tree = KDTree(X)
+            k = 5
+            _, nns = tree.query(X, k=k)
 
-        tolerance = 5 / 100 * (2 * np.pi)  # 5% of the full circle
+            tolerance = 5 / 100 * (2 * np.pi)  # 5% of the full circle
 
-        for i in range(X.shape[0]):
-            assert _maximum_circle_distance(coords[nns[i]]) <= tolerance
+            for i in range(X.shape[0]):
+                assert _maximum_circle_distance(coords[nns[i]]) <= tolerance
 
 
 def _circle_distance(x, y):

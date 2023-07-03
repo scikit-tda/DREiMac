@@ -3,7 +3,7 @@ import scipy
 from numba import jit
 import scipy.sparse as sparse
 from scipy.sparse.linalg import lsqr
-from scipy.optimize import LinearConstraint, milp, linprog
+from scipy.optimize import LinearConstraint, milp
 from .utils import PartUnity, CircleMapUtils, CohomologyUtils
 from .emcoords import EMCoords
 from .combinatorial import (
@@ -128,7 +128,7 @@ class ToroidalCoords(EMCoords):
             fixed_cocycles = []
 
             for class_idx, cocycle_as_vector in enumerate(integer_cocycles_as_vectors):
-                is_cocycle, _ = _is_cocycle(
+                is_cocycle, _ = _is_one_cocycle(
                     cocycle_as_vector,
                     dist_land_land,
                     rips_threshold,
@@ -144,14 +144,16 @@ class ToroidalCoords(EMCoords):
                             dist_land_land, rips_threshold, self.cns_lookup_table_
                         )
                     )
+
                     d1cocycle = delta1 @ cocycle_as_vector.T
 
                     y = d1cocycle // self.prime_
 
-                    constraints = LinearConstraint(delta1, y, y, keep_feasible=True)
+                    constraints = LinearConstraint(delta1, y, y)
                     n_edges = delta1.shape[1]
-                    objective = np.zeros((n_edges), dtype=int)
-                    integrality = np.ones((n_edges), dtype=int)
+                    objective = np.zeros((n_edges))
+                    integrality = np.ones((n_edges))
+
                     optimizer_solution = milp(
                         objective,
                         integrality=integrality,
@@ -238,7 +240,7 @@ def _make_inner_product(dist_mat, threshold, lookup_table):
     columns = np.empty((max_n_entries,), dtype=int)
     values = np.empty((max_n_entries,), dtype=float)
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _make_inner_product_get_row_columns_values(
         dist_mat: np.ndarray,
         threshold: float,
@@ -287,7 +289,7 @@ def _sparse_integrate(
     n_points = integral.shape[0]
     theta_matrix = np.zeros((n_points, n_points))
 
-    @jit(fastmath=True)
+    @jit(fastmath=True, nopython=True)
     def _cocycle_to_matrix(
         dist_mat: np.ndarray,
         threshold: float,
@@ -309,8 +311,8 @@ def _sparse_integrate(
     return np.mod(2 * np.pi * class_map, 2 * np.pi)
 
 
-@jit(fastmath=True)
-def _is_cocycle(
+@jit(fastmath=True, nopython=True)
+def _is_one_cocycle(
     cochain: np.ndarray,
     dist_mat: np.ndarray,
     threshold: float,
