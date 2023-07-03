@@ -92,9 +92,7 @@ class LensCoords(EMCoords):
 
         root_of_unity = np.exp(2 * np.pi * 1j / self.prime_)
 
-        cocycle_matrix = np.ones(
-            (n_landmarks, n_landmarks), dtype=float if self.prime_ == 2 else np.complex_
-        )
+        cocycle_matrix = np.ones( (n_landmarks, n_landmarks), np.complex_ )
         cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = root_of_unity ** cocycle[:, 2]
         cocycle_matrix[cocycle[:, 1], cocycle[:, 0]] = (1 / root_of_unity) ** cocycle[:, 2]
 
