@@ -5,7 +5,7 @@ Theory
 
 DREiMac is based on `cohomology <https://en.wikipedia.org/wiki/Cohomology>`_ and `Eilenberg-MacLane spaces <https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology>`_, and turns persistent cohomology computations into topology-preserving coordinates for data.
 We now give details about what this means.
-For more information, please see the corresponding papers for the circular coordinates algorithm [1]_, the toroidal coordinates algorithm [2]_, and the projective coordinates algorithm [3]_.
+For more information, please see the corresponding papers for the circular coordinates algorithm [1]_, the toroidal coordinates algorithm [2]_, the projective coordinates algorithms [3]_, and the lens coordinate algorithm [4]_.
 
 Inputs
 ------
@@ -75,5 +75,9 @@ References
 .. [2] *Toroidal Coordinates: Decorrelating Circular Coordinates With Lattice Reduction*. L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, and J. A. Perea. 39th International Symposium on Computational Geometry, 2023
 
 .. [3] *Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations*. J.A. Perea. Discrete Comput Geom 59, 175–225, 2018
+
+.. [4] *Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations*. L. Polanco, J.A. Perea. Proceedings of the 31 st Canadian Conference on Computational Geometry (CCCG), pp. 49-57, 2019
+
+
 
 
