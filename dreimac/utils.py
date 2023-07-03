@@ -713,6 +713,10 @@ class EquivariantPCA:
             d different classes are the coordinates
         proj_dim : integer
             The dimension of the projective space onto which to project
+        projective_dim_red_mode : string
+            Either "one-by-one", "exponential", or "direct". How to perform equivariant
+            dimensionality reduction. "exponential" usually works best, being fast
+            without compromising quality.
         verbose : boolean
             Whether to print information during iterations
 
@@ -731,6 +735,8 @@ class EquivariantPCA:
                 % (class_map.shape[0], class_map.shape[1], proj_dim)
             )
 
+        assert projective_dim_red_mode in ["direct", "exponential", "one-by-one"]
+
         X = class_map.T
         variance = np.zeros(X.shape[0] - 1)
         n_dim = class_map.shape[1]
@@ -748,7 +754,6 @@ class EquivariantPCA:
 
         total_dims_to_keep = proj_dim + 1
 
-        modes = ["direct", "exponential", "one-by-one"]
         mode = projective_dim_red_mode
         if mode == "direct":
             XRet = _one_step_linear_reduction(X, total_dims_to_keep)

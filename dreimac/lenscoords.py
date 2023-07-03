@@ -44,7 +44,7 @@ class LensCoords(EMCoords):
         self,
         perc=0.9,
         cocycle_idx=0,
-        lens_dim=2,
+        complex_dim=2,
         partunity_fn=PartUnity.linear,
         standard_range=True,
         projective_dim_red_mode="exponential"
@@ -57,22 +57,24 @@ class LensCoords(EMCoords):
         perc : float
             Percent coverage. Must be between 0 and 1.
         cocycle_idx : list
-            Add the cocycles together, sorted from most to least persistent
-        lens_dim : integer
-            Dimension down to which to project the data
+            Add the cocycles together, sorted from most to least persistent.
+        complex_dim : integer
+            Describes the dimension of the lens space. The lens space is obtained by
+            taking a quotient of the unit sphere inside the complex plane to the power
+            of complex_dimension.
         partunity_fn: (dist_land_data, r_cover) -> phi
-            A function from the distances of each landmark to a bump function
+            A function from the distances of each landmark to a bump function.
         standard_range : bool
             Whether to use the parameter perc to choose a filtration parameter that guarantees
             that the selected cohomology class represents a class in the Cech complex.
         projective_dim_red_mode : string
             Either "one-by-one", "exponential", or "direct". How to perform equivariant
-            dimensionality reduction. "exponential" seems to work best, being fast
+            dimensionality reduction. "exponential" usually works best, being fast
             without compromising quality.
 
         Returns
         -------
-        ndarray(N, proj_dim+1)
+        ndarray(N, complex_dim-1)
             The lens coordinates
 
         """
@@ -98,7 +100,7 @@ class LensCoords(EMCoords):
 
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
-        epca = EquivariantPCA.ppca(class_map, lens_dim-1, projective_dim_red_mode, self.verbose)
+        epca = EquivariantPCA.ppca(class_map, complex_dim-1, projective_dim_red_mode, self.verbose)
         self.variance_ = epca["variance"]
 
         return epca["X"]

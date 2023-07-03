@@ -65,6 +65,8 @@ class ComplexProjectiveCoords(EMCoords):
             Integer representing the index of the persistent cohomology class
             used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
             classes are ordered by persistence, from largest to smallest.
+        proj_dim : integer
+            Complex dimension down to which to project the data.
         partunity_fn : (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
         standard_range : bool
@@ -75,12 +77,12 @@ class ComplexProjectiveCoords(EMCoords):
             using finite field coefficients satisfies the cocycle condition.
         projective_dim_red_mode : string
             Either "one-by-one", "exponential", or "direct". How to perform equivariant
-            dimensionality reduction. "exponential" seems to work best, being fast
+            dimensionality reduction. "exponential" usually works best, being fast
             without compromising quality.
 
         Returns
         -------
-        ndarray(N)
+        ndarray(N, proj_dim+1)
             Complex projective coordinates
         """
 

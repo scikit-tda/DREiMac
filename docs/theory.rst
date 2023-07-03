@@ -29,6 +29,10 @@ The choice of these parameters will depend on which of DREiMac's cohomological c
 
 - For real projective coordinates, the prime :math:`p` is set to :math:`2` and :math:`n` is set to :math:`1`, automatically.
 
+- For complex projective coordinates, the user can choose any prime :math:`p` and :math:`n` is set to :math:`2` automatically.
+
+- For lens coordinates, the user can choose any prime :math:`p` and :math:`n` is set to :math:`1` automatically.
+
 Then, looking at the persistence diagram, a cohomology class is chosen by the user, as follows.
 
 3. The :code:`cocycle_idx` parameter is used to select a persistent cohomology class :math:`\eta \in PH^n(R(L);\mathbb{Z}/p\mathbb{Z})` by indicating its index when the persistent cohomology classes are ordered with respect to their persistence (i.e., their distance to the diagonal).
@@ -55,6 +59,8 @@ where:
    - Circular coordinates algorithm, the EM space is the circle :math:`S^1`;
    - Toroidal coordinates algorithm with :math:`\ell` cohomology classes, the EM space is the :math:`\ell`-torus, i.e., the cartesian product of :math:`\ell` circles :math:`S^1 \times \dots \times S^1`;
    - Real projective coordinates algorithm, the EM space is a real projective space :math:`RP^k`. In this case, the dimension :math:`k` is selected using the :code:`proj_dim` parameter.
+   - Complex projective coordinates algorithm, the EM space is a complex projective space :math:`CP^k`. In this case, the complex dimension :math:`k` is selected using the :code:`proj_dim` parameter. Note that in this case the real dimension will be :math:`2k`.
+   - Lens coordinates algorithm, the EM space is a lens space. In this case, the dimension is selected using the :math:`k =` :code:`complex_dim`, which results in a lens space of real dimension :math:`2 k-1`. The prime determining the lens space is selected using the :code:`prime` parameter.
 
 - The space :math:`L^{\alpha}` is the :math:`\alpha`-thickening of :math:`L` inside :math:`M`, defined as :math:`L^{\alpha} = \{m \in M : d_M(m,L) < \alpha\}`.
 
@@ -76,7 +82,7 @@ References
 
 .. [3] *Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations*. J.A. Perea. Discrete Comput Geom 59, 175–225, 2018
 
-.. [4] *Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations*. L. Polanco, J.A. Perea. Proceedings of the 31 st Canadian Conference on Computational Geometry (CCCG), pp. 49-57, 2019
+.. [4] *Coordinatizing Data With Lens Spaces and Persistent Cohomology*. L. Polanco, J.A. Perea. Proceedings of the 31 st Canadian Conference on Computational Geometry (CCCG), pp. 49-57, 2019
 
 
 

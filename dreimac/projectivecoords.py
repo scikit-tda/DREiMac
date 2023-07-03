@@ -54,9 +54,11 @@ class ProjectiveCoords(EMCoords):
         perc : float
             Percent coverage. Must be between 0 and 1.
         cocycle_idx : list
-            Add the cocycles together, sorted from most to least persistent
+            Integer representing the index of the persistent cohomology class
+            used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+            classes are ordered by persistence, from largest to smallest.
         proj_dim : integer
-            Dimension down to which to project the data
+            Dimension down to which to project the data.
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
         standard_range : bool
@@ -64,7 +66,7 @@ class ProjectiveCoords(EMCoords):
             that the selected cohomology class represents a class in the Cech complex.
         projective_dim_red_mode : string
             Either "one-by-one", "exponential", or "direct". How to perform equivariant
-            dimensionality reduction. "exponential" seems to work best, being fast
+            dimensionality reduction. "exponential" usually works best, being fast
             without compromising quality.
 
         Returns
