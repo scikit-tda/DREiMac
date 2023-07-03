@@ -1,2 +1,5 @@
 coverage:
   range: 50..100
+  status:
+    patch: off
+
