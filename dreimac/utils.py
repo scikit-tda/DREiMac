@@ -1137,9 +1137,20 @@ class GeometryExamples:
         return data / np.linalg.norm(data, axis=1)[:, np.newaxis]
 
     @staticmethod
-    def noisy_circle(n_samples, seed=0):
+    def noisy_circle(n_samples, noise_size=0.2, seed=0):
         """
         Samples on a circle in 2D.
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of points on the circle to sample.
+
+        noise_size : float
+            Maximum perturbation per sample. Must be between 0 and 1.
+        
+        seed : float
+            Seed for random number generator.
 
         Returns
         -------
@@ -1151,7 +1162,7 @@ class GeometryExamples:
         X = np.random.random((n_samples, 2)) - 0.5
         return (
             X / np.linalg.norm(X, axis=1).reshape((n_samples, 1))
-            + (np.random.random((n_samples, 2)) - 0.5) * 0.2
+            + (np.random.random((n_samples, 2)) - 0.5) * noise_size
         )
 
     @staticmethod
