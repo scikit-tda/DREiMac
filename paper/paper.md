@@ -1,0 +1,61 @@
+---
+title: 'DREiMac: Dimension Reduction with Eilenberg-MacLane Coordinates'
+tags:
+  - topological data analysis
+  - unsupervised learning
+  - dimension reduction
+authors:
+ - name: Jose A. Perea
+   orcid: 0000-0002-6440-5096
+   affiliation: 1
+ - name: Luis Scoccola 
+   orcid: 0000-0002-4862-722X
+   affiliation: 1
+ - name: Christopher J. Tralie
+   affiliation: 2
+affiliations:
+ - name: Northeastern University
+   index: 1
+ - name: Ursinus College
+   index: 2
+date: 4 July 2023
+bibliography: paper.bib
+---
+
+# Summary
+
+DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
+Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective space, and in lens spaces.
+
+In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
+
+DREiMac is based on persistent cohomology [@desilva-morozov-vejdemo], a method from topological data analysis; the theory behind DREiMac is developed in
+[@circular-coords],
+[@projective-coords],
+[@lens-coords],
+[@toroidal-coords].
+DREiMac is implemented in Python, using Numba for the more expensive computations.
+We test DREiMac periodically in Ubuntu, macOS, and Windows.
+
+The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac/index.html).
+
+# Related work and statement of need
+
+**Dionysus 2.**
+[@dionysus]
+TODO
+
+(lack of sparse implementations, lack of implementation of algorithms other than circular coordinates, problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates)
+
+# Example
+
+TODO
+
+# Acknowledgements
+
+We thank Tom Mease for contributions and discussions.
+J.A.P. and L.S. were partially supported by the National Science Foundation through grants CCF-2006661
+and CAREER award DMS-1943758.
+
+
+# References
