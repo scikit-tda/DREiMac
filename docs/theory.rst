@@ -62,14 +62,18 @@ where:
    - Complex projective coordinates algorithm, the EM space is a complex projective space :math:`CP^k`. In this case, the complex dimension :math:`k` is selected using the :code:`proj_dim` parameter. Note that in this case the real dimension will be :math:`2k`.
    - Lens coordinates algorithm, the EM space is a lens space. In this case, the dimension is selected using the :math:`k =` :code:`complex_dim`, which results in a lens space of real dimension :math:`2 k-1`. The prime determining the lens space is selected using the :code:`prime` parameter.
 
-- The space :math:`L^{\alpha}` is the :math:`\alpha`-thickening of :math:`L` inside :math:`M`, defined as :math:`L^{\alpha} = \{m \in M : d_M(m,L) < \alpha\}`.
+- The space :math:`L^{\alpha}` is the :math:`\alpha`-thickening of :math:`L` in :math:`M`, defined as :math:`L^{\alpha} = \{m \in M : d_M(m,L) < \alpha\}`.
 
-- The number :math:`\alpha` is computed using the parameter :code:`perc` and the birth and death of the persistent cohomology class :math:`\eta` as follows :math:`\alpha = (1 - \rho)\cdot \max\{d_H^M(L,X), 2 \cdot birth(\eta)\} + \rho \cdot death(\eta)`, where :math:`\rho =` :code:`perc`.  In the case of the toroidal coordinates algorithm, one replaces :math:`birth(\eta)` with :math:`\max\{birth(\eta_i)\}` and :math:`death(\eta)` with :math:`\min\{death(\eta_i)\}`.
+- The number :math:`\alpha` is computed using the parameter :code:`perc` and the birth and death of the persistent cohomology class :math:`\eta` as follows:
+if the parameter :code:`standard_range` is :code:`True`, then :math:`\alpha = (1 - \rho)\cdot \max\{d_H^M(L,X), 2 \cdot birth(\eta)\} + \rho \cdot death(\eta)`, where :math:`\rho =` :code:`perc`.
+If :code:`standard_range` is :code:`False`, then :math:`\alpha = (1 - \rho)\cdot \max\{d_H^M(L,X), birth(\eta)\} + \rho \cdot death(\eta)`.
+In the case of the toroidal coordinates algorithm, one replaces :math:`birth(\eta)` with :math:`\max\{birth(\eta_i)\}` and :math:`death(\eta)` with :math:`\min\{death(\eta_i)\}`.
 
 Guarantee
 ---------
 
-The output map :math:`f_\eta : L^{\alpha} \to K(G,n)` is guaranteed to preserve the cohomology class :math:`\eta`, in the following sense.
+When the parameter :code:`standard_range` is set to :code:`True`,
+the output map :math:`f_\eta : L^{\alpha} \to K(G,n)` is guaranteed to preserve the cohomology class :math:`\eta`, in the following sense.
 When one takes the pullback of the fundamental class of :math:`K(G,n)` along the map :math:`f_\eta`, one gets back a cohomology class corresponding to the user-chosen :math:`\eta`.
 
 
