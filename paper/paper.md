@@ -41,11 +41,15 @@ The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac
 
 # Related work and statement of need
 
-**Dionysus 2.**
-[@dionysus]
-TODO
+To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
+Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
 
-(lack of sparse implementations, lack of implementation of algorithms other than circular coordinates, problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates)
+DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities, such as: sparse algorithms; toroidal, projective, and lens coordinates; 
+
+All of DREiMac's coordinates are _sparse_, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
+This gives a significant speedup, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
+
+(lack of implementation of algorithms other than circular coordinates, problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates)
 
 # Example
 
