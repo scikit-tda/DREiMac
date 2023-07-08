@@ -69,17 +69,17 @@ These allow the user to construct topologically meaningful coordinates for point
 
 # Examples
 
-We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20].
+We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20]; details about this example can be found in the documentaiton.
 The dataset consists of gray-scale images of 5 objects, photographed from different angles.
 As such, it consists of 5 clusters, each cluster exhibiting one large scale circular feature; see Figure \ref{figure:coil-20-pds}.
 
-![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coild-20-pds.png){width=50%}
+![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coil-20-pds.png){width=50%}
 
 We use single-linkage to cluster the data into 5 clusters and compute the persistent cohomology of each cluster.
 We then run the circular coordinates algorithm on each cluster, using the most prominent cohomology class of each cluster.
 We display the result in Figure \ref{figure:coil-20-res}.
 
-![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coild-20-res.png){width=50%}
+![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coil-20-res.png){width=50%}
 
 # Acknowledgements
 
