@@ -1,9 +1,9 @@
 ---
-title: 'DREiMac: Dimension Reduction with Eilenberg-MacLane Coordinates'
+title: 'DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates'
 tags:
   - topological data analysis
   - unsupervised learning
-  - dimension reduction
+  - dimensionality reduction
 authors:
  - name: Jose A. Perea
    orcid: 0000-0002-6440-5096
@@ -36,28 +36,30 @@ DREiMac is based on persistent cohomology [@persistent-cohomology], a method fro
 [@toroidal-coords].
 DREiMac is implemented in Python, using Numba for the more expensive computations.
 We test DREiMac periodically in Ubuntu, macOS, and Windows.
-(mention license?)
 
 The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac/index.html).
 
 
-# Related work and statement of need
+# Statement of need and main contributions
 
 To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
 Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
 
-DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities, such as:
-sparse algorithms;
-toroidal, projective, and lens coordinates; 
-(several example notebooks, and notebooks illustrating the effect of each of the main parameters)
-(problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates, add pictures for both)
-(geometrical utilities, utilities for cohomological coordinates)
-(example datasets)
+DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities; we elaborate on these below.
+DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities, including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
 
-All of DREiMac's coordinates are _sparse_, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
+**Previously not implemented cohomological coordinates.**
+DREiMac implements real projective, complex projective, and lens coordinates.
+These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
+
+**Sparse algorithms.**
+All of DREiMac's coordinates are sparse, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
 This gives a significant speedup, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
 
-# Example
+**Significant improvements to the circular coordinates algorithm.**
+(problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates, add pictures for both)
+
+# Examples
 
 (COIL example, add axis to image (cluster + circular coordinate))
 
