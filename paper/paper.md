@@ -55,12 +55,19 @@ This gives a significant speedup, since the persistent cohomology computation is
 **Significant improvements to the circular coordinates algorithm.**
 The circular coordinates algorithm turns a cohomology class with coefficients in $\mathbb{Z}$ into a map into the circle.
 However, since persistent cohomology is computed with coefficients in a field, the cohomology class is obtained by lifting a cohomology class with coefficients in $\mathbb{Z}/q\mathbb{Z}$, with $q$ a prime.
-This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful (TODO add picture).
+This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful; see Figure \ref{figure:fix-cocycle}.
 An algebraic procedure for fixing this issue is described in [@desilva-morozov-vejdemo], but has thus far not been implemented.
 DREiMac implements this using integer linear programming.
 
+![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=50%}
+
 Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (TODO add picture).
 To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circularities in a provable geometrically simpler fashion.
+
+![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-two-toroidal.png){width=50%}
+
+
+![Parametrizing the circularity of a surface of genus two in 3D. This output is obtained by running the circular coordinates algorithm. The parametrization obtained is arguably less interpretable than that obtained by the toroidal coordinates algorithm, shown in Figure \ref{figure:genus-two-toroidal}.. \label{figure:genus-two-circular}](genus-two-circular.png){width=50%}
 
 
 **Previously not implemented cohomological coordinates.**
@@ -69,17 +76,17 @@ These allow the user to construct topologically meaningful coordinates for point
 
 # Examples
 
-We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20]; details about this example can be found in the documentaiton.
+We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20]; details about this example can be found in the documentation.
 The dataset consists of gray-scale images of 5 objects, photographed from different angles.
 As such, it consists of 5 clusters, each cluster exhibiting one large scale circular feature; see Figure \ref{figure:coil-20-pds}.
 
-![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coil-20-pds.png){width=50%}
+![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coil-20-pds.png){width=85%}
 
 We use single-linkage to cluster the data into 5 clusters and compute the persistent cohomology of each cluster.
 We then run the circular coordinates algorithm on each cluster, using the most prominent cohomology class of each cluster.
 We display the result in Figure \ref{figure:coil-20-res}.
 
-![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coil-20-res.png){width=50%}
+![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coil-20-res.png){width=85%}
 
 # Acknowledgements
 
