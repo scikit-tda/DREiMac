@@ -29,31 +29,37 @@ Currently, DREiMac is able to find topology-preserving representations of point 
 
 In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
 
-DREiMac is based on persistent cohomology [@desilva-morozov-vejdemo], a method from topological data analysis; the theory behind DREiMac is developed in
+DREiMac is based on persistent cohomology [@persistent-cohomology], a method from topological data analysis; the theory behind DREiMac is developed in
 [@circular-coords],
 [@projective-coords],
 [@lens-coords],
 [@toroidal-coords].
 DREiMac is implemented in Python, using Numba for the more expensive computations.
 We test DREiMac periodically in Ubuntu, macOS, and Windows.
+(mention license?)
 
 The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac/index.html).
+
 
 # Related work and statement of need
 
 To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
 Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
 
-DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities, such as: sparse algorithms; toroidal, projective, and lens coordinates; 
+DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities, such as:
+sparse algorithms;
+toroidal, projective, and lens coordinates; 
+(several example notebooks, and notebooks illustrating the effect of each of the main parameters)
+(problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates, add pictures for both)
+(geometrical utilities, utilities for cohomological coordinates)
+(example datasets)
 
 All of DREiMac's coordinates are _sparse_, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
 This gives a significant speedup, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
 
-(lack of implementation of algorithms other than circular coordinates, problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates)
-
 # Example
 
-TODO
+(COIL example, add axis to image (cluster + circular coordinate))
 
 # Acknowledgements
 
