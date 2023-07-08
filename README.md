@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/scikit-tda/dreimac/branch/master/graph/badge.svg)](https://codecov.io/gh/scikit-tda/dreimac)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# DREiMac: Dimension Reduction with Eilenberg-MacLane Coordinates
+# DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates
 
 DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
 Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective space, and in lens spaces.

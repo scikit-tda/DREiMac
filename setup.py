@@ -26,7 +26,7 @@ def requirements():
 setup(
     name="dreimac",
     version=verstr,
-    description="DREiMac: Dimension reduction with Eilenberg-MacLane coordinates",
+    description="DREiMac: Dimensionality reduction with Eilenberg-MacLane coordinates",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Jose A. Perea, Luis Scoccola, Chris Tralie",
@@ -51,5 +51,5 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    keywords="topological data analysis, dimension reduction",
+    keywords="topological data analysis, dimensionality reduction",
 )
