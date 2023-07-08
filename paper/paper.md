@@ -46,22 +46,40 @@ To the best of our knowledge, the only publicly available software implementing 
 Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
 
 DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities; we elaborate on these below.
-DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities, including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
-
-**Previously not implemented cohomological coordinates.**
-DREiMac implements real projective, complex projective, and lens coordinates.
-These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
+DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
 
 **Sparse algorithms.**
 All of DREiMac's coordinates are sparse, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
 This gives a significant speedup, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
 
 **Significant improvements to the circular coordinates algorithm.**
-(problem in lift of cocycles for circular coordinates, problem with decorrelating circular coordinates, add pictures for both)
+The circular coordinates algorithm turns a cohomology class with coefficients in $\mathbb{Z}$ into a map into the circle.
+However, since persistent cohomology is computed with coefficients in a field, the cohomology class is obtained by lifting a cohomology class with coefficients in $\mathbb{Z}/q\mathbb{Z}$, with $q$ a prime.
+This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful (TODO add picture).
+An algebraic procedure for fixing this issue is described in [@desilva-morozov-vejdemo], but has thus far not been implemented.
+DREiMac implements this using integer linear programming.
+
+Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (TODO add picture).
+To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circularities in a provable geometrically simpler fashion.
+
+
+**Previously not implemented cohomological coordinates.**
+DREiMac implements real projective, complex projective, and lens coordinates.
+These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
 
 # Examples
 
-(COIL example, add axis to image (cluster + circular coordinate))
+We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20].
+The dataset consists of gray-scale images of 5 objects, photographed from different angles.
+As such, it consists of 5 clusters, each cluster exhibiting one large scale circular feature; see Figure \ref{figure:coil-20-pds}.
+
+![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coild-20-pds.png){width=50%}
+
+We use single-linkage to cluster the data into 5 clusters and compute the persistent cohomology of each cluster.
+We then run the circular coordinates algorithm on each cluster, using the most prominent cohomology class of each cluster.
+We display the result in Figure \ref{figure:coil-20-res}.
+
+![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coild-20-res.png){width=50%}
 
 # Acknowledgements
 
