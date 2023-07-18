@@ -50,8 +50,8 @@ DREiMac also includes functions for generating topologically interesting dataset
 
 **Sparse algorithms.**
 All of DREiMac's coordinates are sparse, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
-This gives a significant speedup when compared to algorithms which used a simplicial complex built on the entire dataset, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
-For a precise description of the notion of sparseness, see the papers that develop the algorithms DREiMac implements 
+This gives a significant speedup when compared to algorithms which use a simplicial complex built on the entire dataset, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
+For a precise description of the notion of sparseness, see the papers that develop the algorithms that DREiMac implements 
 [@circular-coords],
 [@projective-coords],
 [@lens-coords],
@@ -59,18 +59,18 @@ For a precise description of the notion of sparseness, see the papers that devel
 
 
 **Improvements to the circular coordinates algorithm.**
-DREiMac implements two new functionalities addressing two issues that can arise when finding circular coordinates for data.
+DREiMac implements two new functionalities addressing two issues that can arise when computing circular coordinates for data.
 
 The circular coordinates algorithm turns a cohomology class with coefficients in $\mathbb{Z}$ into a map into the circle.
 However, since persistent cohomology is computed with coefficients in a field, the cohomology class is obtained by lifting a cohomology class with coefficients in $\mathbb{Z}/q\mathbb{Z}$, with $q$ a prime.
-This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful; see Figure \ref{figure:fix-cocycle}.
+This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful; see Figure \ref{figure:fix-cocycle} (right).
 An algebraic procedure for fixing this issue is described in [@desilva-morozov-vejdemo], but has thus far not been implemented.
 DREiMac implements this using integer linear programming.
 
-![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=50%}
+![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=70%}
 
-Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (Figures \ref{figure:genus-two-circular} and \ref{figure:genus-two-toroidal}).
-To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circularities in a provable geometrically simpler fashion.
+Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (Figures \ref{figure:genus-two-toroidal} and \ref{figure:genus-two-circular}).
+To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circular features in a provable geometrically simpler fashion.
 
 ![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-2-toroidal-c.png){width=80%}
 
