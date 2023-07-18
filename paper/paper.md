@@ -25,7 +25,7 @@ bibliography: paper.bib
 # Summary
 
 DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
-Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective space, and in lens spaces.
+Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective spaces, and in lens spaces.
 
 In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
 
@@ -50,9 +50,17 @@ DREiMac also includes functions for generating topologically interesting dataset
 
 **Sparse algorithms.**
 All of DREiMac's coordinates are sparse, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
-This gives a significant speedup, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
+This gives a significant speedup when compared to algorithms which used a simplicial complex built on the entire dataset, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
+For a precise description of the notion of sparseness, see the papers that develop the algorithms DREiMac implements 
+[@circular-coords],
+[@projective-coords],
+[@lens-coords],
+[@toroidal-coords].
 
-**Significant improvements to the circular coordinates algorithm.**
+
+**Improvements to the circular coordinates algorithm.**
+DREiMac implements two new functionalities addressing two issues that can arise when finding circular coordinates for data.
+
 The circular coordinates algorithm turns a cohomology class with coefficients in $\mathbb{Z}$ into a map into the circle.
 However, since persistent cohomology is computed with coefficients in a field, the cohomology class is obtained by lifting a cohomology class with coefficients in $\mathbb{Z}/q\mathbb{Z}$, with $q$ a prime.
 This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful; see Figure \ref{figure:fix-cocycle}.
@@ -61,20 +69,21 @@ DREiMac implements this using integer linear programming.
 
 ![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=50%}
 
-Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (TODO add picture).
+Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (Figures \ref{figure:genus-two-circular} and \ref{figure:genus-two-toroidal}).
 To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circularities in a provable geometrically simpler fashion.
 
-![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-2-toroidal.png){width=80%}
+![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-2-toroidal-c.png){width=80%}
 
 
-![Parametrizing the circularity of a surface of genus two in 3D. This output is obtained by running the circular coordinates algorithm. The parametrization obtained is arguably less interpretable than that obtained by the toroidal coordinates algorithm, shown in Figure \ref{figure:genus-two-toroidal}.. \label{figure:genus-two-circular}](genus-2-circular.png){width=80%}
+![Parametrizing the circularity of a surface of genus two in 3D. This output is obtained by running the circular coordinates algorithm. The parametrization obtained is arguably less interpretable than that obtained by the toroidal coordinates algorithm, shown in Figure \ref{figure:genus-two-toroidal}.. \label{figure:genus-two-circular}](genus-2-circular-c.png){width=80%}
 
 
 **Previously not implemented cohomological coordinates.**
-DREiMac implements real projective, complex projective, and lens coordinates.
+DREiMac implements real projective, complex projective, and lens coordinates, introduced in [@projective-coords],
+[@lens-coords].
 These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
 
-# Examples
+# Example
 
 We illustrate DREiMac's capabilities by showing how it parametrizes the large scale circular features of the unprecessed COIL-20 dataset [@coil-20]; details about this example can be found in the documentation.
 The dataset consists of gray-scale images of 5 objects, photographed from different angles.
