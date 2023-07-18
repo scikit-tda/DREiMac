@@ -75,13 +75,14 @@ To address this, DREiMac implements the toroidal coordinates algorithm, introduc
 ![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-2-toroidal-c.png){width=80%}
 
 
-![Parametrizing the circularity of a surface of genus two in 3D. This output is obtained by running the circular coordinates algorithm. The parametrization obtained is arguably less interpretable than that obtained by the toroidal coordinates algorithm, shown in Figure \ref{figure:genus-two-toroidal}.. \label{figure:genus-two-circular}](genus-2-circular-c.png){width=80%}
+![Parametrizing the circularity of a surface of genus two in 3D. This output is obtained by running the circular coordinates algorithm. The parametrization obtained is arguably less interpretable than that obtained by the toroidal coordinates algorithm, shown in Figure \ref{figure:genus-two-toroidal}. \label{figure:genus-two-circular}](genus-2-circular-c.png){width=80%}
 
 
 **Previously not implemented cohomological coordinates.**
 DREiMac implements real projective, complex projective, and lens coordinates, introduced in [@projective-coords],
 [@lens-coords].
-These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
+jhese allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
+
 
 # Example
 
@@ -89,7 +90,7 @@ We illustrate DREiMac's capabilities by showing how it parametrizes the large sc
 The dataset consists of gray-scale images of 5 objects, photographed from different angles.
 As such, it consists of 5 clusters, each cluster exhibiting one large scale circular feature; see Figure \ref{figure:coil-20-pds}.
 
-![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coil-20-pds.png){width=95%}
+![Persistent cohomology of 5 clusters of unprocessed COIL-20 dataset. \label{figure:coil-20-pds}](coil-20-pds-h.png){width=100%}
 
 We use single-linkage to cluster the data into 5 clusters and compute the persistent cohomology of each cluster.
 We then run the circular coordinates algorithm on each cluster, using the most prominent cohomology class of each cluster.
