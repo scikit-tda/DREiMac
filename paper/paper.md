@@ -42,6 +42,12 @@ The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac
 
 # Statement of need and main contributions
 
+Topological coordinatization is witnessing increased application in domains such as
+neuroscience [@rybakken-et-al] [@kang-xu-morozov] [@gardner-et-al],
+dynamical systems [@vejdemo-pokorny-skraba-kragic],
+and dimensionality reduction [@fibered].
+The fast implementations and data science integrations provided in DREiMac are aimed at enabling other domain scientists in their pursuits.
+
 To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
 Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
 
@@ -70,7 +76,7 @@ DREiMac implements this using integer linear programming.
 ![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=70%}
 
 Another practical issue of the circular coordinates algorithm is its performance in the presence of more than one large scale circular feature (Figures \ref{figure:genus-two-toroidal} and \ref{figure:genus-two-circular}).
-To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circular features in a provable geometrically simpler fashion.
+To address this, DREiMac implements the toroidal coordinates algorithm, introduced in [@toroidal-coords], which allows the user to select several 1-dimensional cohomology classes and returns coordinates that parametrize these circular features in a simpler fashion.
 
 ![Parametrizing the circularity of a surface of genus two in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 2-dimensional everywhere). This is DREiMac's output obtained by running the toroidal coordinates algorithm. The output of running the circular coordinates algorithm is in Figure \ref{figure:genus-two-circular}. Details about this example can be found in the documentation. \label{figure:genus-two-toroidal}](genus-2-toroidal-c.png){width=80%}
 
@@ -81,7 +87,7 @@ To address this, DREiMac implements the toroidal coordinates algorithm, introduc
 **Previously not implemented cohomological coordinates.**
 DREiMac implements real projective, complex projective, and lens coordinates, introduced in [@projective-coords],
 [@lens-coords].
-jhese allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
+These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
 
 
 # Example
