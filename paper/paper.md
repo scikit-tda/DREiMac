@@ -12,6 +12,7 @@ authors:
    orcid: 0000-0002-4862-722X
    affiliation: 1
  - name: Christopher J. Tralie
+   orcid: 0000-0003-4206-1963
    affiliation: 2
 affiliations:
  - name: Northeastern University
