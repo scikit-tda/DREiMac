@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |    
-          conda install nbconvert>=6.4.3 sphinx sphinx_rtd_theme nbsphinx pandoc
+          conda install nbconvert>=6.4.3 sphinx sphinx_rtd_theme>=1.0.0 nbsphinx pandoc
           python -m pip install --upgrade pip
           pip install .
       - name: Sphinx build
