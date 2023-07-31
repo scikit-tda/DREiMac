@@ -31,10 +31,11 @@ Currently, DREiMac is able to find topology-preserving representations of point 
 In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
 
 DREiMac is based on persistent cohomology [@persistent-cohomology], a method from topological data analysis; the theory behind DREiMac is developed in
-[@circular-coords],
-[@projective-coords],
-[@lens-coords],
-[@toroidal-coords].
+@circular-coords,
+@projective-coords,
+@lens-coords,
+and
+@toroidal-coords.
 DREiMac is implemented in Python, using Numba for the more expensive computations.
 We test DREiMac periodically in Ubuntu, macOS, and Windows.
 
@@ -44,13 +45,13 @@ The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac
 # Statement of need and main contributions
 
 Topological coordinatization is witnessing increased application in domains such as
-neuroscience [@rybakken-et-al] [@kang-xu-morozov] [@gardner-et-al],
+neuroscience [@rybakken-et-al; @kang-xu-morozov; @gardner-et-al],
 dynamical systems [@vejdemo-pokorny-skraba-kragic],
 and dimensionality reduction [@fibered].
 The fast implementations and data science integrations provided in DREiMac are aimed at enabling other domain scientists in their pursuits.
 
 To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
-Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of [@desilva-morozov-vejdemo].
+Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of @desilva-morozov-vejdemo.
 
 DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities; we elaborate on these below.
 DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
@@ -59,10 +60,7 @@ DREiMac also includes functions for generating topologically interesting dataset
 All of DREiMac's coordinates are sparse, meaning that persistent cohomology computations are carried on a simplicial complex built on a small sample of the full point cloud.
 This gives a significant speedup when compared to algorithms which use a simplicial complex built on the entire dataset, since the persistent cohomology computation is the most computationally intensive part of the algorithm.
 For a precise description of the notion of sparseness, see the papers that develop the algorithms that DREiMac implements 
-[@circular-coords],
-[@projective-coords],
-[@lens-coords],
-[@toroidal-coords].
+[@circular-coords; @projective-coords; @lens-coords; @toroidal-coords].
 
 
 **Improvements to the circular coordinates algorithm.**
@@ -71,7 +69,7 @@ DREiMac implements two new functionalities addressing two issues that can arise 
 The circular coordinates algorithm turns a cohomology class with coefficients in $\mathbb{Z}$ into a map into the circle.
 However, since persistent cohomology is computed with coefficients in a field, the cohomology class is obtained by lifting a cohomology class with coefficients in $\mathbb{Z}/q\mathbb{Z}$, with $q$ a prime.
 This lift can fail to be a cocycle, resulting in discontinuous coordinates, which are arguably not meaningful; see Figure \ref{figure:fix-cocycle} (right).
-An algebraic procedure for fixing this issue is described in [@desilva-morozov-vejdemo], but has thus far not been implemented.
+An algebraic procedure for fixing this issue is described in @desilva-morozov-vejdemo, but has thus far not been implemented.
 DREiMac implements this using integer linear programming.
 
 ![Parametrizing the circularity of a trefoil knot in 3D. Here we display a 2-dimensional representation, but the 3-dimensional point cloud does not have self intersections (in the sense that it is locally 1-dimensional everywhere). On the right, the output of the circular coordinates algorithm without applying the algebraic procedure to fix the lift of the cohomology class. On the left, the ouput of DREiMac, which implements this fix. Details about this example can be found in the documentation. \label{figure:fix-cocycle}](fix-cocycle.png){width=70%}
@@ -86,8 +84,8 @@ To address this, DREiMac implements the toroidal coordinates algorithm, introduc
 
 
 **Previously not implemented cohomological coordinates.**
-DREiMac implements real projective, complex projective, and lens coordinates, introduced in [@projective-coords],
-[@lens-coords].
+DREiMac implements real projective, complex projective, and lens coordinates, introduced in
+@projective-coords and @lens-coords.
 These allow the user to construct topologically meaningful coordinates for point clouds using cohomology classes with coefficients in $\mathbb{Z}/2\mathbb{Z}$, $\mathbb{Z}$, and $\mathbb{Z}/q\mathbb{Z}$ ($q$ a prime), respectively, and in cohomological dimensions $1$, $2$, and $1$, respectively.
 
 
