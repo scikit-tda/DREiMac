@@ -10,16 +10,18 @@ authors:
    affiliation: 1
  - name: Luis Scoccola 
    orcid: 0000-0002-4862-722X
-   affiliation: 1
+   affiliation: 2
  - name: Christopher J. Tralie
    orcid: 0000-0003-4206-1963
-   affiliation: 2
+   affiliation: 3
 affiliations:
  - name: Northeastern University
    index: 1
- - name: Ursinus College
+ - name: University of Oxford
    index: 2
-date: 4 July 2023
+ - name: Ursinus College
+   index: 3
+date: 3 October 2023
 bibliography: paper.bib
 ---
 
@@ -36,7 +38,7 @@ DREiMac is based on persistent cohomology [@persistent-cohomology], a method fro
 @lens-coords,
 and
 @toroidal-coords.
-DREiMac is implemented in Python, using Numba for the more expensive computations.
+DREiMac is implemented in Python, using Numba [@numba] for the more expensive computations, and Ripser [@ripser] and its Python wrapper [@ripserpy] for persistent homology computations.
 We test DREiMac periodically in Ubuntu, macOS, and Windows.
 
 The documentation for DREiMac can be found [here](https://scikit-tda.org/DREiMac/index.html).
@@ -50,8 +52,8 @@ dynamical systems [@vejdemo-pokorny-skraba-kragic],
 and dimensionality reduction [@fibered].
 The fast implementations and data science integrations provided in DREiMac are aimed at enabling other domain scientists in their pursuits.
 
-To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology is Dionysus [@dionysus].
-Dionysus is a general purpose library for topological data analysis, which in particular implements the original circular coordinates algorithm of @desilva-morozov-vejdemo.
+To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology are Dionysus [@dionysus] and Ripserer [@ripserer].
+Dionysus and Ripserer are general purpose library for persistent homology, which in particular implement the original circular coordinates algorithm of @desilva-morozov-vejdemo, and the sparse circular coordinates algorithm of @circular-coords.
 
 DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities; we elaborate on these below.
 DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
