@@ -52,8 +52,8 @@ dynamical systems [@vejdemo-pokorny-skraba-kragic],
 and dimensionality reduction [@fibered].
 The fast implementations and data science integrations provided in DREiMac are aimed at enabling other domain scientists in their pursuits.
 
-To the best of our knowledge, the only publicly available software implementing cohomological coordinates based on persistent cohomology are Dionysus [@dionysus] and Ripserer [@ripserer].
-Dionysus and Ripserer are general purpose library for persistent homology, which in particular implement the original circular coordinates algorithm of @desilva-morozov-vejdemo, and the sparse circular coordinates algorithm of @circular-coords, respectively.
+To the best of our knowledge, the only publicly available software packages implementing cohomological coordinates based on persistent cohomology are Dionysus [@dionysus] and Ripserer [@ripserer].
+Dionysus and Ripserer are general purpose libraries for persistent homology, which in particular implement the original circular coordinates algorithm of @desilva-morozov-vejdemo, and the sparse circular coordinates algorithm of @circular-coords, respectively.
 
 DREiMac adds to the current landscape of cohomological coordinates software by implementing various currently missing functionalities; we elaborate on these below.
 DREiMac also includes functions for generating topologically interesting datasets for testing, various geometrical utilities including functions for manipulating the coordinates returned by the algorithms, and several example notebooks including notebooks illustrating the effect of each of the main parameters of the algorithms.
