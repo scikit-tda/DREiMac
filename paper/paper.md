@@ -108,8 +108,8 @@ We display the result in Figure \ref{figure:coil-20-res}.
 
 # Statement of contribution 
 
-J.A.P.:~initial MATLAB implementation (not part of this software) and design of this software.
-C.T.~and L.S.:~design and implementation.
+J.A.P.: initial MATLAB implementation (not part of this software) and design of this software.
+C.T. and L.S.: design and implementation.
 
 
 # Acknowledgements
