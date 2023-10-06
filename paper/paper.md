@@ -105,6 +105,13 @@ We display the result in Figure \ref{figure:coil-20-res}.
 
 ![Unprocessed COIL-20 parametrized by clustering and circular coordinates. \label{figure:coil-20-res}](coil-20-res.png){width=95%}
 
+
+# Statement of contribution 
+
+J.A.P.:~initial MATLAB implementation (not part of this software) and design of this software.
+C.T.~and L.S.:~design and implementation.
+
+
 # Acknowledgements
 
 We thank Tom Mease for contributions and discussions.
