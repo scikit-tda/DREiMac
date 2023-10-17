@@ -38,7 +38,7 @@ a0.set_title("Input point cloud") ; a0.axis("off") ; a0.set_aspect("equal")
 
 # plot the persistence diagram, showing a single prominent class
 cc = CircularCoords(X, n_landmarks=200)
-plot_diagrams(cc.dgms_, title="Persistence diagram", ax=a1)
+plot_diagrams(cc._dgms, title="Persistence diagram", ax=a1)
 
 # plot the data colored by the circle-valued map constructed by DREiMac
 circular_coordinates = cc.get_coordinates()
