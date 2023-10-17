@@ -38,7 +38,7 @@ setup(
         "testing": ["pytest"],
         "examples": [],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.8,<3.12",
     classifiers=[
         "Intended Audience :: Science/Research",
         "Intended Audience :: Education",

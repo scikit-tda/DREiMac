@@ -10,7 +10,7 @@ You can check the :ref:`theory section <theory>` for details and or the examples
 Installing
 ----------
 
-Make sure you are using Python 3.8 or newer.
+Make sure your Python version is >=3.8 and <3.12.
 DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
 `matplotlib`,
 `numba`,
