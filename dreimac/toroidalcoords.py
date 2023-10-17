@@ -137,12 +137,8 @@ class ToroidalCoords(EMCoords):
                 if is_cocycle:
                     fixed_cocycles.append(cocycle_as_vector)
                 else:
-                    delta1 = (
-                        delta1
-                        if delta1
-                        else CohomologyUtils.make_delta1_compact(
-                            dist_land_land, rips_threshold, self.cns_lookup_table_
-                        )
+                    delta1 = delta1 or CohomologyUtils.make_delta1_compact(
+                        dist_land_land, rips_threshold, self.cns_lookup_table_
                     )
 
                     d1cocycle = delta1 @ cocycle_as_vector.T
