@@ -39,6 +39,7 @@ class CircularCoords(ToroidalCoords):
 
     def get_coordinates(
         self,
+        X_query=None,
         perc=0.5,
         cocycle_idx=0,
         partunity_fn=PartUnity.linear,
@@ -51,6 +52,8 @@ class CircularCoords(ToroidalCoords):
 
         Parameters
         ----------
+        X_query: ndarray(M, d) or None
+            A point cloud to compute the circular coordinates on. If None, uses self.X.
         perc : float
             Percent coverage. Must be between 0 and 1.
         cocycle_idx : integer
@@ -68,12 +71,13 @@ class CircularCoords(ToroidalCoords):
 
         Returns
         -------
-        thetas : ndarray(N)
+        thetas : ndarray(M)
             Circular coordinates
         """
 
         return ToroidalCoords.get_coordinates(
             self,
+            X_query,
             perc,
             [cocycle_idx],
             partunity_fn,
