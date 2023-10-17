@@ -62,7 +62,7 @@ class TestCircular:
 
         assert toroidal_coords.shape == (4, X.shape[0])
         assert _less_than_or_equal_with_tolerance(
-            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
+            np.linalg.norm(tc._gram_matrix), np.linalg.norm(tc._original_gram_matrix)
         )
 
         X = GeometryExamples.torus_3d(2000, 5, 1, seed=0)
@@ -72,7 +72,7 @@ class TestCircular:
 
         assert toroidal_coords.shape == (2, X.shape[0])
         assert _less_than_or_equal_with_tolerance(
-            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
+            np.linalg.norm(tc._gram_matrix), np.linalg.norm(tc._original_gram_matrix)
         )
 
 
@@ -83,7 +83,7 @@ class TestCircular:
 
         assert toroidal_coords.shape == (3, X.shape[0])
         assert _less_than_or_equal_with_tolerance(
-            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
+            np.linalg.norm(tc._gram_matrix), np.linalg.norm(tc._original_gram_matrix)
         )
 
 
@@ -94,7 +94,7 @@ class TestCircular:
 
         assert toroidal_coords.shape == (3, X.shape[0])
         assert _less_than_or_equal_with_tolerance(
-            np.linalg.norm(tc.gram_matrix_), np.linalg.norm(tc.original_gram_matrix_)
+            np.linalg.norm(tc._gram_matrix), np.linalg.norm(tc._original_gram_matrix)
         )
 
 

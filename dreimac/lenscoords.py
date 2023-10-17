@@ -38,7 +38,6 @@ class LensCoords(EMCoords):
             maxdim=maxdim,
             verbose=verbose,
         )
-        self.type_ = "lens"
 
     def get_coordinates(
         self,
@@ -79,7 +78,7 @@ class LensCoords(EMCoords):
 
         """
 
-        n_landmarks = self.n_landmarks_
+        n_landmarks = self._n_landmarks
 
         homological_dimension = 1
         cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(
@@ -92,7 +91,7 @@ class LensCoords(EMCoords):
 
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
-        root_of_unity = np.exp(2 * np.pi * 1j / self.prime_)
+        root_of_unity = np.exp(2 * np.pi * 1j / self._prime)
 
         cocycle_matrix = np.ones( (n_landmarks, n_landmarks), np.complex_ )
         cocycle_matrix[cocycle[:, 0], cocycle[:, 1]] = root_of_unity ** cocycle[:, 2]
@@ -101,6 +100,6 @@ class LensCoords(EMCoords):
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
         epca = EquivariantPCA.ppca(class_map, complex_dim-1, projective_dim_red_mode, self.verbose)
-        self.variance_ = epca["variance"]
+        self._variance = epca["variance"]
 
         return epca["X"]

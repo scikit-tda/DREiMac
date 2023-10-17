@@ -37,7 +37,7 @@ class ToroidalCoords(EMCoords):
     ):
         EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
         simplicial_complex_dimension = 2
-        self.cns_lookup_table_ = combinatorial_number_system_table(
+        self._cns_lookup_table = combinatorial_number_system_table(
             n_landmarks, simplicial_complex_dimension
         )
 
@@ -96,7 +96,7 @@ class ToroidalCoords(EMCoords):
 
         # lift to integer cocycles
         integer_cocycles = [
-            CohomologyUtils.lift_to_integer_cocycle(cocycle, prime=self.prime_)
+            CohomologyUtils.lift_to_integer_cocycle(cocycle, prime=self._prime)
             for cocycle in cocycles
         ]
 
@@ -109,15 +109,15 @@ class ToroidalCoords(EMCoords):
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
 
         # compute boundary matrix
-        dist_land_land = self.dist_land_land_
+        dist_land_land = self._dist_land_land
         delta0 = CohomologyUtils.make_delta0(
-            dist_land_land, rips_threshold, self.cns_lookup_table_
+            dist_land_land, rips_threshold, self._cns_lookup_table
         )
 
         # go from sparse to dense representation of cocycles
         integer_cocycles_as_vectors = [
             CohomologyUtils.sparse_cocycle_to_vector(
-                sparse_cocycle, self.cns_lookup_table_, self.n_landmarks_, int
+                sparse_cocycle, self._cns_lookup_table, self._n_landmarks, int
             )
             for sparse_cocycle in integer_cocycles
         ]
@@ -131,18 +131,18 @@ class ToroidalCoords(EMCoords):
                     cocycle_as_vector,
                     dist_land_land,
                     rips_threshold,
-                    self.cns_lookup_table_,
+                    self._cns_lookup_table,
                 )
                 if is_cocycle:
                     fixed_cocycles.append(cocycle_as_vector)
                 else:
                     delta1 = delta1 or CohomologyUtils.make_delta1_compact(
-                        dist_land_land, rips_threshold, self.cns_lookup_table_
+                        dist_land_land, rips_threshold, self._cns_lookup_table
                     )
 
                     d1cocycle = delta1 @ cocycle_as_vector.T
 
-                    y = d1cocycle // self.prime_
+                    y = d1cocycle // self._prime
 
                     constraints = LinearConstraint(delta1, y, y)
                     n_edges = delta1.shape[1]
@@ -165,7 +165,7 @@ class ToroidalCoords(EMCoords):
                         solution = optimizer_solution["x"]
                         new_cocycle_as_vector = (
                             cocycle_as_vector
-                            - self.prime_ * np.array(np.rint(solution), dtype=int)
+                            - self._prime * np.array(np.rint(solution), dtype=int)
                         )
 
                         fixed_cocycles.append(new_cocycle_as_vector)
@@ -173,7 +173,7 @@ class ToroidalCoords(EMCoords):
 
         # compute harmonic representatives of cocycles and their circle-valued integrals
         inner_product_matrix, sqrt_inner_product_matrix = _make_inner_product(
-            dist_land_land, rips_threshold, self.cns_lookup_table_
+            dist_land_land, rips_threshold, self._cns_lookup_table
         )
 
         harm_reps_and_integrals = [
@@ -193,7 +193,7 @@ class ToroidalCoords(EMCoords):
                 ball_indx,
                 dist_land_land,
                 rips_threshold,
-                self.cns_lookup_table_,
+                self._cns_lookup_table,
             )
             for harm_rep, integral in harm_reps_and_integrals
         ]
@@ -211,9 +211,9 @@ class ToroidalCoords(EMCoords):
                 decorrelated_vectors,
             ) = _reduce_circular_coordinates(circ_coords, gram_mat)
 
-            self.original_gram_matrix_ = gram_mat
-            self.gram_matrix_ = decorrelated_vectors @ decorrelated_vectors.T
-            self.change_basis_ = change_basis
+            self._original_gram_matrix = gram_mat
+            self._gram_matrix = decorrelated_vectors @ decorrelated_vectors.T
+            self._change_basis = change_basis
 
         return circ_coords
 
