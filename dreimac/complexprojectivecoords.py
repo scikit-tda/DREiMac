@@ -38,7 +38,7 @@ class ComplexProjectiveCoords(EMCoords):
     ):
         EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
         simplicial_complex_dimension = 3
-        self.cns_lookup_table_ = combinatorial_number_system_table(
+        self._cns_lookup_table = combinatorial_number_system_table(
             n_landmarks, simplicial_complex_dimension
         )
 
@@ -100,33 +100,33 @@ class ComplexProjectiveCoords(EMCoords):
 
         # compute boundary matrix
         delta1 = CohomologyUtils.make_delta1(
-            self.dist_land_land_, rips_threshold, self.cns_lookup_table_
+            self._dist_land_land, rips_threshold, self._cns_lookup_table
         )
 
         # lift to integer cocycles
         integer_cocycle = CohomologyUtils.lift_to_integer_cocycle(
-            cocycle, prime=self.prime_
+            cocycle, prime=self._prime
         )
 
         # go from sparse to dense representation of cocycles
         integer_cocycle_as_vector = CohomologyUtils.sparse_cocycle_to_vector(
-            integer_cocycle, self.cns_lookup_table_, self.n_landmarks_, int
+            integer_cocycle, self._cns_lookup_table, self._n_landmarks, int
         )
 
         if check_cocycle_condition:
             is_cocycle = _is_two_cocycle(
                 integer_cocycle_as_vector,
-                self.dist_land_land_,
+                self._dist_land_land,
                 rips_threshold,
-                self.cns_lookup_table_,
+                self._cns_lookup_table,
             )
             if not is_cocycle:
                 delta2 = CohomologyUtils.make_delta2_compact(
-                    self.dist_land_land_, rips_threshold, self.cns_lookup_table_
+                    self._dist_land_land, rips_threshold, self._cns_lookup_table
                 )
                 d2cocycle = delta2 @ integer_cocycle_as_vector.T
 
-                y = d2cocycle // self.prime_
+                y = d2cocycle // self._prime
 
                 constraints = LinearConstraint(delta2, y, y, keep_feasible=True)
                 n_edges = delta2.shape[1]
@@ -148,7 +148,7 @@ class ComplexProjectiveCoords(EMCoords):
                     solution = optimizer_solution["x"]
                     new_cocycle_as_vector = (
                         integer_cocycle_as_vector
-                        - self.prime_ * np.array(np.rint(solution), dtype=int)
+                        - self._prime * np.array(np.rint(solution), dtype=int)
                     )
                     integer_cocycle_as_vector = new_cocycle_as_vector
 
@@ -162,9 +162,9 @@ class ComplexProjectiveCoords(EMCoords):
             integral,
             varphi,
             ball_indx,
-            self.dist_land_land_,
+            self._dist_land_land,
             rips_threshold,
-            self.cns_lookup_table_,
+            self._cns_lookup_table,
         )
 
         # reduce dimensionality of complex projective space
@@ -174,7 +174,7 @@ class ComplexProjectiveCoords(EMCoords):
             projective_dim_red_mode,
             self.verbose,
         )
-        self.variance_ = epca["variance"]
+        self._variance = epca["variance"]
 
         return epca["X"]
 

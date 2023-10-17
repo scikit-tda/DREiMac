@@ -75,7 +75,7 @@ class ProjectiveCoords(EMCoords):
 
         """
 
-        n_landmarks = self.n_landmarks_
+        n_landmarks = self._n_landmarks
 
         homological_dimension = 1
         cohomdeath_rips, cohombirth_rips, cocycle = self.get_representative_cocycle(
@@ -99,6 +99,6 @@ class ProjectiveCoords(EMCoords):
         epca = EquivariantPCA.ppca(
             class_map, proj_dim, projective_dim_red_mode, self.verbose
         )
-        self.variance_ = epca["variance"]
+        self._variance = epca["variance"]
 
         return epca["X"]

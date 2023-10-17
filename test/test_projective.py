@@ -26,10 +26,10 @@ class TestRealProjective:
         pc = ProjectiveCoords(D, n_landmarks, distance_matrix=True, verbose=True)
         coordinates = pc.get_coordinates()
         assert len(coordinates) == len(X)
-        total_variance = np.linalg.norm(pc.variance_)
+        total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
         variance_threshold = 0.8
-        assert np.linalg.norm(pc.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(pc._variance[:target_coordinates]) >= total_variance * variance_threshold
 
 
 
@@ -45,10 +45,10 @@ class TestRealProjective:
         pc = ProjectiveCoords(X, n_landmarks, verbose=True)
         coordinates = pc.get_coordinates()
         assert len(coordinates) == len(X)
-        total_variance = np.linalg.norm(pc.variance_)
+        total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
         variance_threshold = 0.3
-        assert np.linalg.norm(pc.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(pc._variance[:target_coordinates]) >= total_variance * variance_threshold
 
 
     def test_line_segment(self):
@@ -60,10 +60,10 @@ class TestRealProjective:
         pc = ProjectiveCoords(P, n_landmarks=100)
         coordinates = pc.get_coordinates()
         assert len(coordinates) == len(P)
-        total_variance = np.linalg.norm(pc.variance_)
+        total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
         variance_threshold = 0.3
-        assert np.linalg.norm(pc.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(pc._variance[:target_coordinates]) >= total_variance * variance_threshold
 
 
     def test_image_patches(self):
@@ -71,10 +71,10 @@ class TestRealProjective:
         proj = ProjectiveCoords(X, n_landmarks=200)
         coordinates = proj.get_coordinates(proj_dim=2, perc=0.8, cocycle_idx=0)
         assert len(coordinates) == len(X)
-        total_variance = np.linalg.norm(proj.variance_)
+        total_variance = np.linalg.norm(proj._variance)
         target_coordinates = 2
         variance_threshold = 0.3
-        assert np.linalg.norm(proj.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(proj._variance[:target_coordinates]) >= total_variance * variance_threshold
 
 
 class TestComplexProjective:
@@ -85,9 +85,9 @@ class TestComplexProjective:
         target_coordinates = 1
         coordinates = cpc.get_coordinates(proj_dim=target_coordinates)
         assert len(coordinates) == len(data)
-        total_variance = np.linalg.norm(cpc.variance_)
+        total_variance = np.linalg.norm(cpc._variance)
         variance_threshold = 0.3
-        assert np.linalg.norm(cpc.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(cpc._variance[:target_coordinates]) >= total_variance * variance_threshold
 
     def test_moving_dot(self):
         P = GeometryExamples.moving_dot(40)
@@ -95,6 +95,6 @@ class TestComplexProjective:
         target_coordinates = 1
         coordinates = cpc.get_coordinates(proj_dim=target_coordinates)
         assert len(coordinates) == len(P)
-        total_variance = np.linalg.norm(cpc.variance_)
+        total_variance = np.linalg.norm(cpc._variance)
         variance_threshold = 0.3
-        assert np.linalg.norm(cpc.variance_[:target_coordinates]) >= total_variance * variance_threshold
+        assert np.linalg.norm(cpc._variance[:target_coordinates]) >= total_variance * variance_threshold
