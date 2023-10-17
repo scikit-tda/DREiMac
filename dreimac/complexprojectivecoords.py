@@ -41,7 +41,6 @@ class ComplexProjectiveCoords(EMCoords):
         self.cns_lookup_table_ = combinatorial_number_system_table(
             n_landmarks, simplicial_complex_dimension
         )
-        self.type_ = "complexprojective"
 
     def get_coordinates(
         self,

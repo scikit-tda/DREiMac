@@ -36,7 +36,6 @@ class ToroidalCoords(EMCoords):
         self, X, n_landmarks, distance_matrix=False, prime=41, maxdim=1, verbose=False
     ):
         EMCoords.__init__(self, X, n_landmarks, distance_matrix, prime, maxdim, verbose)
-        self.type_ = "toroidal"
         simplicial_complex_dimension = 2
         self.cns_lookup_table_ = combinatorial_number_system_table(
             n_landmarks, simplicial_complex_dimension

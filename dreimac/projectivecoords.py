@@ -35,7 +35,6 @@ class ProjectiveCoords(EMCoords):
             maxdim=maxdim,
             verbose=verbose,
         )
-        self.type_ = "proj"
 
     def get_coordinates(
         self,
