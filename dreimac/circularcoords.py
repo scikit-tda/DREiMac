@@ -36,7 +36,6 @@ class CircularCoords(ToroidalCoords):
             maxdim=maxdim,
             verbose=verbose,
         )
-        self.type_ = "circ"
 
     def get_coordinates(
         self,
