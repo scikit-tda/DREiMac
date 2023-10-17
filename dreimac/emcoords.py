@@ -3,6 +3,7 @@ A superclass for shared code across all different types of coordinates
 """
 import numpy as np
 from scipy.sparse.linalg import lsqr
+from scipy.spatial.distance import cdist
 import time
 from .utils import CohomologyUtils
 from ripser import ripser
@@ -43,10 +44,11 @@ class EMCoords(object):
         if verbose:
             tic = time.time()
             print("Doing TDA...")
+        self.distance_matrix = distance_matrix
         if distance_matrix is False:
-            ripser_metric_input = X 
+            ripser_metric_input = X
         elif X.shape[0] == X.shape[1]:
-            ripser_metric_input = X 
+            ripser_metric_input = X
         else:
             ripser_metric_input = X[:,:X.shape[0]]
         res = ripser(
@@ -149,7 +151,7 @@ class EMCoords(object):
 
         return self.r_cover_, self.rips_threshold_
 
-    def get_covering_partition(self, r_cover, partunity_fn):
+    def get_covering_partition(self, r_cover, partunity_fn, X_query=None):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
@@ -159,15 +161,20 @@ class EMCoords(object):
             Covering radius
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
+        X_query: ndarray(M, d)
+            A point cloud to compute the circular coordinates on. If None, uses self.X.
 
         Returns
         -------
-        varphi: ndarray(n_data, dtype=float)
+        varphi: ndarray(M, dtype=float)
             varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b)),
-        ball_indx: ndarray(n_data, dtype=int)
+        ball_indx: ndarray(M, dtype=int)
             The index of the first open set each data point belongs to
         """
-        dist_land_data = self.dist_land_data_
+        if X_query is None:
+            dist_land_data = self.dist_land_data_
+        else: # calculate the distance between the landmarks and the query
+            dist_land_data = cdist(self.X_[self.idx_land_], X_query)
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
