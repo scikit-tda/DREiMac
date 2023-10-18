@@ -61,6 +61,8 @@ class EMCoords(object):
             print("Elapsed time persistence: %.3g seconds" % (time.time() - tic))
         self._prime = prime
         self._dgms = res["dgms"]
+        # TODO: the following is kept for backwards compatibility, remove in next interface-breaking version
+        self.dgms_ = self._dgms
         self._idx_land = res["idx_perm"]
         self._n_landmarks = len(self._idx_land)
         #self.dist_land_data_ = res["dperm2all"]
