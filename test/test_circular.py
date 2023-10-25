@@ -1,5 +1,4 @@
 import numpy as np
-from pytest import approx
 from scipy.spatial import KDTree
 
 from dreimac import CircularCoords, ToroidalCoords, GeometryExamples
