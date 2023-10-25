@@ -1,4 +1,5 @@
 import numpy as np
+from pytest import approx
 from scipy.spatial import KDTree
 
 from dreimac import CircularCoords, ToroidalCoords, GeometryExamples
@@ -97,6 +98,35 @@ class TestCircular:
             np.linalg.norm(tc._gram_matrix), np.linalg.norm(tc._original_gram_matrix)
         )
 
+    def test_toroidal_consistent_on_query(self):
+        """
+        Check that the coordinates computed on the query point-cloud are the same as
+        those computed on the initial points, when the two are equal up to permutation.
+        """
+        X = GeometryExamples.bullseye()
+        n_landmarks = 300
+        tc = ToroidalCoords(X, n_landmarks=n_landmarks)
+        perc = 0.1; cohomology_classes = [1]
+        t_coords_ref = tc.get_coordinates(perc=perc, cocycle_idxs=cohomology_classes)[0]
+
+        indices = np.random.randint(low=0, high=X.shape[0], size=(20,)).astype(int)
+        X_query = X[indices]
+        t_coords_new = tc.get_coordinates(X_query=X_query, perc=perc, cocycle_idxs=cohomology_classes)[0]
+        assert _less_than_or_equal_with_tolerance(0., np.array([_circle_distance(x,y) for x,y in zip(t_coords_ref[indices], t_coords_new)]))
+
+    def test_toroidal_coordinates_continuity(self):
+        X = GeometryExamples.bullseye()
+        n_landmarks = 300
+        tc = ToroidalCoords(X, n_landmarks=n_landmarks)
+        perc = 0.1; cohomology_classes = [1]
+        indices = np.random.randint(low=0, high=X.shape[0], size=(20,)).astype(int)
+
+        X_subsample = X[indices]
+        t_coords_ref = tc.get_coordinates(X_query=X_subsample, perc=perc, cocycle_idxs=cohomology_classes)[0]
+
+        X_noisy = X_subsample + 0.01*(np.random.rand(*X_subsample.shape)-0.5)
+        t_coords_new = tc.get_coordinates(X_query=X_noisy, perc=perc, cocycle_idxs=cohomology_classes)[0]
+        assert all(_less_than_or_equal_with_tolerance(0., np.array([_circle_distance(x,y) for x,y in zip(t_coords_ref, t_coords_new)])))
 
     def test_trefoil(self):
         """Check that circular coordinates returns a continuous map, even when the lifted
@@ -110,7 +140,7 @@ class TestCircular:
             cc = CircularCoords(X, 300, prime=prime)
             coords = cc.get_coordinates(
                 perc=large_perc,
-                cocycle_idx=0,
+                cocycle_idx=[0],
                 check_cocycle_condition=True,
             )
             assert len(coords) == len(X)
