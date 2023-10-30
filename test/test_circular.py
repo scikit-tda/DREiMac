@@ -139,7 +139,7 @@ class TestCircular:
             cc = CircularCoords(X, 300, prime=prime)
             coords = cc.get_coordinates(
                 perc=large_perc,
-                cocycle_idx=[0],
+                cocycle_idx=0,
                 check_cocycle_condition=True,
             )
             assert len(coords) == len(X)
