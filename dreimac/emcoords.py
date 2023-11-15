@@ -103,7 +103,8 @@ class EMCoords(object):
             Cohomological birth of the linear combination or single cocycle
         cocycle: ndarray(K, homological_dimension+2, dtype=int)
             Representative cocycle. First homological_dimension+1 columns are vertex indices,
-            and last column takes values in finite field corresponding to self._prime
+            and last column takes values in finite field corresponding to self._prime.
+            The number of rows K is the number of simplices on which the cocycle is non-zero.
         """
 
         assert isinstance(cohomology_class, int)
