@@ -2,6 +2,7 @@
 [![Downloads](https://static.pepy.tech/badge/dreimac)](https://pepy.tech/project/dreimac)
 [![codecov](https://codecov.io/gh/scikit-tda/dreimac/branch/master/graph/badge.svg)](https://codecov.io/gh/scikit-tda/dreimac)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05791/status.svg)](https://doi.org/10.21105/joss.05791)
 
 # DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates
 
@@ -105,13 +106,27 @@ If you're looking for a way to contribute, you could consider:
 * adding functionality and the corresponding documentation and tests;
 * responding to a bug or feature request in the Github issues.
 
-## Authors
+## Citing
+If you use this package, please site the JoSS paper found here: [![DOI](https://joss.theoj.org/papers/10.21105/joss.05791/status.svg)](https://doi.org/10.21105/joss.05791)
 
-Jose A. Perea, Luis Scoccola, Chris Tralie
-
+You can use the following bibtex entry
+```
+@article{Perea2023,
+  doi = {10.21105/joss.05791},
+  url = {https://doi.org/10.21105/joss.05791},
+  year = {2023},
+  publisher = {The Open Journal},
+  volume = {8},
+  number = {91},
+  pages = {5791},
+  author = {Jose A. Perea and Luis Scoccola and Christopher J. Tralie},
+  title = {DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates},
+  journal = {Journal of Open Source Software}
+}
+```
 ## Acknowledgements
 
-We thank Tom Mease for contributions and discussions.
+We thank Tom Mease for contributions and discussions. J.A.P. and L.S. were partially supported by the National Science Foundation through grants CCF-2006661 and CAREER award DMS-1943758.
 
 ## License
 
