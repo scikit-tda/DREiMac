@@ -107,9 +107,9 @@ If you're looking for a way to contribute, you could consider:
 * responding to a bug or feature request in the Github issues.
 
 ## Citing
-If you use this package, please site the JoSS paper found here: [![DOI](https://joss.theoj.org/papers/10.21105/joss.05791/status.svg)](https://doi.org/10.21105/joss.05791)
 
-You can use the following bibtex entry
+If you use this package, please cite the JOSS paper found [here](https://joss.theoj.org/papers/10.21105/joss.05791), using the following bibtex entry.
+
 ```
 @article{Perea2023,
   doi = {10.21105/joss.05791},
@@ -124,6 +124,7 @@ You can use the following bibtex entry
   journal = {Journal of Open Source Software}
 }
 ```
+
 ## Acknowledgements
 
 We thank Tom Mease for contributions and discussions. J.A.P. and L.S. were partially supported by the National Science Foundation through grants CCF-2006661 and CAREER award DMS-1943758.
