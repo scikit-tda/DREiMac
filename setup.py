@@ -36,7 +36,7 @@ setup(
     install_requires=requirements(),
     extras_require={
         "testing": ["pytest"],
-        "examples": [],
+        "docs": ["sphinx", "sphinx_rtd_theme", "numpydoc", "ipykernel", "nbsphinx"],
     },
     python_requires=">=3.8,<3.12",
     classifiers=[
