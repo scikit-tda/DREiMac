@@ -10,7 +10,7 @@ DREiMac is a library for topological data coordinatization, visualization, and d
 Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective space, and in lens spaces.
 
 In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
-For more information, please check the theory and examples in the [documentation](https://scikit-tda.org/DREiMac/index.html).
+For more information, please check the theory and examples in the [documentation](http://dreimac.scikit-tda.org/).
 
 
 ## Basic usage
@@ -55,7 +55,7 @@ cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0"
 
 ## More examples
 
-For Jupyter notebooks with more examples, please check the [documentation](https://scikit-tda.org/DREiMac/index.html) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
+For Jupyter notebooks with more examples, please check the [documentation](http://dreimac.scikit-tda.org/) or this repository's [docs/notebooks](https://github.com/scikit-tda/DREiMac/tree/master/docs/notebooks) directory.
 
 ## Installing
 
@@ -82,7 +82,7 @@ pip install git+https://github.com/scikit-tda/DREiMac.git
 
 ## Documentation and support
 
-You can find the documentation [here](https://scikit-tda.org/DREiMac/index.html), including the [API reference](https://scikit-tda.org/DREiMac/api.html).
+You can find the documentation [here](http://dreimac.scikit-tda.org/), including the [API reference](https://dreimac.scikit-tda.org/en/latest/api.html).
 If you have further questions, please [open an issue](https://github.com/scikit-tda/DREiMac/issues/new) and we will do our best to help you.
 Please include as much information as possible, including your system's information, warnings, logs, screenshots, and anything else you think may be of use.
 
