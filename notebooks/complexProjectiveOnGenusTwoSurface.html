@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complex projective coordinates on surface of genus two &mdash; DREiMac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DREiMac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bullseye.html">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DREiMac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Complex projective coordinates on surface of genus two</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notebooks/complexProjectiveOnGenusTwoSurface.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Complex-projective-coordinates-on-surface-of-genus-two">
+<h1>Complex projective coordinates on surface of genus two<a class="headerlink" href="#Complex-projective-coordinates-on-surface-of-genus-two" title="Link to this heading"></a></h1>
+<p>We use complex projective coordinate to parametrize the two-dimensional void of a surface of genus two.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">dreimac</span> <span class="kn">import</span> <span class="n">GeometryExamples</span><span class="p">,</span> <span class="n">PlotUtils</span><span class="p">,</span> <span class="n">ComplexProjectiveCoords</span><span class="p">,</span> <span class="n">ProjectiveMapUtils</span><span class="p">,</span> <span class="n">GeometryUtils</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">GeometryExamples</span><span class="o">.</span><span class="n">genus_two_surface</span><span class="p">()</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">PlotUtils</span><span class="o">.</span><span class="n">set_axes_equal</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span> <span class="p">;</span> <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_complexProjectiveOnGenusTwoSurface_2_0.png" src="../_images/notebooks_complexProjectiveOnGenusTwoSurface_2_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_mat</span><span class="p">,</span> <span class="n">pointcloud_permutation</span> <span class="o">=</span> <span class="n">GeometryUtils</span><span class="o">.</span><span class="n">landmark_geodesic_distance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">cpc</span> <span class="o">=</span> <span class="n">ComplexProjectiveCoords</span><span class="p">(</span><span class="n">dist_mat</span><span class="p">,</span> <span class="n">n_landmarks</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coords</span> <span class="o">=</span> <span class="n">cpc</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">perc</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">proj_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">coords_R3</span> <span class="o">=</span> <span class="n">ProjectiveMapUtils</span><span class="o">.</span><span class="n">hopf_map</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Next is the original pointcloud colored by the <span class="math notranslate nohighlight">\(z\)</span>-coordinate of the sphere coordinates obstained with complex projective coordinates.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">pointcloud_permutation</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Y</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">coords_R3</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">PlotUtils</span><span class="o">.</span><span class="n">set_axes_equal</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span> <span class="p">;</span> <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_complexProjectiveOnGenusTwoSurface_6_0.png" src="../_images/notebooks_complexProjectiveOnGenusTwoSurface_6_0.png" />
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jose A. Perea, Luis Scoccola, Chris Tralie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

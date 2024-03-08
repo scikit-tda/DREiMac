@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates &mdash; DREiMac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Theory" href="theory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            DREiMac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bullseye.html">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">DREiMac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dreimac-dimensionality-reduction-with-eilenberg-maclane-coordinates">
+<h1>DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates<a class="headerlink" href="#dreimac-dimensionality-reduction-with-eilenberg-maclane-coordinates" title="Link to this heading"></a></h1>
+<p>DREiMac is a library for topological data coordinatization, visualization, and dimensionality reduction.
+Currently, DREiMac is able to find topology-preserving representations of point clouds taking values in the circle, in higher dimensional tori, in the real and complex projective space, and in lens spaces.</p>
+<p>In a few words, DREiMac takes as input a point cloud together with a topological feature of the point cloud (in the form of a persistent cohomology class), and returns a map from the point cloud to a well-understood topological space (a circle, a product of circles, a projective space, or a lens space), which preserves the given topological feature in a precise sense.
+You can check the <a class="reference internal" href="theory.html#theory"><span class="std std-ref">theory section</span></a> for details and or the examples below to see how DREiMac works in practice.</p>
+<section id="installing">
+<h2>Installing<a class="headerlink" href="#installing" title="Link to this heading"></a></h2>
+<p>Make sure your Python version is &gt;=3.8 and &lt;3.12.
+DREiMac depends on the following python packages, which will be installed automatically when you install with pip:
+<cite>matplotlib</cite>,
+<cite>numba</cite>,
+<cite>numpy</cite>,
+<cite>persim</cite>,
+<cite>ripser</cite>, and
+<cite>scipy</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dreimac</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#ouput">Ouput</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#guarantee">Guarantee</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#index">Index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#details">Details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#why-does-my-output-not-look-exactly-like-the-output-in-the-examples">Why does my output not look exactly like the output in the examples?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#how-can-i-get-further-help">How can I get further help?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html#The-n_landmarks-parameter">The n_landmarks parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html#The-cocycle_idx-parameter">The cocycle_idx parameter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html#The-prime-parameter">The prime parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html#The-check_cocycle_condition-parameter">The check_cocycle_condition parameter</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="further-examples">
+<h2>Further examples<a class="headerlink" href="#further-examples" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bullseye.html">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="authors">
+<h1>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h1>
+<p>Jose A. Perea, Luis Scoccola, Chris Tralie</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theory.html" class="btn btn-neutral float-right" title="Theory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jose A. Perea, Luis Scoccola, Chris Tralie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

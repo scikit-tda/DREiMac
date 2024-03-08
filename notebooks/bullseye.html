@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toroidal coordinates on bullseye &mdash; DREiMac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Toroidal coordinates on surface of genus two" href="genusTwoSurface.html" />
+    <link rel="prev" title="Circular coordinates on COIL-20 data set" href="coil20.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DREiMac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DREiMac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Toroidal coordinates on bullseye</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notebooks/bullseye.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Toroidal-coordinates-on-bullseye">
+<h1>Toroidal coordinates on bullseye<a class="headerlink" href="#Toroidal-coordinates-on-bullseye" title="Link to this heading"></a></h1>
+<p>An example of how toroidal coordinates is more reliable than circular coordinates when more than one prominent class is present. In this example, we seek to find a single circle-valued map that parametrizes all circularities present in the data at once. For this, we first find a circle-valued map representing each class and then add together these circle-valued maps into a single circle-valued map.</p>
+<p>We use two approaches. In one, we use toroidal coordinates to find three “geometrically independent” circle-valued maps and then sum them together. In the second, we run circular coordinates three times with different cocycles and sum the output circle-valued maps together.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">dreimac</span> <span class="kn">import</span> <span class="n">ToroidalCoords</span><span class="p">,</span> <span class="n">CircularCoords</span><span class="p">,</span> <span class="n">GeometryExamples</span><span class="p">,</span> <span class="n">CircleMapUtils</span>
+<span class="kn">from</span> <span class="nn">persim</span> <span class="kn">import</span> <span class="n">plot_diagrams</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">GeometryExamples</span><span class="o">.</span><span class="n">bullseye</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span> <span class="p">;</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_2_0.png" src="../_images/notebooks_bullseye_2_0.png" />
+</div>
+</div>
+<p>The persistence diagram suggests that there are three prominent 1-dimensional holes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_landmarks</span> <span class="o">=</span> <span class="mi">300</span>
+
+<span class="n">tc</span> <span class="o">=</span> <span class="n">ToroidalCoords</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_landmarks</span><span class="o">=</span><span class="n">n_landmarks</span><span class="p">)</span>
+<span class="n">plot_diagrams</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">_dgms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_4_0.png" src="../_images/notebooks_bullseye_4_0.png" />
+</div>
+</div>
+<p>We now run the toroidal coordinates algorithm with the 3 most prominent classes and plot the result.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">perc</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">cohomology_classes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+<span class="n">toroidal_coords</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">perc</span><span class="o">=</span><span class="n">perc</span><span class="p">,</span> <span class="n">cocycle_idxs</span><span class="o">=</span><span class="n">cohomology_classes</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">toroidal_coords</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">toroidal_coords</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">to_sinebow</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;toroidal</span><span class="se">\n</span><span class="s2">coordinate &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_6_0.png" src="../_images/notebooks_bullseye_6_0.png" />
+</div>
+</div>
+<p>We now sum the three maps returned by toroidal coordinates and display it</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">t_sum</span> <span class="o">=</span> <span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">linear_combination</span><span class="p">(</span><span class="n">toroidal_coords</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">to_sinebow</span><span class="p">(</span><span class="n">t_sum</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;sum of toroidal coordinates&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span> <span class="p">;</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_8_0.png" src="../_images/notebooks_bullseye_8_0.png" />
+</div>
+</div>
+<p>Run circular coordinates algorithm with three most prominent classes</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cc</span> <span class="o">=</span> <span class="n">CircularCoords</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_landmarks</span><span class="o">=</span><span class="n">n_landmarks</span><span class="p">)</span>
+<span class="n">circular_coords1</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">perc</span><span class="o">=</span><span class="n">perc</span><span class="p">,</span> <span class="n">cocycle_idx</span><span class="o">=</span><span class="n">cohomology_classes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">circular_coords2</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">perc</span><span class="o">=</span><span class="n">perc</span><span class="p">,</span> <span class="n">cocycle_idx</span><span class="o">=</span><span class="n">cohomology_classes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">circular_coords3</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">perc</span><span class="o">=</span><span class="n">perc</span><span class="p">,</span> <span class="n">cocycle_idx</span><span class="o">=</span><span class="n">cohomology_classes</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">circular_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">circular_coords1</span><span class="p">,</span> <span class="n">circular_coords2</span><span class="p">,</span> <span class="n">circular_coords3</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circular_coords</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">circular_coords</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">to_sinebow</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;circular</span><span class="se">\n</span><span class="s2">coordinate &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_10_0.png" src="../_images/notebooks_bullseye_10_0.png" />
+</div>
+</div>
+<p>Finally, see how the sum of the three maps returned by the circular coordinates algorithm fails to parametrize the three circles properly</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">c_sum</span> <span class="o">=</span> <span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">linear_combination</span><span class="p">(</span><span class="n">circular_coords</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">CircleMapUtils</span><span class="o">.</span><span class="n">to_sinebow</span><span class="p">(</span><span class="n">c_sum</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;sum of circular coordinates&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span> <span class="p">;</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_bullseye_12_0.png" src="../_images/notebooks_bullseye_12_0.png" />
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="coil20.html" class="btn btn-neutral float-left" title="Circular coordinates on COIL-20 data set" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="genusTwoSurface.html" class="btn btn-neutral float-right" title="Toroidal coordinates on surface of genus two" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jose A. Perea, Luis Scoccola, Chris Tralie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

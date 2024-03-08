@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theory &mdash; DREiMac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DREiMac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Theory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ouput">Ouput</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#guarantee">Guarantee</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bullseye.html">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DREiMac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Theory</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/theory.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="theory">
+<span id="id1"></span><h1>Theory<a class="headerlink" href="#theory" title="Link to this heading"></a></h1>
+<p>DREiMac is based on <a class="reference external" href="https://en.wikipedia.org/wiki/Cohomology">cohomology</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Eilenberg%E2%80%93MacLane_space#Bijection_between_homotopy_classes_of_maps_and_cohomology">Eilenberg-MacLane spaces</a>, and turns persistent cohomology computations into topology-preserving coordinates for data.
+We now give details about what this means.
+For more information, please see the corresponding papers for the circular coordinates algorithm <a class="footnote-reference brackets" href="#id6" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, the toroidal coordinates algorithm <a class="footnote-reference brackets" href="#id7" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, the projective coordinates algorithms <a class="footnote-reference brackets" href="#id8" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>, and the lens coordinate algorithm <a class="footnote-reference brackets" href="#id9" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>.</p>
+<section id="inputs">
+<h2>Inputs<a class="headerlink" href="#inputs" title="Link to this heading"></a></h2>
+<p>DREiMac currently implements three cohomological coordinates procedures: the circular coordinates algorithm, the toroidal coordinates algorithm, and the real projective coordinates algorithm.
+All procedures take 4 main parameters:</p>
+<ol class="arabic simple">
+<li><p>A dataset <code class="code docutils literal notranslate"><span class="pre">X</span></code>, which can be either a point cloud <span class="math notranslate nohighlight">\(X \subseteq \mathbb{R}^n\)</span> or a distance matrix.</p></li>
+</ol>
+<p>The dataset is interpreted as a finite sample of a continuous space <span class="math notranslate nohighlight">\(X \subseteq M\)</span>.
+In order to speed-up computations, a subsample of the initial dataset is computed <span class="math notranslate nohighlight">\(L \subseteq X\)</span>, using a maxmin sampling procedure.</p>
+<ol class="arabic simple" start="2">
+<li><p>The <code class="code docutils literal notranslate"><span class="pre">n_landmarks</span></code> parameter determines the size of the subsample <span class="math notranslate nohighlight">\(L\)</span>.</p></li>
+</ol>
+<p>Then, a persistent cohomology computation is done using the Vietoris-Rips complex <span class="math notranslate nohighlight">\(R(L)\)</span> of the metric space <span class="math notranslate nohighlight">\(L\)</span>, which returns the persistence diagram of <span class="math notranslate nohighlight">\(PH^n(R(L),\mathbb{Z}/p\mathbb{Z})\)</span>.
+For this, a cohomological dimension <span class="math notranslate nohighlight">\(n \in \mathbb{N}\)</span> and a prime <span class="math notranslate nohighlight">\(p\)</span> must be chosen.
+Right now, DREiMac supports arbitrary primes but only <span class="math notranslate nohighlight">\(n=1\)</span>.
+The choice of these parameters will depend on which of DREiMac’s cohomological coordinates one is using.</p>
+<ul class="simple">
+<li><p>For circular and toroidal coordinates, the user can choose any prime <span class="math notranslate nohighlight">\(p\)</span> and <span class="math notranslate nohighlight">\(n\)</span> is set to <span class="math notranslate nohighlight">\(1\)</span> automatically.</p></li>
+<li><p>For real projective coordinates, the prime <span class="math notranslate nohighlight">\(p\)</span> is set to <span class="math notranslate nohighlight">\(2\)</span> and <span class="math notranslate nohighlight">\(n\)</span> is set to <span class="math notranslate nohighlight">\(1\)</span>, automatically.</p></li>
+<li><p>For complex projective coordinates, the user can choose any prime <span class="math notranslate nohighlight">\(p\)</span> and <span class="math notranslate nohighlight">\(n\)</span> is set to <span class="math notranslate nohighlight">\(2\)</span> automatically.</p></li>
+<li><p>For lens coordinates, the user can choose any prime <span class="math notranslate nohighlight">\(p\)</span> and <span class="math notranslate nohighlight">\(n\)</span> is set to <span class="math notranslate nohighlight">\(1\)</span> automatically.</p></li>
+</ul>
+<p>Then, looking at the persistence diagram, a cohomology class is chosen by the user, as follows.</p>
+<p>3. The <code class="code docutils literal notranslate"><span class="pre">cocycle_idx</span></code> parameter is used to select a persistent cohomology class <span class="math notranslate nohighlight">\(\eta \in PH^n(R(L);\mathbb{Z}/p\mathbb{Z})\)</span> by indicating its index when the persistent cohomology classes are ordered with respect to their persistence (i.e., their distance to the diagonal).
+In the case of the toroidal coordinates algorithm, the corresponding parameter <code class="code docutils literal notranslate"><span class="pre">cocycle_idxs</span></code> specifies a list of persistent cohomology classes <span class="math notranslate nohighlight">\(\eta_1 , \dots, \eta_\ell \in PH^1(R(L);\mathbb{Z}/p\mathbb{Z})\)</span>, such that the intersection of all of their supports is non-empty.</p>
+<p>Finally:</p>
+<ol class="arabic simple" start="4">
+<li><p>The parameter <span class="math notranslate nohighlight">\(0 &lt;\)</span> <code class="code docutils literal notranslate"><span class="pre">perc</span></code> <span class="math notranslate nohighlight">\(&lt; 1\)</span> specifies the time in the filtration to construct the coordinates.</p></li>
+</ol>
+</section>
+<section id="ouput">
+<h2>Ouput<a class="headerlink" href="#ouput" title="Link to this heading"></a></h2>
+<p>With these choices, DREiMac returns a continuous function</p>
+<div class="math notranslate nohighlight">
+\[f_\eta \;:\; L^{\alpha}\; \xrightarrow{\;\;\;\;\;\;}\; K(G,n)\]</div>
+<p>where:</p>
+<p><span class="math notranslate nohighlight">\(K(G,n)\)</span> is an Eilenberg-MacLane space (EM space). Specifically, when using the</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Circular coordinates algorithm, the EM space is the circle <span class="math notranslate nohighlight">\(S^1\)</span>;</p></li>
+<li><p>Toroidal coordinates algorithm with <span class="math notranslate nohighlight">\(\ell\)</span> cohomology classes, the EM space is the <span class="math notranslate nohighlight">\(\ell\)</span>-torus, i.e., the cartesian product of <span class="math notranslate nohighlight">\(\ell\)</span> circles <span class="math notranslate nohighlight">\(S^1 \times \dots \times S^1\)</span>;</p></li>
+<li><p>Real projective coordinates algorithm, the EM space is a real projective space <span class="math notranslate nohighlight">\(RP^k\)</span>. In this case, the dimension <span class="math notranslate nohighlight">\(k\)</span> is selected using the <code class="code docutils literal notranslate"><span class="pre">proj_dim</span></code> parameter.</p></li>
+<li><p>Complex projective coordinates algorithm, the EM space is a complex projective space <span class="math notranslate nohighlight">\(CP^k\)</span>. In this case, the complex dimension <span class="math notranslate nohighlight">\(k\)</span> is selected using the <code class="code docutils literal notranslate"><span class="pre">proj_dim</span></code> parameter. Note that in this case the real dimension will be <span class="math notranslate nohighlight">\(2k\)</span>.</p></li>
+<li><p>Lens coordinates algorithm, the EM space is a lens space. In this case, the dimension is selected using the <span class="math notranslate nohighlight">\(k =\)</span> <code class="code docutils literal notranslate"><span class="pre">complex_dim</span></code>, which results in a lens space of real dimension <span class="math notranslate nohighlight">\(2 k-1\)</span>. The prime determining the lens space is selected using the <code class="code docutils literal notranslate"><span class="pre">prime</span></code> parameter.</p></li>
+</ul>
+</div></blockquote>
+<p>The space <span class="math notranslate nohighlight">\(L^{\alpha}\)</span> is the <span class="math notranslate nohighlight">\(\alpha\)</span>-thickening of <span class="math notranslate nohighlight">\(L\)</span> in <span class="math notranslate nohighlight">\(M\)</span>, defined as <span class="math notranslate nohighlight">\(L^{\alpha} = \{m \in M : d_M(m,L) &lt; \alpha\}\)</span>.</p>
+<p>The number <span class="math notranslate nohighlight">\(\alpha\)</span> is computed using the parameter <code class="code docutils literal notranslate"><span class="pre">perc</span></code> and the birth and death of the persistent cohomology class <span class="math notranslate nohighlight">\(\eta\)</span> as follows: if the parameter <code class="code docutils literal notranslate"><span class="pre">standard_range</span></code> is <code class="code docutils literal notranslate"><span class="pre">True</span></code>, then</p>
+<div class="math notranslate nohighlight">
+\[\alpha = (1 - \rho)\cdot \max\{d_H^M(L,X), 2 \cdot birth(\eta)\} + \rho \cdot death(\eta),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\rho =\)</span> <code class="code docutils literal notranslate"><span class="pre">perc</span></code>. If <code class="code docutils literal notranslate"><span class="pre">standard_range</span></code> is <code class="code docutils literal notranslate"><span class="pre">False</span></code>, then</p>
+<div class="math notranslate nohighlight">
+\[\alpha = (1 - \rho)\cdot \max\{d_H^M(L,X), birth(\eta)\} + \rho \cdot death(\eta).\]</div>
+<p>In the case of the toroidal coordinates algorithm, one replaces <span class="math notranslate nohighlight">\(birth(\eta)\)</span> with <span class="math notranslate nohighlight">\(\max\{birth(\eta_i)\}\)</span> and <span class="math notranslate nohighlight">\(death(\eta)\)</span> with <span class="math notranslate nohighlight">\(\min\{death(\eta_i)\}\)</span>.</p>
+</section>
+<section id="guarantee">
+<h2>Guarantee<a class="headerlink" href="#guarantee" title="Link to this heading"></a></h2>
+<p>When the parameter <code class="code docutils literal notranslate"><span class="pre">standard_range</span></code> is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>,
+the output map <span class="math notranslate nohighlight">\(f_\eta : L^{\alpha} \to K(G,n)\)</span> is guaranteed to preserve the cohomology class <span class="math notranslate nohighlight">\(\eta\)</span>, in the following sense.
+When one takes the pullback of the fundamental class of <span class="math notranslate nohighlight">\(K(G,n)\)</span> along the map <span class="math notranslate nohighlight">\(f_\eta\)</span>, one gets back a cohomology class corresponding to the user-chosen <span class="math notranslate nohighlight">\(\eta\)</span>.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p><em>Sparse Circular Coordinates via Principal Z-bundles</em>. J.A. Perea. The Abel Symposium (Book Series): Topological Data Analysis, vol. 15, no.1, pp. 435-458, 2020</p>
+</aside>
+<aside class="footnote brackets" id="id7" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">2</a><span class="fn-bracket">]</span></span>
+<p><em>Toroidal Coordinates: Decorrelating Circular Coordinates With Lattice Reduction</em>. L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, and J. A. Perea. 39th International Symposium on Computational Geometry, 2023</p>
+</aside>
+<aside class="footnote brackets" id="id8" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">3</a><span class="fn-bracket">]</span></span>
+<p><em>Multiscale Projective Coordinates via Persistent Cohomology of Sparse Filtrations</em>. J.A. Perea. Discrete Comput Geom 59, 175–225, 2018</p>
+</aside>
+<aside class="footnote brackets" id="id9" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">4</a><span class="fn-bracket">]</span></span>
+<p><em>Coordinatizing Data With Lens Spaces and Persistent Cohomology</em>. L. Polanco, J.A. Perea. Proceedings of the 31 st Canadian Conference on Computational Geometry (CCCG), pp. 49-57, 2019</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jose A. Perea, Luis Scoccola, Chris Tralie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

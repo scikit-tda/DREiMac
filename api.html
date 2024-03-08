@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; DREiMac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="faq.html" />
+    <link rel="prev" title="Theory" href="theory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DREiMac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#index">Index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#details">Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.CircularCoords"><code class="docutils literal notranslate"><span class="pre">CircularCoords</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircularCoords.get_coordinates"><code class="docutils literal notranslate"><span class="pre">CircularCoords.get_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.ToroidalCoords"><code class="docutils literal notranslate"><span class="pre">ToroidalCoords</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ToroidalCoords.get_coordinates"><code class="docutils literal notranslate"><span class="pre">ToroidalCoords.get_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.ProjectiveCoords"><code class="docutils literal notranslate"><span class="pre">ProjectiveCoords</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveCoords.get_coordinates"><code class="docutils literal notranslate"><span class="pre">ProjectiveCoords.get_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.ComplexProjectiveCoords"><code class="docutils literal notranslate"><span class="pre">ComplexProjectiveCoords</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ComplexProjectiveCoords.get_coordinates"><code class="docutils literal notranslate"><span class="pre">ComplexProjectiveCoords.get_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.LensCoords"><code class="docutils literal notranslate"><span class="pre">LensCoords</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.LensCoords.get_coordinates"><code class="docutils literal notranslate"><span class="pre">LensCoords.get_coordinates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.PartUnity"><code class="docutils literal notranslate"><span class="pre">PartUnity</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PartUnity.exp"><code class="docutils literal notranslate"><span class="pre">PartUnity.exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PartUnity.linear"><code class="docutils literal notranslate"><span class="pre">PartUnity.linear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PartUnity.quadratic"><code class="docutils literal notranslate"><span class="pre">PartUnity.quadratic()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.GeometryExamples"><code class="docutils literal notranslate"><span class="pre">GeometryExamples</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.bullseye"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.bullseye()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.genus_two_surface"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.genus_two_surface()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.klein_bottle_4d"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.klein_bottle_4d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.line_patches"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.line_patches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.moore_space_distance_matrix"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.moore_space_distance_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.moving_dot"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.moving_dot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.noisy_circle"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.noisy_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.rp2_metric"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.rp2_metric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.sphere"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.sphere()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.three_circles"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.three_circles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.torus_3d"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.torus_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryExamples.trefoil"><code class="docutils literal notranslate"><span class="pre">GeometryExamples.trefoil()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.PlotUtils"><code class="docutils literal notranslate"><span class="pre">PlotUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.imscatter"><code class="docutils literal notranslate"><span class="pre">PlotUtils.imscatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_2sphere_boundary"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_2sphere_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_3sphere_mesh"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_3sphere_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_patches"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_patches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_proj_boundary"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_proj_boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_rp2_stereo"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_rp2_stereo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.plot_rp3_stereo"><code class="docutils literal notranslate"><span class="pre">PlotUtils.plot_rp3_stereo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.PlotUtils.set_axes_equal"><code class="docutils literal notranslate"><span class="pre">PlotUtils.set_axes_equal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.CircleMapUtils"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircleMapUtils.center"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils.center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircleMapUtils.levelset_coloring"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils.levelset_coloring()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircleMapUtils.linear_combination"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils.linear_combination()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircleMapUtils.offset"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils.offset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.CircleMapUtils.to_sinebow"><code class="docutils literal notranslate"><span class="pre">CircleMapUtils.to_sinebow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.ProjectiveMapUtils"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveMapUtils.circle_to_3dnorthpole"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils.circle_to_3dnorthpole()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveMapUtils.get_stereo_proj_codim1"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils.get_stereo_proj_codim1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveMapUtils.hopf_map"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils.hopf_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveMapUtils.rotmat"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils.rotmat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.ProjectiveMapUtils.stereographic_projection_hemispheres"><code class="docutils literal notranslate"><span class="pre">ProjectiveMapUtils.stereographic_projection_hemispheres()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.LensMapUtils"><code class="docutils literal notranslate"><span class="pre">LensMapUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.LensMapUtils.lens_3D_to_disk_3D"><code class="docutils literal notranslate"><span class="pre">LensMapUtils.lens_3D_to_disk_3D()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dreimac.GeometryUtils"><code class="docutils literal notranslate"><span class="pre">GeometryUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryUtils.get_csm"><code class="docutils literal notranslate"><span class="pre">GeometryUtils.get_csm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryUtils.get_csm_projarc"><code class="docutils literal notranslate"><span class="pre">GeometryUtils.get_csm_projarc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryUtils.get_greedy_perm_dm"><code class="docutils literal notranslate"><span class="pre">GeometryUtils.get_greedy_perm_dm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryUtils.get_greedy_perm_pc"><code class="docutils literal notranslate"><span class="pre">GeometryUtils.get_greedy_perm_pc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dreimac.GeometryUtils.landmark_geodesic_distance"><code class="docutils literal notranslate"><span class="pre">GeometryUtils.landmark_geodesic_distance()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Choosing parameters</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_n_landmarks_and_cocycle_idx.html">Choosing the parameters n_landmarks and cocycle_idx</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_perc.html">Choosing the parameter perc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_standard_range.html">Choosing the parameter standard_range</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameter_n_samples.html">Parameter n_samples for speeding up computations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/parameters_prime_and_check_cocycle_condition.html">Choosing the parameters prime and check_cocycle_condition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Circular coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/coil20.html">Circular coordinates on COIL-20 data set</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Toroidal coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/bullseye.html">Toroidal coordinates on bullseye</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/genusTwoSurface.html">Toroidal coordinates on surface of genus two</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Real projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/ImagePatches.html">Real projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Complex projective coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/twoSphere.html">Complex projective coordinates on a 2-sphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/movingDot.html">Complex projective coordinates on data set of image patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Lens coordinates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/circleLensCoordinates.html">Lens coordinates on a circle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/MooreSpace.html">Lens coordinates on Moore space</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DREiMac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="index">
+<h2>Index<a class="headerlink" href="#index" title="Link to this heading"></a></h2>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.CircularCoords" title="dreimac.CircularCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircularCoords</span></code></a></p></td>
+<td><p>Object that performs circular coordinates via persistent cohomology of sparse filtrations (Jose Perea 2020).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.ToroidalCoords" title="dreimac.ToroidalCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ToroidalCoords</span></code></a></p></td>
+<td><p>Object that performs sparse toroidal coordinates via persistent cohomology as in (L.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.ProjectiveCoords" title="dreimac.ProjectiveCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ProjectiveCoords</span></code></a></p></td>
+<td><p>Object that performs multiscale real projective coordinates via persistent cohomology of sparse filtrations (Jose Perea 2018).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.ComplexProjectiveCoords" title="dreimac.ComplexProjectiveCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ComplexProjectiveCoords</span></code></a></p></td>
+<td><p>Object that performs multiscale complex projective coordinates via persistent cohomology of sparse filtrations (Perea 2018).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.LensCoords" title="dreimac.LensCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.LensCoords</span></code></a></p></td>
+<td><p>Object that performs multiscale lens coordinates via persistent cohomology of sparse filtrations (Polanco, Perea 2019).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.PartUnity" title="dreimac.PartUnity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PartUnity</span></code></a></p></td>
+<td><p>Partitions of unity subordinate to open ball covers using standard bump functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples" title="dreimac.GeometryExamples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples</span></code></a></p></td>
+<td><p>Finite samples from topologically nontrivial spaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.PlotUtils" title="dreimac.PlotUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils</span></code></a></p></td>
+<td><p>Plotting utilities for DREiMac's output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.CircleMapUtils" title="dreimac.CircleMapUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircleMapUtils</span></code></a></p></td>
+<td><p>Utilities for adding, rotating, and plotting circle-valued maps.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.ProjectiveMapUtils" title="dreimac.ProjectiveMapUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ProjectiveMapUtils</span></code></a></p></td>
+<td><p>Utilities for manipulating projective space-valued maps.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.LensMapUtils" title="dreimac.LensMapUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.LensMapUtils</span></code></a></p></td>
+<td><p>Utilities for manipulating lens space-valued maps.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryUtils" title="dreimac.GeometryUtils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryUtils</span></code></a></p></td>
+<td><p>Utilities for subsampling from point clouds and distance matrices.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.CircularCoords methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.CircularCoords.get_coordinates" title="dreimac.CircularCoords.get_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircularCoords.get_coordinates</span></code></a></p></td>
+<td><p>Get circular coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.ToroidalCoords methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.ToroidalCoords.get_coordinates" title="dreimac.ToroidalCoords.get_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ToroidalCoords.get_coordinates</span></code></a></p></td>
+<td><p>Get toroidal coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.ProjectiveCoords methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.ProjectiveCoords.get_coordinates" title="dreimac.ProjectiveCoords.get_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ProjectiveCoords.get_coordinates</span></code></a></p></td>
+<td><p>Get real projective coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.ComplexProjectiveCoords methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.ComplexProjectiveCoords.get_coordinates" title="dreimac.ComplexProjectiveCoords.get_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ComplexProjectiveCoords.get_coordinates</span></code></a></p></td>
+<td><p>Get complex projective coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.LensCoords methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.LensCoords.get_coordinates" title="dreimac.LensCoords.get_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.LensCoords.get_coordinates</span></code></a></p></td>
+<td><p>Get lens coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.PartUnity methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.PartUnity.linear" title="dreimac.PartUnity.linear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PartUnity.linear</span></code></a></p></td>
+<td><p>Linear partition of unity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.PartUnity.quadratic" title="dreimac.PartUnity.quadratic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PartUnity.quadratic</span></code></a></p></td>
+<td><p>Quadratic partition of unity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.PartUnity.exp" title="dreimac.PartUnity.exp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PartUnity.exp</span></code></a></p></td>
+<td><p>Exponential partition of unity.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.GeometryExamples methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.line_patches" title="dreimac.GeometryExamples.line_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.line_patches</span></code></a></p></td>
+<td><p>Sample a set of line segments, as witnessed by square patches</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.moving_dot" title="dreimac.GeometryExamples.moving_dot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.moving_dot</span></code></a></p></td>
+<td><p>Sample a set of (smoothened) dots on the plane, as witnessed by square patches</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.torus_3d" title="dreimac.GeometryExamples.torus_3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.torus_3d</span></code></a></p></td>
+<td><p>Return points sampled on a 3D torus</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.klein_bottle_4d" title="dreimac.GeometryExamples.klein_bottle_4d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.klein_bottle_4d</span></code></a></p></td>
+<td><p>Return samples on a klein bottle in 4D</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.genus_two_surface" title="dreimac.GeometryExamples.genus_two_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.genus_two_surface</span></code></a></p></td>
+<td><p>Return samples on a genus two surface in 3D</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.trefoil" title="dreimac.GeometryExamples.trefoil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.trefoil</span></code></a></p></td>
+<td><p>Samples on a trefoil in 3D</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.bullseye" title="dreimac.GeometryExamples.bullseye"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.bullseye</span></code></a></p></td>
+<td><p>Samples on three concentric noisy circles in 2D.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.sphere" title="dreimac.GeometryExamples.sphere"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.sphere</span></code></a></p></td>
+<td><p>Samples on a 2-sphere in 3D.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.noisy_circle" title="dreimac.GeometryExamples.noisy_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.noisy_circle</span></code></a></p></td>
+<td><p>Samples on a circle in 2D.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryExamples.moore_space_distance_matrix" title="dreimac.GeometryExamples.moore_space_distance_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryExamples.moore_space_distance_matrix</span></code></a></p></td>
+<td><p>Distance matrix of a sample of the Moore space M(1,Z/prime).</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.PlotUtils methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.PlotUtils.plot_patches" title="dreimac.PlotUtils.plot_patches"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils.plot_patches</span></code></a></p></td>
+<td><p>Plot patches in a best fitting rectangular grid</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.PlotUtils.plot_proj_boundary" title="dreimac.PlotUtils.plot_proj_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils.plot_proj_boundary</span></code></a></p></td>
+<td><p>Plot the boundary of RP2 on the unit circle</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.PlotUtils.plot_2sphere_boundary" title="dreimac.PlotUtils.plot_2sphere_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils.plot_2sphere_boundary</span></code></a></p></td>
+<td><p>Plot the boundary of two sphere hemispheres</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.PlotUtils.plot_3sphere_mesh" title="dreimac.PlotUtils.plot_3sphere_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils.plot_3sphere_mesh</span></code></a></p></td>
+<td><p>Draw a spherical mesh in 3D around the unit sphere.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.PlotUtils.set_axes_equal" title="dreimac.PlotUtils.set_axes_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.PlotUtils.set_axes_equal</span></code></a></p></td>
+<td><p>Make axes of 3D plot have equal scale so that spheres appear as spheres, cubes as cubes, etc.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.CircleMapUtils methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.CircleMapUtils.offset" title="dreimac.CircleMapUtils.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircleMapUtils.offset</span></code></a></p></td>
+<td><p>Rotationally offset a circle-valued map.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.CircleMapUtils.linear_combination" title="dreimac.CircleMapUtils.linear_combination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircleMapUtils.linear_combination</span></code></a></p></td>
+<td><p>Given k circle-valued maps on a dataset with n points and an l x k matrix with integer coefficients, return the l linear combinations of the given circle-valued maps induced by the given matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.CircleMapUtils.to_sinebow" title="dreimac.CircleMapUtils.to_sinebow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircleMapUtils.to_sinebow</span></code></a></p></td>
+<td><p>Given a circle map construct an array of the same shape that can be fed as color in a matplotlib scatterplot to simulate the sinebow colormap.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.CircleMapUtils.levelset_coloring" title="dreimac.CircleMapUtils.levelset_coloring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.CircleMapUtils.levelset_coloring</span></code></a></p></td>
+<td><p>Given points on the circle and a number of levelsets subdivide the circle into the given number of levelsets and return a smoothened membership function to the levelsets.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.ProjectiveMapUtils methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.ProjectiveMapUtils.get_stereo_proj_codim1" title="dreimac.ProjectiveMapUtils.get_stereo_proj_codim1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.ProjectiveMapUtils.get_stereo_proj_codim1</span></code></a></p></td>
+<td><p>Do a projective stereographic projection</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.LensMapUtils methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.LensMapUtils.lens_3D_to_disk_3D" title="dreimac.LensMapUtils.lens_3D_to_disk_3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.LensMapUtils.lens_3D_to_disk_3D</span></code></a></p></td>
+<td><p>Project points on the unit sphere in C^2 representing points in the 3-dimensional lens space corresponding to the prime q to points on the unit disk in R^3.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">dreimac.GeometryUtils methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#dreimac.GeometryUtils.get_greedy_perm_pc" title="dreimac.GeometryUtils.get_greedy_perm_pc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryUtils.get_greedy_perm_pc</span></code></a></p></td>
+<td><p>A Naive O(NM) algorithm to do furthest points sampling, assuming the input is a point cloud specified in Euclidean space.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#dreimac.GeometryUtils.landmark_geodesic_distance" title="dreimac.GeometryUtils.landmark_geodesic_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dreimac.GeometryUtils.landmark_geodesic_distance</span></code></a></p></td>
+<td><p>Get a minmax sample of Euclidean point cloud using an approximation of the geodesic distance.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.CircularCoords">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">CircularCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">41</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircularCoords" title="Link to this definition"></a></dt>
+<dd><p>Object that performs circular coordinates via persistent cohomology of
+sparse filtrations (Jose Perea 2020).</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(N, d)</dt><dd><p>A point cloud with N points in d dimensions</p>
+</dd>
+<dt>n_landmarks: int</dt><dd><p>Number of landmarks to use</p>
+</dd>
+<dt>distance_matrix: boolean</dt><dd><p>If true, treat X as a distance matrix instead of a point cloud</p>
+</dd>
+<dt>prime<span class="classifier">int</span></dt><dd><p>Field coefficient with which to compute rips on landmarks</p>
+</dd>
+<dt>maxdim<span class="classifier">int</span></dt><dd><p>Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+but it may be of interest to see other dimensions (e.g. for a torus)</p>
+</dd>
+<dt>verbose<span class="classifier">bool</span></dt><dd><p>Print debug information.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircularCoords.get_coordinates">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perc=0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cocycle_idx=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partunity_fn=&lt;function</span> <span class="pre">PartUnity.linear&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_range=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_cocycle_condition=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircularCoords.get_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Get circular coordinates.</p>
+<section id="id1">
+<h4>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>perc<span class="classifier">float</span></dt><dd><p>Percent coverage. Must be between 0 and 1.</p>
+</dd>
+<dt>cocycle_idx<span class="classifier">integer</span></dt><dd><p>Integer representing the index of the persistent cohomology class
+used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+classes are ordered by persistence, from largest to smallest.</p>
+</dd>
+<dt>partunity_fn<span class="classifier">(dist_land_data, r_cover) -&gt; phi</span></dt><dd><p>A function from the distances of each landmark to a bump function</p>
+</dd>
+<dt>standard_range<span class="classifier">bool</span></dt><dd><p>Whether to use the parameter perc to choose a filtration parameter that guarantees
+that the selected cohomology class represents a non-trivial class in the Cech complex.</p>
+</dd>
+<dt>check_cocycle_condition<span class="classifier">bool</span></dt><dd><p>Whether to check, and fix if necessary, that the integer cocycle constructed
+using finite field coefficients satisfies the cocycle condition.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h4>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>thetas<span class="classifier">ndarray(N)</span></dt><dd><p>Circular coordinates</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.ToroidalCoords">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">ToroidalCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">41</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ToroidalCoords" title="Link to this definition"></a></dt>
+<dd><p>Object that performs sparse toroidal coordinates via persistent cohomology as in
+(L. Scoccola, H. Gakhar, J. Bush, N. Schonsheck, T. Rask, L. Zhou, J. Perea 2022)</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(N, d)</dt><dd><p>A point cloud with N points in d dimensions</p>
+</dd>
+<dt>n_landmarks: int</dt><dd><p>Number of landmarks to use</p>
+</dd>
+<dt>distance_matrix: boolean</dt><dd><p>If true, treat X as a distance matrix instead of a point cloud</p>
+</dd>
+<dt>prime<span class="classifier">int</span></dt><dd><p>Field coefficient with which to compute rips on landmarks</p>
+</dd>
+<dt>maxdim<span class="classifier">int</span></dt><dd><p>Maximum dimension of homology.  Only dimension 1 is needed for circular coordinates,
+but it may be of interest to see other dimensions (e.g. for a torus)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ToroidalCoords.get_coordinates">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">perc=0.5,</span> <span class="pre">cocycle_idxs=[0],</span> <span class="pre">partunity_fn=&lt;function</span> <span class="pre">PartUnity.linear&gt;,</span> <span class="pre">standard_range=True,</span> <span class="pre">check_cocycle_condition=True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ToroidalCoords.get_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Get toroidal coordinates.</p>
+<section id="id3">
+<h4>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>perc<span class="classifier">float</span></dt><dd><p>Percent coverage. Must be between 0 and 1.</p>
+</dd>
+<dt>cocycle_idx<span class="classifier">integer</span></dt><dd><p>Integer representing the index of the persistent cohomology class
+used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+classes are ordered by persistence, from largest to smallest.</p>
+</dd>
+<dt>partunity_fn<span class="classifier">(dist_land_data, r_cover) -&gt; phi</span></dt><dd><p>A function from the distances of each landmark to a bump function</p>
+</dd>
+<dt>standard_range<span class="classifier">bool</span></dt><dd><p>Whether to use the parameter perc to choose a filtration parameter that guarantees
+that the selected cohomology class represents a non-trivial class in the Cech complex.</p>
+</dd>
+<dt>check_cocycle_condition<span class="classifier">bool</span></dt><dd><p>Whether to check, and fix if necessary, that the integer cocycle constructed
+using finite field coefficients satisfies the cocycle condition.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h4>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>thetas<span class="classifier">ndarray(n, N)</span></dt><dd><p>List of circular coordinates, with n the length of cocycle_idxs</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.ProjectiveCoords">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">ProjectiveCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveCoords" title="Link to this definition"></a></dt>
+<dd><p>Object that performs multiscale real projective coordinates via
+persistent cohomology of sparse filtrations (Jose Perea 2018).</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(N, d)</dt><dd><p>A point cloud with N points in d dimensions</p>
+</dd>
+<dt>n_landmarks: int</dt><dd><p>Number of landmarks to use</p>
+</dd>
+<dt>distance_matrix: boolean</dt><dd><p>If true, treat X as a distance matrix instead of a point cloud</p>
+</dd>
+<dt>maxdim<span class="classifier">int</span></dt><dd><p>Maximum dimension of homology. Only dimension 1 is needed for real projective coordinates,
+but it may be of interest to see other dimensions (e.g. for a torus)</p>
+</dd>
+<dt>partunity_fn: ndarray(n_landmarks, N) -&gt; ndarray(n_landmarks, N)</dt><dd><p>A partition of unity function</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveCoords.get_coordinates">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perc=0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cocycle_idx=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_dim=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partunity_fn=&lt;function</span> <span class="pre">PartUnity.linear&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_range=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projective_dim_red_mode='exponential'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveCoords.get_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Get real projective coordinates.</p>
+<section id="id6">
+<h4>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>perc<span class="classifier">float</span></dt><dd><p>Percent coverage. Must be between 0 and 1.</p>
+</dd>
+<dt>cocycle_idx<span class="classifier">list</span></dt><dd><p>Integer representing the index of the persistent cohomology class
+used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+classes are ordered by persistence, from largest to smallest.</p>
+</dd>
+<dt>proj_dim<span class="classifier">integer</span></dt><dd><p>Dimension down to which to project the data.</p>
+</dd>
+<dt>partunity_fn: (dist_land_data, r_cover) -&gt; phi</dt><dd><p>A function from the distances of each landmark to a bump function</p>
+</dd>
+<dt>standard_range<span class="classifier">bool</span></dt><dd><p>Whether to use the parameter perc to choose a filtration parameter that guarantees
+that the selected cohomology class represents a class in the Cech complex.</p>
+</dd>
+<dt>projective_dim_red_mode<span class="classifier">string</span></dt><dd><p>Either “one-by-one”, “exponential”, or “direct”. How to perform equivariant
+dimensionality reduction. “exponential” usually works best, being fast
+without compromising quality.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h4>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>ndarray(N, proj_dim+1)</dt><dd><p>The projective coordinates</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.ComplexProjectiveCoords">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">ComplexProjectiveCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">41</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ComplexProjectiveCoords" title="Link to this definition"></a></dt>
+<dd><p>Object that performs multiscale complex projective coordinates via
+persistent cohomology of sparse filtrations (Perea 2018).</p>
+<section id="id8">
+<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(N, d)</dt><dd><p>A point cloud with N points in d dimensions</p>
+</dd>
+<dt>n_landmarks: int</dt><dd><p>Number of landmarks to use</p>
+</dd>
+<dt>distance_matrix: boolean</dt><dd><p>If true, treat X as a distance matrix instead of a point cloud</p>
+</dd>
+<dt>prime<span class="classifier">int</span></dt><dd><p>Field coefficient with which to compute rips on landmarks</p>
+</dd>
+<dt>maxdim<span class="classifier">int</span></dt><dd><p>Maximum dimension of homology.  Only dimension 2 is needed for complex projective coordinates,
+but it may be of interest to see other dimensions</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ComplexProjectiveCoords.get_coordinates">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perc=0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cocycle_idx=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_dim=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partunity_fn=&lt;function</span> <span class="pre">PartUnity.linear&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_range=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_cocycle_condition=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projective_dim_red_mode='exponential'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ComplexProjectiveCoords.get_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Get complex projective coordinates.</p>
+<section id="id9">
+<h4>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>perc<span class="classifier">float</span></dt><dd><p>Percent coverage. Must be between 0 and 1.</p>
+</dd>
+<dt>cocycle_idx<span class="classifier">integer</span></dt><dd><p>Integer representing the index of the persistent cohomology class
+used to construct the Eilenberg-MacLane coordinate. Persistent cohomology
+classes are ordered by persistence, from largest to smallest.</p>
+</dd>
+<dt>proj_dim<span class="classifier">integer</span></dt><dd><p>Complex dimension down to which to project the data.</p>
+</dd>
+<dt>partunity_fn<span class="classifier">(dist_land_data, r_cover) -&gt; phi</span></dt><dd><p>A function from the distances of each landmark to a bump function</p>
+</dd>
+<dt>standard_range<span class="classifier">bool</span></dt><dd><p>Whether to use the parameter perc to choose a filtration parameter that guarantees
+that the selected cohomology class represents a non-trivial class in the Cech complex.</p>
+</dd>
+<dt>check_cocycle_condition<span class="classifier">bool</span></dt><dd><p>Whether to check, and fix if necessary, that the integer cocycle constructed
+using finite field coefficients satisfies the cocycle condition.</p>
+</dd>
+<dt>projective_dim_red_mode<span class="classifier">string</span></dt><dd><p>Either “one-by-one”, “exponential”, or “direct”. How to perform equivariant
+dimensionality reduction. “exponential” usually works best, being fast
+without compromising quality.</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h4>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>ndarray(N, proj_dim+1)</dt><dd><p>Complex projective coordinates</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.LensCoords">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">LensCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.LensCoords" title="Link to this definition"></a></dt>
+<dd><p>Object that performs multiscale lens coordinates via
+persistent cohomology of sparse filtrations (Polanco, Perea 2019).</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(N, d)</dt><dd><p>A point cloud with N points in d dimensions</p>
+</dd>
+<dt>n_landmarks: int</dt><dd><p>Number of landmarks to use</p>
+</dd>
+<dt>distance_matrix: boolean</dt><dd><p>If true, treat X as a distance matrix instead of a point cloud</p>
+</dd>
+<dt>prime<span class="classifier">int</span></dt><dd><p>Field coefficient with which to compute rips on landmarks</p>
+</dd>
+<dt>maxdim<span class="classifier">int</span></dt><dd><p>Maximum dimension of homology. Only dimension 1 is needed for lens coordinates,
+but it may be of interest to see other dimensions (e.g. for a torus)</p>
+</dd>
+<dt>partunity_fn: ndarray(n_landmarks, N) -&gt; ndarray(n_landmarks, N)</dt><dd><p>A partition of unity function</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.LensCoords.get_coordinates">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perc=0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cocycle_idx=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complex_dim=2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partunity_fn=&lt;function</span> <span class="pre">PartUnity.linear&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_range=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projective_dim_red_mode='exponential'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.LensCoords.get_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Get lens coordinates.</p>
+<section id="id12">
+<h4>Parameters<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>perc<span class="classifier">float</span></dt><dd><p>Percent coverage. Must be between 0 and 1.</p>
+</dd>
+<dt>cocycle_idx<span class="classifier">list</span></dt><dd><p>Add the cocycles together, sorted from most to least persistent.</p>
+</dd>
+<dt>complex_dim<span class="classifier">integer</span></dt><dd><p>Describes the dimension of the lens space. The lens space is obtained by
+taking a quotient of the unit sphere inside the complex plane to the power
+of complex_dimension.</p>
+</dd>
+<dt>partunity_fn: (dist_land_data, r_cover) -&gt; phi</dt><dd><p>A function from the distances of each landmark to a bump function.</p>
+</dd>
+<dt>standard_range<span class="classifier">bool</span></dt><dd><p>Whether to use the parameter perc to choose a filtration parameter that guarantees
+that the selected cohomology class represents a class in the Cech complex.</p>
+</dd>
+<dt>projective_dim_red_mode<span class="classifier">string</span></dt><dd><p>Either “one-by-one”, “exponential”, or “direct”. How to perform equivariant
+dimensionality reduction. “exponential” usually works best, being fast
+without compromising quality.</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h4>Returns<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>ndarray(N, complex_dim-1)</dt><dd><p>The lens coordinates</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.PartUnity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">PartUnity</span></span><a class="headerlink" href="#dreimac.PartUnity" title="Link to this definition"></a></dt>
+<dd><p>Partitions of unity subordinate to open ball covers using
+standard bump functions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PartUnity.exp">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_cover</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PartUnity.exp" title="Link to this definition"></a></dt>
+<dd><p>Exponential partition of unity.</p>
+<section id="id14">
+<h3>Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ds: ndarray(n)</dt><dd><p>Some subset of distances between landmarks and
+data points</p>
+</dd>
+<dt>r_cover: float</dt><dd><p>Covering radius</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h3>Returns<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>varphi: ndarray(n)</dt><dd><p>The bump function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PartUnity.linear">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_cover</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PartUnity.linear" title="Link to this definition"></a></dt>
+<dd><p>Linear partition of unity.</p>
+<section id="id16">
+<h3>Parameters<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ds: ndarray(n)</dt><dd><p>Some subset of distances between landmarks and
+data points</p>
+</dd>
+<dt>r_cover: float</dt><dd><p>Covering radius</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h3>Returns<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>varphi: ndarray(n)</dt><dd><p>The bump function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PartUnity.quadratic">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quadratic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_cover</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PartUnity.quadratic" title="Link to this definition"></a></dt>
+<dd><p>Quadratic partition of unity.</p>
+<section id="id18">
+<h3>Parameters<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ds: ndarray(n)</dt><dd><p>Some subset of distances between landmarks and
+data points</p>
+</dd>
+<dt>r_cover: float</dt><dd><p>Covering radius</p>
+</dd>
+</dl>
+</section>
+<section id="id19">
+<h3>Returns<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>varphi: ndarray(n)</dt><dd><p>The bump function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">GeometryExamples</span></span><a class="headerlink" href="#dreimac.GeometryExamples" title="Link to this definition"></a></dt>
+<dd><p>Finite samples from topologically nontrivial spaces.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.bullseye">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bullseye</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.bullseye" title="Link to this definition"></a></dt>
+<dd><p>Samples on three concentric noisy circles in 2D.</p>
+<section id="id20">
+<h3>Returns<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 2)</dt><dd><p>2D circles samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.genus_two_surface">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">genus_two_surface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.genus_two_surface" title="Link to this definition"></a></dt>
+<dd><p>Return samples on a genus two surface in 3D</p>
+<section id="id21">
+<h3>Returns<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 3)</dt><dd><p>3D surface samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.klein_bottle_4d">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">klein_bottle_4d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.klein_bottle_4d" title="Link to this definition"></a></dt>
+<dd><p>Return samples on a klein bottle in 4D</p>
+<section id="id22">
+<h3>Parameters<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_samples<span class="classifier">int</span></dt><dd><p>Number of random samples on the projective plane</p>
+</dd>
+<dt>R: float</dt><dd><p>Outer radius</p>
+</dd>
+<dt>r: float</dt><dd><p>Inner radius</p>
+</dd>
+<dt>seed: int</dt><dd><p>Seed to use.  If omitted, use the number of samples as a seed</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h3>Returns<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 4)</dt><dd><p>4D klein bottle samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.line_patches">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">line_patches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.line_patches" title="Link to this definition"></a></dt>
+<dd><p>Sample a set of line segments, as witnessed by square patches</p>
+<section id="id24">
+<h3>Parameters<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dim: int</dt><dd><p>Patches will be dim x dim</p>
+</dd>
+<dt>n_angles: int</dt><dd><p>Number of angles to sweep between 0 and pi</p>
+</dd>
+<dt>n_offsets: int</dt><dd><p>Number of offsets to sweep from the origin to the edge of the patch</p>
+</dd>
+<dt>sigma: float</dt><dd><p>The blur parameter.  Higher sigma is more blur</p>
+</dd>
+</dl>
+</section>
+<section id="id25">
+<h3>Returns<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray(n_angles*n_offsets, dim*dim)</dt><dd><p>An array of all of the patches raveled into dim*dim dimensional Euclidean space</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.moore_space_distance_matrix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moore_space_distance_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rough_n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.moore_space_distance_matrix" title="Link to this definition"></a></dt>
+<dd><p>Distance matrix of a sample of the Moore space M(1,Z/prime).</p>
+<section id="id26">
+<h3>Parameters<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>rough_n_samples<span class="classifier">int</span></dt><dd><p>The function returns a distance matrix with approximately n = rough_n_points * (pi/4) points.</p>
+</dd>
+<dt>prime<span class="classifier">int</span></dt><dd><p>The prime associated with the Moore space.</p>
+</dd>
+</dl>
+</section>
+<section id="id27">
+<h3>Returns<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray(n, n)</dt><dd><p>Distance matrix of points on the Moore space M(1,Z/prime).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.moving_dot">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">moving_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sqrt_num_images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.moving_dot" title="Link to this definition"></a></dt>
+<dd><p>Sample a set of (smoothened) dots on the plane, as witnessed by square patches</p>
+<section id="id28">
+<h3>Parameters<a class="headerlink" href="#id28" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>sqrt_num_images<span class="classifier">int</span></dt><dd><p>The output will consist of sqrt_num_images**2 patches.</p>
+</dd>
+<dt>sigma<span class="classifier">float</span></dt><dd><p>The blur parameter. Higher sigma is more blur. Default is 3.</p>
+</dd>
+<dt>dim<span class="classifier">int</span></dt><dd><p>Patches will be dim x dim. Default is 10.</p>
+</dd>
+</dl>
+</section>
+<section id="id29">
+<h3>Returns<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray(sqrt_num_images*sqrt_num_images, dim*dim)</dt><dd><p>An array of all of the patches raveled into dim*dim dimensional Euclidean space</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.noisy_circle">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noisy_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.noisy_circle" title="Link to this definition"></a></dt>
+<dd><p>Samples on a circle in 2D.</p>
+<section id="id30">
+<h3>Parameters<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_samples<span class="classifier">int</span></dt><dd><p>Number of points on the circle to sample.</p>
+</dd>
+<dt>noise_size<span class="classifier">float</span></dt><dd><p>Maximum perturbation per sample. Must be between 0 and 1.</p>
+</dd>
+<dt>seed<span class="classifier">float</span></dt><dd><p>Seed for random number generator.</p>
+</dd>
+</dl>
+</section>
+<section id="id31">
+<h3>Returns<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 2)</dt><dd><p>2D circle samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.rp2_metric">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rp2_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.rp2_metric" title="Link to this definition"></a></dt>
+<dd><p>Return a distance matrix of points on the projective plane
+obtained by identifying antipodal Gaussian random samples
+of a sphere</p>
+<section id="id32">
+<h3>Parameters<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_samples<span class="classifier">int</span></dt><dd><p>Number of random samples on the projective plane</p>
+</dd>
+<dt>seed: int</dt><dd><p>Seed to use.  If omitted, use the number of samples as a seed</p>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h3>Returns<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray(n_samples, 3)</dt><dd><p>Original points on the sphere</p>
+</dd>
+<dt>ndarray(n_samples, n_samples)</dt><dd><p>Distance matrix of rp2</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.sphere">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.sphere" title="Link to this definition"></a></dt>
+<dd><p>Samples on a 2-sphere in 3D.</p>
+<section id="id34">
+<h3>Returns<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 3)</dt><dd><p>3D sphere samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.three_circles">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">three_circles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.three_circles" title="Link to this definition"></a></dt>
+<dd><p>Samples on two circles of different radii in 2D.</p>
+<section id="id35">
+<h3>Returns<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 2)</dt><dd><p>2D circles samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.torus_3d">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">torus_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.torus_3d" title="Link to this definition"></a></dt>
+<dd><p>Return points sampled on a 3D torus</p>
+<section id="id36">
+<h3>Parameters<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_samples<span class="classifier">int</span></dt><dd><p>Number of random samples on the torus</p>
+</dd>
+<dt>R: float</dt><dd><p>Outer radius</p>
+</dd>
+<dt>r: float</dt><dd><p>Inner radius</p>
+</dd>
+<dt>seed: int</dt><dd><p>Seed to use.  If omitted, use the number of samples as a seed</p>
+</dd>
+</dl>
+</section>
+<section id="id37">
+<h3>Returns<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 4)</dt><dd><p>3D torus samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryExamples.trefoil">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trefoil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizontal_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noisy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryExamples.trefoil" title="Link to this definition"></a></dt>
+<dd><p>Samples on a trefoil in 3D</p>
+<section id="id38">
+<h3>Parameters<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_samples<span class="classifier">int</span></dt><dd><p>Number of random samples.</p>
+</dd>
+</dl>
+</section>
+<section id="id39">
+<h3>Returns<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X: ndarray(n_samples, 3)</dt><dd><p>3D trefoil samples</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.PlotUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">PlotUtils</span></span><a class="headerlink" href="#dreimac.PlotUtils" title="Link to this definition"></a></dt>
+<dd><p>Plotting utilities for DREiMac’s output.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.imscatter">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">imscatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.imscatter" title="Link to this definition"></a></dt>
+<dd><p>Plot patches in specified locations in R2</p>
+<section id="id40">
+<h3>Parameters<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray (N, 2)</span></dt><dd><p>The positions of each patch in R2</p>
+</dd>
+<dt>P<span class="classifier">ndarray (N, dim*dim)</span></dt><dd><p>An array of all of the patches</p>
+</dd>
+<dt>dim<span class="classifier">int</span></dt><dd><p>The dimension of each patch</p>
+</dd>
+<dt>ax<span class="classifier">matplotlib axes, optional</span></dt><dd><p>If given, plot on those axes, otherwise plot
+on current axes by calling gca()</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_2sphere_boundary">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_2sphere_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_2sphere_boundary" title="Link to this definition"></a></dt>
+<dd><p>Plot the boundary of two sphere hemispheres</p>
+<section id="id41">
+<h3>Parameters<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ax<span class="classifier">matplotlib axes, optional</span></dt><dd><p>If given, plot on those axes, otherwise plot
+on current axes by calling gca()</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_3sphere_mesh">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_3sphere_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_parallels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_meridians</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_3sphere_mesh" title="Link to this definition"></a></dt>
+<dd><p>Draw a spherical mesh in 3D around the unit sphere.</p>
+<section id="id42">
+<h3>Parameters<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_parallels<span class="classifier">int</span></dt><dd><p>How many parallels to draw.</p>
+</dd>
+<dt>n_meridians<span class="classifier">int</span></dt><dd><p>How many meridians to draw.</p>
+</dd>
+<dt>alpha<span class="classifier">float</span></dt><dd><p>Opacity of the mesh. Must be between 0 and 1.</p>
+</dd>
+<dt>ax<span class="classifier">matplotlib axes, optional</span></dt><dd><p>If given, plot on those axes, otherwise plot
+on current axes by calling gca()</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_patches">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_patches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_patches" title="Link to this definition"></a></dt>
+<dd><p>Plot patches in a best fitting rectangular grid</p>
+<section id="id43">
+<h3>Parameters<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ax<span class="classifier">matplotlib axes, optional</span></dt><dd><p>If given, plot on those axes, otherwise plot
+on current axes by calling gca()</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_proj_boundary">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_proj_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_proj_boundary" title="Link to this definition"></a></dt>
+<dd><p>Plot the boundary of RP2 on the unit circle</p>
+<section id="id44">
+<h3>Parameters<a class="headerlink" href="#id44" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ax<span class="classifier">matplotlib axes, optional</span></dt><dd><p>If given, plot on those axes, otherwise plot
+on current axes by calling gca()</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_rp2_stereo">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_rp2_stereo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrowcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facecolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.15,</span> <span class="pre">0.15,</span> <span class="pre">0.15)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_rp2_stereo" title="Link to this definition"></a></dt>
+<dd><p>Plot a 2D Stereographic Projection</p>
+<section id="id45">
+<h3>Parameters<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>S<span class="classifier">ndarray (N, 2)</span></dt><dd><p>An Nx2 array of N points to plot on RP2</p>
+</dd>
+<dt>f<span class="classifier">ndarray (N) or ndarray (N, 3)</span></dt><dd><p>A function with which to color the points, or a list of colors</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.plot_rp3_stereo">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot_rp3_stereo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.plot_rp3_stereo" title="Link to this definition"></a></dt>
+<dd><p>Plot a 3D Stereographic Projection</p>
+<section id="id46">
+<h3>Parameters<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ax<span class="classifier">matplotlib axis</span></dt><dd><p>3D subplotting axis</p>
+</dd>
+<dt>S<span class="classifier">ndarray (N, 3)</span></dt><dd><p>An Nx3 array of N points to plot on RP3</p>
+</dd>
+<dt>f<span class="classifier">ndarray (N) or ndarray (N, 3)</span></dt><dd><p>A function with which to color the points, or a list of colors</p>
+</dd>
+<dt>draw_sphere<span class="classifier">boolean</span></dt><dd><p>Whether to draw the 2-sphere</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.PlotUtils.set_axes_equal">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_axes_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.PlotUtils.set_axes_equal" title="Link to this definition"></a></dt>
+<dd><p>Make axes of 3D plot have equal scale so that spheres appear as spheres,
+cubes as cubes, etc..  This is one possible solution to Matplotlib’s
+ax.set_aspect(‘equal’) and ax.axis(‘equal’) not working for 3D.</p>
+<section id="id47">
+<h3>Parameters<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
+<p>ax : a matplotlib axis, e.g., as output from plt.gca().</p>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">CircleMapUtils</span></span><a class="headerlink" href="#dreimac.CircleMapUtils" title="Link to this definition"></a></dt>
+<dd><p>Utilities for adding, rotating, and plotting circle-valued maps.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils.center">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle_map</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircleMapUtils.center" title="Link to this definition"></a></dt>
+<dd><p>Rotationally offset a circle-valued map so that most
+of the points map to the center of the circle (i.e., pi).</p>
+<section id="id48">
+<h3>Parameters<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circle_map: ndarray</dt><dd><p>A numpy array of numbers between 0 and 2pi representing
+points on the circle.</p>
+</dd>
+</dl>
+</section>
+<section id="id49">
+<h3>Returns<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>A numpy array of numbers between 0 and 2pi representing
+the rotation of the given points by the given offset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils.levelset_coloring">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">levelset_coloring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_levelsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircleMapUtils.levelset_coloring" title="Link to this definition"></a></dt>
+<dd><p>Given points on the circle and a number of levelsets subdivide the
+circle into the given number of levelsets and return a smoothened
+membership function to the levelsets. This is useful for coloring a
+dataset X according to a circle-valued map X -&gt; S^1.</p>
+<section id="id50">
+<h3>Parameters<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circle_map: ndarray</dt><dd><p>A numpy array of numbers between 0 and 2pi representing
+points on the circle.</p>
+</dd>
+<dt>n_levelset: int, optional, default is 4</dt><dd><p>Number of levelsets to evenly cover the circle.</p>
+</dd>
+<dt>smoothing: float, optional, default is 0.25</dt><dd><p>How much to smoothen the membership function</p>
+</dd>
+</dl>
+</section>
+<section id="id51">
+<h3>Returns<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>The smoothened membership function of each of the given
+points in the circle.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils.linear_combination">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle_maps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_combination_matrix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircleMapUtils.linear_combination" title="Link to this definition"></a></dt>
+<dd><p>Given k circle-valued maps on a dataset with n points and an l x k
+matrix with integer coefficients, return the l linear combinations of the
+given circle-valued maps induced by the given matrix.</p>
+<section id="id52">
+<h3>Parameters<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circle_maps: list or ndarray(k, n, dtype=float)</dt><dd><p>A numpy array with rows containing n points in the circle represented as
+floats between 0 and 2pi.</p>
+</dd>
+<dt>linear_combination_matrix: list or ndarray(l, k, dtype=int)</dt><dd><p>A numpy array encoding l integer linear combinations of the given k
+circle-valued maps.</p>
+</dd>
+</dl>
+</section>
+<section id="id53">
+<h3>Returns<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray(l, n, dtype=float)</dt><dd><p>A numpy array with rows containing n points in the circle representing
+the l linear combinations of the given k circle-valued maps.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils.offset">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircleMapUtils.offset" title="Link to this definition"></a></dt>
+<dd><p>Rotationally offset a circle-valued map.</p>
+<blockquote>
+<div><p>points on the circle.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>offset: float</dt><dd><p>A number between 0 and 1 representing a rotational offset.</p>
+</dd>
+</dl>
+<section id="id54">
+<h3>Returns<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>A numpy array of numbers between 0 and 2pi representing
+the rotation of the given points by the given offset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.CircleMapUtils.to_sinebow">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_sinebow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circle_map</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.CircleMapUtils.to_sinebow" title="Link to this definition"></a></dt>
+<dd><p>Given a circle map construct an array of the same shape that can be fed as color in a matplotlib
+scatterplot to simulate the sinebow colormap.</p>
+<section id="id55">
+<h3>Parameters<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circle_map: ndarray</dt><dd><p>A numpy array of numbers between 0 and 2pi representing
+points on the circle.</p>
+</dd>
+</dl>
+</section>
+<section id="id56">
+<h3>Returns<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ndarray</dt><dd><p>A numpy array of floats to be used as color in a matplotlib scatterplot.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">ProjectiveMapUtils</span></span><a class="headerlink" href="#dreimac.ProjectiveMapUtils" title="Link to this definition"></a></dt>
+<dd><p>Utilities for manipulating projective space-valued maps.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils.circle_to_3dnorthpole">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circle_to_3dnorthpole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveMapUtils.circle_to_3dnorthpole" title="Link to this definition"></a></dt>
+<dd><p>Convert a point selected on the circle to a 3D
+unit vector on the upper hemisphere</p>
+<section id="id57">
+<h3>Parameters<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x: ndarray(2)</dt><dd><p>Selected point in the circle</p>
+</dd>
+</dl>
+</section>
+<section id="id58">
+<h3>Returns<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>x: ndarray(2)</dt><dd><p>Selected point in the circle (possibly clipped to the circle)</p>
+</dd>
+<dt>u: ndarray(3)</dt><dd><p>Unit vector on the upper hemisphere</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils.get_stereo_proj_codim1">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_stereo_proj_codim1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveMapUtils.get_stereo_proj_codim1" title="Link to this definition"></a></dt>
+<dd><p>Do a projective stereographic projection</p>
+<section id="id59">
+<h3>Parameters<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>pX: ndarray(N, d)</dt><dd><p>A collection of N points in d dimensions</p>
+</dd>
+<dt>u: ndarray(d)</dt><dd><p>A unit vector representing the north pole
+for the stereographic projection</p>
+</dd>
+</dl>
+</section>
+<section id="id60">
+<h3>Returns<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>S: ndarray(N, d-1)</dt><dd><p>The stereographically projected coordinates</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils.hopf_map">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hopf_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveMapUtils.hopf_map" title="Link to this definition"></a></dt>
+<dd><p>Use the Hopf map to project points on the unit sphere in C^2 representing points in CP^1 to points on the unit sphere in R^3.</p>
+<section id="id61">
+<h3>Parameters<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">complex ndarray(n,2)</span></dt><dd><p>Points on the unit sphere in C^2.</p>
+</dd>
+</dl>
+</section>
+<section id="id62">
+<h3>Returns<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>real ndarray(n,3)</dt><dd><p>Points on the unit sphere in R^3.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils.rotmat">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rotmat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveMapUtils.rotmat" title="Link to this definition"></a></dt>
+<dd><p>Construct a d x d rotation matrix that rotates
+a vector a so that it coincides with a vector b</p>
+<section id="id63">
+<h3>Parameters<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>a<span class="classifier">ndarray (d)</span></dt><dd><p>A d-dimensional vector that should be rotated to b</p>
+</dd>
+<dt>b<span class="classifier">ndarray(d)</span></dt><dd><p>A d-dimensional vector that should end up residing at
+the north pole (0,0,…,0,1)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.ProjectiveMapUtils.stereographic_projection_hemispheres">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stereographic_projection_hemispheres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.ProjectiveMapUtils.stereographic_projection_hemispheres" title="Link to this definition"></a></dt>
+<dd><p>Project points on the unit sphere in 3D to two disks in 2D corresponding to each hemisphere.</p>
+<section id="id64">
+<h3>Parameters<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray(n,3)</span></dt><dd><p>Points on the unit sphere in 3D</p>
+</dd>
+</dl>
+</section>
+<section id="id65">
+<h3>Returns<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
+<p>ndarray(n,2)</p>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.LensMapUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">LensMapUtils</span></span><a class="headerlink" href="#dreimac.LensMapUtils" title="Link to this definition"></a></dt>
+<dd><p>Utilities for manipulating lens space-valued maps.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.LensMapUtils.lens_3D_to_disk_3D">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lens_3D_to_disk_3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.LensMapUtils.lens_3D_to_disk_3D" title="Link to this definition"></a></dt>
+<dd><p>Project points on the unit sphere in C^2 representing points in the 3-dimensional
+lens space corresponding to the prime q to points on the unit disk in R^3.</p>
+<section id="id66">
+<h3>Parameters<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">complex ndarray(n,2)</span></dt><dd><p>Points on the unit sphere in C^2.</p>
+</dd>
+<dt>q<span class="classifier">int</span></dt><dd><p>Prime number such that X represents points in the 3-dimensional lens space
+corresponding to this prime.</p>
+</dd>
+</dl>
+</section>
+<section id="id67">
+<h3>Returns<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>real ndarray(n,3)</dt><dd><p>Points on the unit disk in R^3.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dreimac.</span></span><span class="sig-name descname"><span class="pre">GeometryUtils</span></span><a class="headerlink" href="#dreimac.GeometryUtils" title="Link to this definition"></a></dt>
+<dd><p>Utilities for subsampling from point clouds and distance matrices.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils.get_csm">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_csm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryUtils.get_csm" title="Link to this definition"></a></dt>
+<dd><p>Return the Euclidean cross-similarity matrix between the M points
+in the Mxd matrix X and the N points in the Nxd matrix Y.</p>
+<section id="id68">
+<h3>Parameters<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray (M, d)</span></dt><dd><p>A matrix holding the coordinates of M points</p>
+</dd>
+<dt>Y<span class="classifier">ndarray (N, d)</span></dt><dd><p>A matrix holding the coordinates of N points</p>
+</dd>
+</dl>
+</section>
+<section id="id69">
+<h3>Returns<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>D<span class="classifier">ndarray (M, N)</span></dt><dd><p>An MxN Euclidean cross-similarity matrix</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils.get_csm_projarc">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_csm_projarc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryUtils.get_csm_projarc" title="Link to this definition"></a></dt>
+<dd><p>Return the projective arc length cross-similarity between two point
+clouds specified as points on the sphere</p>
+<section id="id70">
+<h3>Parameters<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray (M, d)</span></dt><dd><p>A matrix holding the coordinates of M points on RP^{d-1}</p>
+</dd>
+<dt>Y<span class="classifier">ndarray (N, d)</span></dt><dd><p>A matrix holding the coordinates of N points on RP^{d-1}</p>
+</dd>
+</dl>
+</section>
+<section id="id71">
+<h3>Returns<a class="headerlink" href="#id71" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>D<span class="classifier">ndarray (M, N)</span></dt><dd><p>An MxN  cross-similarity matrix</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils.get_greedy_perm_dm">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_greedy_perm_dm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryUtils.get_greedy_perm_dm" title="Link to this definition"></a></dt>
+<dd><p>A Naive O(NM) algorithm to do furthest points sampling, assuming
+the input is a N x N distance matrix</p>
+<section id="id72">
+<h3>Parameters<a class="headerlink" href="#id72" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>D<span class="classifier">ndarray (N, N)</span></dt><dd><p>An N x N distance matrix</p>
+</dd>
+<dt>M<span class="classifier">integer</span></dt><dd><p>Number of landmarks to compute</p>
+</dd>
+</dl>
+</section>
+<section id="return">
+<h3>Return<a class="headerlink" href="#return" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>result: Dictionary</dt><dd><p>{‘perm’: An array of indices into X of the greedy permutation
+‘lambdas’: Insertion radii of the landmarks
+‘DLandmarks’: An MxN array of distances from landmarks to points in the point cloud}</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils.get_greedy_perm_pc">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_greedy_perm_pc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csm_fn=&lt;function</span> <span class="pre">GeometryUtils.get_csm&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryUtils.get_greedy_perm_pc" title="Link to this definition"></a></dt>
+<dd><p>A Naive O(NM) algorithm to do furthest points sampling, assuming
+the input is a point cloud specified in Euclidean space.  This saves
+computation over having compute the full distance matrix if the number
+of landmarks M &lt;&lt; N</p>
+<section id="id73">
+<h3>Parameters<a class="headerlink" href="#id73" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray (N, d)</span></dt><dd><p>An Nxd Euclidean point cloud</p>
+</dd>
+<dt>M<span class="classifier">integer</span></dt><dd><p>Number of landmarks to compute</p>
+</dd>
+<dt>csm_fn: function X, Y -&gt; D</dt><dd><p>Cross-similarity function (Euclidean by default)</p>
+</dd>
+</dl>
+</section>
+<section id="id74">
+<h3>Return<a class="headerlink" href="#id74" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>result: Dictionary</dt><dd><p>{‘Y’: An Mxd array of landmarks,
+‘perm’: An array of indices into X of the greedy permutation
+‘lambdas’: Insertion radii of the landmarks
+‘D’: An MxN array of distances from landmarks to points in X}</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dreimac.GeometryUtils.landmark_geodesic_distance">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmark_geodesic_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_landmarks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dreimac.GeometryUtils.landmark_geodesic_distance" title="Link to this definition"></a></dt>
+<dd><p>Get a minmax sample of Euclidean point cloud using an approximation of the geodesic distance.
+Return the geodesic distance from the sample (landmarks) to the rest of the points.</p>
+<section id="id75">
+<h3>Parameters<a class="headerlink" href="#id75" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">ndarray(n,d)</span></dt><dd><p>Point cloud of n points in d-dimensional Euclidean space.</p>
+</dd>
+<dt>n_landmarks<span class="classifier">int</span></dt><dd><p>How many landmarks to sample.</p>
+</dd>
+<dt>n_neighbors<span class="classifier">int</span></dt><dd><p>How many neighbors to use to compute the nearest neighbors graph used to approximate
+the geodesic distance.</p>
+</dd>
+</dl>
+</section>
+<section id="id76">
+<h3>Return<a class="headerlink" href="#id76" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dist_landmarks_points<span class="classifier">ndarray(n_landmarks,n)</span></dt><dd><p>Geodesic distance from landmarks to the rest of the points.
+The first n_landmarks columns represent the landmarks, and are in the same order as landmarks.
+The rest of the columns represent the rest of the data points.
+The permutation that reorders the rows of X to correspond to the columns of dist_landmarks_points is
+given by perm_all_points.</p>
+</dd>
+<dt>perm_all_points<span class="classifier">ndarray(n)</span></dt><dd><p>Permutation of [0, …, n-1] which makes the rows of X correspond to the columns of dist_landmarks_points.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theory.html" class="btn btn-neutral float-left" title="Theory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="faq.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jose A. Perea, Luis Scoccola, Chris Tralie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
