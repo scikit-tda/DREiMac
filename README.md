@@ -2,6 +2,7 @@
 [![Downloads](https://static.pepy.tech/badge/dreimac)](https://pepy.tech/project/dreimac)
 [![codecov](https://codecov.io/gh/scikit-tda/dreimac/branch/master/graph/badge.svg)](https://codecov.io/gh/scikit-tda/dreimac)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![docs](https://readthedocs.org/projects/dreimac/badge/?version=latest)](https://dreimac.readthedocs.io/)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.05791/status.svg)](https://doi.org/10.21105/joss.05791)
 
 # DREiMac: Dimensionality Reduction with Eilenberg-MacLane Coordinates
