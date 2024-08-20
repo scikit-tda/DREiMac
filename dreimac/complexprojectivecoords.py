@@ -132,10 +132,13 @@ class ComplexProjectiveCoords(EMCoords):
                 n_edges = delta2.shape[1]
                 objective = np.zeros((n_edges), dtype=int)
                 integrality = np.ones((n_edges), dtype=int)
+                bounds = scipy.optimize.Bounds()  # empty bounds
+
                 optimizer_solution = milp(
                     objective,
                     integrality=integrality,
                     constraints=constraints,
+                    bounds=bounds,
                 )
 
                 if not optimizer_solution["success"]:
