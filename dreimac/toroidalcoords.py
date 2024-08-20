@@ -148,11 +148,13 @@ class ToroidalCoords(EMCoords):
                     n_edges = delta1.shape[1]
                     objective = np.zeros((n_edges))
                     integrality = np.ones((n_edges))
+                    bounds = scipy.optimize.Bounds()  # empty bounds
 
                     optimizer_solution = milp(
                         objective,
                         integrality=integrality,
                         constraints=constraints,
+                        bounds=bounds,
                     )
 
                     if not optimizer_solution["success"]:
