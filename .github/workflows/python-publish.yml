@@ -1,66 +1,48 @@
 # This workflows will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Upload Python Package
+name: Build and Upload Python Package
 
 on:
   workflow_dispatch:
   release:
-    types: [published]
+    types:
+      - published
 
 jobs:
-  deploy-unix:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-
-    runs-on: "ubuntu-latest"
-    permissions:
-      id-token: write
+  build_wheel_and_sdist:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
-          pip install pytest setuptools wheel twine
-      - name: Run tests
-        run: pytest .
-      - name: Build and publish
-        run: |
-          python setup.py sdist
-          twine upload --skip-existing dist/*
+          fetch-depth: 0
 
-  deploy-windows-pip:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+      - name: Build SDist and wheel
+        run: pipx run build
 
-    runs-on: "windows-latest"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Packages
+          path: dist/*
+
+      - name: Check metadata
+        run: pipx run twine check dist/*
+
+  upload_pypi:
+    name: Upload release to PyPI
+    needs: [build_wheel_and_sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dreimac
     permissions:
       id-token: write
-
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
-          pip install pytest setuptools wheel twine
-      - name: Run tests
-        run: pytest .
-      - name: Build and publish
-        run: |
-          python setup.py bdist_wheel
-          twine upload --skip-existing dist/*
+          name: Packages
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
