@@ -16,6 +16,9 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: "ubuntu-latest"
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -30,9 +33,6 @@ jobs:
       - name: Run tests
         run: pytest .
       - name: Build and publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           python setup.py sdist
           twine upload --skip-existing dist/*
@@ -44,6 +44,8 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: "windows-latest"
+    permissions:
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -59,9 +61,6 @@ jobs:
       - name: Run tests
         run: pytest .
       - name: Build and publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           python setup.py bdist_wheel
           twine upload --skip-existing dist/*
