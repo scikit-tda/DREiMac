@@ -46,7 +46,7 @@ classifiers = [
 keywords = ["dimensionality reduction", "topological data analysis"]
 
 [project.optional-dependencies]
-testing = ["pytest"]
+testing = ["pytest", "pytestcov"]
 
 docs = ["sphinx", "sphinx-_rtd_theme", "numpydoc", "ipykernel", "nbsphinx"]
 
