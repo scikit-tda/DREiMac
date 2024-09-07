@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 61.0", "build", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -46,9 +46,9 @@ classifiers = [
 keywords = ["dimensionality reduction", "topological data analysis"]
 
 [project.optional-dependencies]
-testing = ["pytest", "pytestcov"]
+testing = ["pytest", "pytest-cov"]
 
-docs = ["sphinx", "sphinx-_rtd_theme", "numpydoc", "ipykernel", "nbsphinx"]
+docs = ["sphinx", "sphinx_rtd_theme", "numpydoc", "ipykernel", "nbsphinx"]
 
 [project.urls]
 Homepage = "https://dreimac.scikit-tda.org"
