@@ -1,6 +1,0 @@
-matplotlib>=3.6
-numba>=0.56
-numpy>=1.23
-persim>=0.3
-ripser>=0.6
-scipy>=1.10
