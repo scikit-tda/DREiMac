@@ -5,7 +5,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   test-linux-macos:
@@ -25,17 +25,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .
+          pip install ".[tests]"
           : # pip install pytest nbmake
-          pip install pytest
-      - name: Run test 
+      - name: Run test
         run: |
           : # we were also testing the jupyter notebooks with the command below
           : # but some recent update broke this and we get "No such file or directory: 'latex'"
           : # so for now we don't test notebooks
           : # original command "pytest --nbmake ."
           pytest .
-
 
   test-windows:
     runs-on: windows-latest
@@ -54,10 +52,9 @@ jobs:
         shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip
-          pip install .
+          pip install ".[tests]"
           : # pip install pytest nbmake
-          pip install pytest
-      - name: Run test 
+      - name: Run test
         shell: bash -l {0}
         run: |
           : # we were also testing the jupyter notebooks with the command below
@@ -81,8 +78,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install ".[tests]"
       - name: Tests
         run: |
           export NUMBA_DISABLE_JIT=1
