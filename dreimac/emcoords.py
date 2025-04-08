@@ -92,7 +92,17 @@ class EMCoords(object):
         Compute the representative cocycle, given a list of cohomology classes
 
         Parameters
-        ----------
+        ----------        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are {} point not covered by a landmark".format(nzero))
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx
+
         cohomology_class : integer
             Integer representing the index of the persistent cohomology class.
             Persistent cohomology classes are ordered by persistence, from largest to smallest.
@@ -153,7 +163,7 @@ class EMCoords(object):
 
         return self._r_cover, self._rips_threshold
 
-    def get_covering_partition(self, r_cover, partunity_fn, X_query=None):
+    def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
@@ -173,10 +183,18 @@ class EMCoords(object):
         ball_indx: ndarray(M, dtype=int)
             The index of the first open set each data point belongs to
         """
+        if X_query is not None:
+            if self.distance_matrix and not distance_matrix_query:
+                raise Exception("Coordinates initialized by distance matrix. " \
+                "Please input query as a distance matrix.")  
+                   
         if X_query is None:
             dist_land_data = self._dist_land_data
+        elif distance_matrix_query:
+            dist_land_data = X_query
         else: # calculate the distance between the landmarks and the query
-            dist_land_data = cdist(self.X_[self.idx_land_], X_query)
+            dist_land_data = cdist(self._X[self._idx_land], X_query)
+            
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
