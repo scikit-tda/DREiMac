@@ -179,7 +179,7 @@ class EMCoords(object):
         nzero = np.sum(denom == 0)
         if nzero > 0:
             warnings.warn("There are {} point not covered by a landmark".format(nzero))
-            denom[denom == 0] = 1
+            denom[denom == 0] = np.nan
         varphi = phi / denom[None, :]
         # To each data point, associate the index of the first open set it belongs to
         ball_indx = np.argmax(U, 0)
