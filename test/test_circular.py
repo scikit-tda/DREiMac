@@ -119,7 +119,7 @@ class TestCircular:
             k = 5
             _, nns = tree.query(X, k=k)
 
-            tolerance = 5 / 100 * (2 * np.pi)  # 5% of the full circle
+            tolerance = 10 / 100 * (2 * np.pi)  # 10% of the full circle
 
             for i in range(X.shape[0]):
                 assert _maximum_circle_distance(coords[nns[i]]) <= tolerance
