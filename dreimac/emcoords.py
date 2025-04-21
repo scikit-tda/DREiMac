@@ -184,17 +184,22 @@ class EMCoords(object):
             The index of the first open set each data point belongs to
         """
         if X_query is not None:
-            if self.distance_matrix and not distance_matrix_query:
-                raise Exception("Coordinates initialized by distance matrix. " \
-                "Please input query as a distance matrix.")  
-                   
-        if X_query is None:
-            dist_land_data = self._dist_land_data
-        elif distance_matrix_query:
-            dist_land_data = X_query
-        else: # calculate the distance between the landmarks and the query
-            dist_land_data = cdist(self._X[self._idx_land], X_query)
             
+            if self.distance_matrix and not distance_matrix_query: #Handle the bad case first
+                raise Exception("Coordinates initialized by distance matrix. " \
+                "Please input query as a distance matrix to landmarks.")  
+            elif distance_matrix_query:
+                dist_land_data = X_query
+            else: # calculate the distance between the landmarks and the query
+                dist_land_data = cdist(self._X[self._idx_land], X_query)
+        else:
+            dist_land_data=self._dist_land_data
+                   
+       
+        
+        if dist_land_data.shape[0] != self._n_landmarks:
+            raise Exception(f"Expected shape ({self._n_landmarks}, ...) received {dist_land_data.shape}")
+        
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
