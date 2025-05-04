@@ -1,6 +1,6 @@
 import numpy as np
 
-from dreimac import ProjectiveCoords, ComplexProjectiveCoords, GeometryExamples
+from dreimac import ProjectiveCoords, ComplexProjectiveCoords, GeometryExamples, GeometryUtils
 
 class TestRealProjective:
 
@@ -30,7 +30,34 @@ class TestRealProjective:
         target_coordinates = 2
         variance_threshold = 0.8
         assert np.linalg.norm(pc._variance[:target_coordinates]) >= total_variance * variance_threshold
+    
+    def test_projective_consistent_on_query(self):
+        """
+        Test projective coordinates on the projective plane are consistent upto permutation.
+        Parameters
+        ----------
+        NSamples : int
+            Number of random samples on the projective plane
+        NLandmarks : int
+            Number of landmarks to take in the projective coordinates computation
+        """
 
+        n_samples = 10000
+        n_landmarks = 100
+        X, D = GeometryExamples.rp2_metric(n_samples)
+
+    
+        pc = ProjectiveCoords(D, n_landmarks, distance_matrix=True, verbose=True)
+        coordinates = pc.get_coordinates()
+        assert len(coordinates) == len(X)
+        
+        indices = np.random.randint(low=0, high=X.shape[0], size=(20,)).astype(int)
+        X_query = D[pc._idx_land,:][:,np.append(np.arange(X.shape[0]),indices)]
+        
+        coords_query = pc.get_coordinates(X_query=X_query, distance_matrix_query=True)
+        target_coordinates = 2
+        csm_mat = GeometryUtils.get_csm_projarc(coordinates[indices],coords_query[-len(indices):])
+        assert np.allclose(0,np.diag(csm_mat))
 
 
     def test_klein_bottle(self):
