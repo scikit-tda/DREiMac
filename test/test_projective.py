@@ -24,7 +24,7 @@ class TestRealProjective:
         #theta = np.arccos(np.abs(SOrig[:, 0]))
         
         pc = ProjectiveCoords(D, n_landmarks, distance_matrix=True, verbose=True)
-        coordinates = pc.get_coordinates()
+        coordinates = pc.get_coordinates(projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(X)
         total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
@@ -43,7 +43,7 @@ class TestRealProjective:
         r = 1
         X = GeometryExamples.klein_bottle_4d(n_samples, R, r)
         pc = ProjectiveCoords(X, n_landmarks, verbose=True)
-        coordinates = pc.get_coordinates()
+        coordinates = pc.get_coordinates(projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(X)
         total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
@@ -58,7 +58,7 @@ class TestRealProjective:
         dim = 10
         P = GeometryExamples.line_patches(dim=dim, n_angles=200, n_offsets=200, sigma=0.25)
         pc = ProjectiveCoords(P, n_landmarks=100)
-        coordinates = pc.get_coordinates()
+        coordinates = pc.get_coordinates(projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(P)
         total_variance = np.linalg.norm(pc._variance)
         target_coordinates = 2
@@ -69,7 +69,7 @@ class TestRealProjective:
     def test_image_patches(self):
         X = GeometryExamples.line_patches(dim=10, n_angles=200, n_offsets=200, sigma=0.25)
         proj = ProjectiveCoords(X, n_landmarks=200)
-        coordinates = proj.get_coordinates(proj_dim=2, perc=0.8, cocycle_idx=0)
+        coordinates = proj.get_coordinates(proj_dim=2, perc=0.8, cocycle_idx=0, projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(X)
         total_variance = np.linalg.norm(proj._variance)
         target_coordinates = 2
@@ -83,7 +83,7 @@ class TestComplexProjective:
         data = GeometryExamples.sphere(2000)
         cpc = ComplexProjectiveCoords(data, n_landmarks=100)
         target_coordinates = 1
-        coordinates = cpc.get_coordinates(proj_dim=target_coordinates)
+        coordinates = cpc.get_coordinates(proj_dim=target_coordinates, projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(data)
         total_variance = np.linalg.norm(cpc._variance)
         variance_threshold = 0.3
@@ -93,7 +93,7 @@ class TestComplexProjective:
         P = GeometryExamples.moving_dot(40)
         cpc = ComplexProjectiveCoords(P, n_landmarks=300)
         target_coordinates = 1
-        coordinates = cpc.get_coordinates(proj_dim=target_coordinates)
+        coordinates = cpc.get_coordinates(proj_dim=target_coordinates, projective_dim_red_mode='one-by-one')
         assert len(coordinates) == len(P)
         total_variance = np.linalg.norm(cpc._variance)
         variance_threshold = 0.3
