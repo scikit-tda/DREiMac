@@ -3,7 +3,7 @@ from numba import jit
 import scipy.sparse as sparse
 from scipy.sparse.linalg import lsqr
 from scipy.optimize import LinearConstraint, milp
-from .utils import PartUnity, CohomologyUtils, EquivariantPCA
+from .utils import PartUnity, CohomologyUtils, EquivariantPCA, PPCA
 from .emcoords import EMCoords
 from .combinatorial import (
     combinatorial_number_system_table,
@@ -41,6 +41,7 @@ class ComplexProjectiveCoords(EMCoords):
         self._cns_lookup_table = combinatorial_number_system_table(
             n_landmarks, simplicial_complex_dimension
         )
+        self.ppca = None
 
     def get_coordinates(
         self,
@@ -51,6 +52,7 @@ class ComplexProjectiveCoords(EMCoords):
         standard_range=True,
         check_cocycle_condition=True,
         projective_dim_red_mode="exponential",
+        save_projections=False
     ):
         """
         Get complex projective coordinates.
@@ -171,15 +173,14 @@ class ComplexProjectiveCoords(EMCoords):
         )
 
         # reduce dimensionality of complex projective space
-        epca = EquivariantPCA.ppca(
-            class_map,
-            proj_dim,
-            projective_dim_red_mode,
-            self.verbose,
-        )
-        self._variance = epca["variance"]
+        self.ppca = PPCA(n_components=proj_dim, projective_dim_red_mode= projective_dim_red_mode)
 
-        return epca["X"]
+        X = self.ppca.fit_transform(
+            class_map, self.verbose, save=save_projections
+        )
+        self._variance = self.ppca.variance
+
+        return X
 
 
 # turn cocycle into tensor
