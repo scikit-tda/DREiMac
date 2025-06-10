@@ -45,6 +45,7 @@ class ProjectiveCoords(EMCoords):
         partunity_fn=PartUnity.linear,
         standard_range=True,
         projective_dim_red_mode="exponential",
+        save_projections=False
     ):
         """
         Get real projective coordinates.
@@ -100,7 +101,7 @@ class ProjectiveCoords(EMCoords):
         self.ppca = PPCA(n_components=proj_dim, projective_dim_red_mode= projective_dim_red_mode)
 
         X = self.ppca.fit_transform(
-            class_map, self.verbose
+            class_map, self.verbose, save=save_projections
         )
         self._variance = self.ppca.variance
         return X
