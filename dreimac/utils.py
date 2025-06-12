@@ -699,6 +699,149 @@ class PartUnity:
         """
         return np.exp(r_cover**2 / (ds**2 - r_cover**2))
 
+class PPCA:
+    """
+        Principal Projective Component Analysis (Jose Perea 2017)
+
+        Parameters
+        ----------
+        n_components : integer
+            The dimension of the projective space onto which to project
+        projective_dim_red_mode : string
+            Either "one-by-one", "exponential", or "direct". How to perform equivariant
+            dimensionality reduction. "exponential" usually works best, being fast
+            without compromising quality.
+
+    """
+    def __init__(
+            self,
+            n_components=None,
+            projective_dim_red_mode="one-by-one"
+    ):
+        self.n_components = n_components
+        self.projective_dim_red_mode = projective_dim_red_mode
+        self.projections = None
+        assert projective_dim_red_mode in ["direct", "exponential", "one-by-one"]
+
+        self.variance = None
+    
+    def _one_step_linear_reduction(self, X, dims_to_keep):
+            try:
+                _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
+                U = np.fliplr(U)
+            except:
+                U = np.eye(X.shape[0])
+            U = U[:, :dims_to_keep]
+            Y = (np.conjugate(U).T).dot(X)
+            X = Y / np.linalg.norm(Y, axis=0)[None, :]
+            return X, U
+
+    def fit_transform(self, class_map, verbose=False, save=False):
+        '''
+        Parameters
+        ----------
+        class_map : ndarray (N, d)
+            For all N points of the dataset, membership weights to
+            d different classes are the coordinates
+        verbose : boolean
+            Whether to print information during iterations
+        '''
+        mode = self.projective_dim_red_mode
+        X = class_map.T
+        n_dim = class_map.shape[1]
+        projections = number_of_simplices_of_dimension
+
+        if mode == "direct":
+            XRet, self.projections = self._fit_direct(X, n_dim, verbose, save=save)
+        elif mode == "exponential":
+            XRet, self.projections = self._fit_exponential(X, n_dim, verbose, save=save)
+        elif mode == 'one-by-one':
+            XRet, self.projections = self._fit_one_by_one(X, n_dim, verbose, save=save)  
+        return XRet.T
+    
+    def _fit_direct(self, X, n_dim, verbose, save=False):
+        ''' Directly fit a projective subspace
+        '''
+        projections = []
+        total_dims_to_keep = self.n_components + 1
+        XRet, U = self._one_step_linear_reduction(X, total_dims_to_keep)
+        if save:
+            projections.append(U)
+        return XRet, projections
+
+    def _fit_exponential(self, X, n_dim, verbose, save=False):
+        ''' Reduce half the dimensions
+        '''
+        projections = []
+        total_dims_to_keep = self.n_components + 1
+        to_keep_this_iter = (n_dim - total_dims_to_keep) // 2
+        while to_keep_this_iter > 0:
+            X, U = self._one_step_linear_reduction(
+                X, total_dims_to_keep + to_keep_this_iter
+            )
+            
+            if save:
+                projections.append(U)
+            to_keep_this_iter = to_keep_this_iter // 2
+        
+        if X.shape[0] > total_dims_to_keep:
+            X, U = self._one_step_linear_reduction(X, total_dims_to_keep)
+            
+            if save:
+                projections.append(U)
+        
+        XRet = X
+        return XRet, projections
+    
+    def _fit_one_by_one(self, X, n_dim, verbose, save=False):
+        proj_dim = self.n_components
+        XRet = None
+        variance = np.zeros(X.shape[0] - 1)
+        projections = []
+        
+        tic = time.time()
+        # Projective dimensionality reduction : Main Loop
+        for i in range(n_dim - 1):
+            if i == n_dim - proj_dim - 1:
+                XRet = X
+            
+            try:
+                _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
+                U = np.fliplr(U)
+                # U, _, _ = np.linalg.svd(X)
+            except:
+                U = np.eye(X.shape[0])
+            
+            variance[-i - 1] = np.mean(
+                (np.pi / 2 - np.real(np.arccos(np.abs(U[:, -1][None, :].dot(X)))))
+                ** 2
+            )
+            
+            U = U[:,0:-1]
+
+            if save:
+                projections.append(U)
+            
+            Y = (np.conjugate(U).T).dot(X)
+            X = Y / np.linalg.norm(Y, axis=0)[None, :]
+        
+        self.variance = variance
+        if verbose:
+            print("Elapsed time ppca: %.3g" % (time.time() - tic))
+
+        return XRet, projections
+
+
+    def transform(self, class_map):
+        '''Project down to fitted projective subspace'''
+        if len(self.projections) == 0:
+            raise ValueError("Projection list empty, please fit and save first!")
+        X = class_map.T
+        for U in self.projections:
+            Y = (np.conjugate(U).T).dot(X)
+            X = Y / np.linalg.norm(Y, axis=0)[None, :]
+        return X
+
 
 class EquivariantPCA:
     @staticmethod

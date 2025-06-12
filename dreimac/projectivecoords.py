@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from .utils import PartUnity, EquivariantPCA
+from .utils import PartUnity, EquivariantPCA, PPCA
 from .emcoords import EMCoords
 
 class ProjectiveCoords(EMCoords):
@@ -35,6 +35,7 @@ class ProjectiveCoords(EMCoords):
             maxdim=maxdim,
             verbose=verbose,
         )
+        self.ppca = None
 
     def get_coordinates(
         self,
@@ -44,6 +45,7 @@ class ProjectiveCoords(EMCoords):
         partunity_fn=PartUnity.linear,
         standard_range=True,
         projective_dim_red_mode="exponential",
+        save_projections=False
     ):
         """
         Get real projective coordinates.
@@ -96,9 +98,10 @@ class ProjectiveCoords(EMCoords):
 
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
-        epca = EquivariantPCA.ppca(
-            class_map, proj_dim, projective_dim_red_mode, self.verbose
-        )
-        self._variance = epca["variance"]
+        self.ppca = PPCA(n_components=proj_dim, projective_dim_red_mode= projective_dim_red_mode)
 
-        return epca["X"]
+        X = self.ppca.fit_transform(
+            class_map, self.verbose, save=save_projections
+        )
+        self._variance = self.ppca.variance
+        return X
