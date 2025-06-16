@@ -796,7 +796,6 @@ class PPCA:
         return XRet, projections
     
     def _fit_one_by_one(self, X, n_dim, verbose, save=False):
-        proj_dim = self.n_components
         XRet = None
         variance = np.zeros(X.shape[0] - 1)
         projections = []
@@ -804,9 +803,9 @@ class PPCA:
         tic = time.time()
         # Projective dimensionality reduction : Main Loop
         for i in range(n_dim - 1):
-            if i == n_dim - proj_dim - 1:
+            if i == n_dim - self.n_components - 1:
                 XRet = X
-            
+                save = False
             try:
                 _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
                 U = np.fliplr(U)
@@ -819,11 +818,10 @@ class PPCA:
                 ** 2
             )
             
-            U = U[:,0:-1]
+            U = U[:, 0:-1]
 
             if save:
                 projections.append(U)
-            
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
         
