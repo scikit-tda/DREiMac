@@ -48,6 +48,7 @@ class ProjectiveCoords(EMCoords):
         standard_range=True,
         projective_dim_red_mode="exponential",
         save_projections=False
+        
     ):
         """
         Get real projective coordinates.

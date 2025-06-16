@@ -103,6 +103,17 @@ class EMCoords(object):
         ball_indx = np.argmax(U, 0)
         return varphi, ball_indx
 
+        ----------        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are {} point not covered by a landmark".format(nzero))
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx
+
         cohomology_class : integer
             Integer representing the index of the persistent cohomology class.
             Persistent cohomology classes are ordered by persistence, from largest to smallest.
@@ -163,6 +174,7 @@ class EMCoords(object):
 
         return self._r_cover, self._rips_threshold
 
+    def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
     def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity

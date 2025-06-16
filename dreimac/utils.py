@@ -735,7 +735,10 @@ class PPCA:
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
             return X, U
-
+    
+    def is_fit(self):
+        return (self.projections is not None) and (len(self.projections) > 0)
+    
     def fit_transform(self, class_map, verbose=False, save=False):
         '''
         Parameters
@@ -749,7 +752,6 @@ class PPCA:
         mode = self.projective_dim_red_mode
         X = class_map.T
         n_dim = class_map.shape[1]
-        projections = number_of_simplices_of_dimension
 
         if mode == "direct":
             XRet, self.projections = self._fit_direct(X, n_dim, verbose, save=save)
@@ -840,7 +842,7 @@ class PPCA:
         for U in self.projections:
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
-        return X
+        return X.T
 
 
 class EquivariantPCA:
