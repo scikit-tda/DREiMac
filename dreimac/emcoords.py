@@ -175,7 +175,6 @@ class EMCoords(object):
         return self._r_cover, self._rips_threshold
 
     def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
-    def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 

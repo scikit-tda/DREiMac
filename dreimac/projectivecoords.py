@@ -78,6 +78,8 @@ class ProjectiveCoords(EMCoords):
             without compromising quality.
         X_query: ndarray(M, d)
             A point cloud to compute the projective coordinates on. If None, uses self.X.
+        save_projections: bool
+            Whether to save projections for projective pca
         Returns
         -------
         ndarray(N, proj_dim+1)
@@ -97,7 +99,6 @@ class ProjectiveCoords(EMCoords):
         )
 
         varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn, X_query, distance_matrix_query)
-
         root_of_unity = -1
 
         cocycle_matrix = np.ones((n_landmarks, n_landmarks), dtype=float)
@@ -106,10 +107,17 @@ class ProjectiveCoords(EMCoords):
 
         class_map = np.sqrt(varphi.T) * cocycle_matrix[ball_indx[:], :]
 
-        self.ppca = PPCA(n_components=proj_dim, projective_dim_red_mode= projective_dim_red_mode)
+        if X_query is None:
+            self.ppca = PPCA(n_components=proj_dim,
+                             projective_dim_red_mode=projective_dim_red_mode)
+            X = self.ppca.fit_transform(
+                class_map, self.verbose, save=save_projections
+            )
+            self._variance = self.ppca.variance  
+        elif (self.ppca is None) or (not self.ppca.is_fit()):
+            raise ValueError('Please get coordinates for original data and set\
+                              save_projections to True!')
+        else:
+            X = self.ppca.transform(class_map)
 
-        X = self.ppca.fit_transform(
-            class_map, self.verbose, save=save_projections
-        )
-        self._variance = self.ppca.variance
         return X
