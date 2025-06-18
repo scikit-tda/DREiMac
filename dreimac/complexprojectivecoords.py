@@ -299,7 +299,7 @@ def _sparse_integrate(
                 class_map[b, i] += nu[i, ball_indx[b]]
                 for t in range(n_landmarks):
                     class_map[b, i] += varphi[t, b] * eta[i, ball_indx[b], t]
-        return np.exp(2 * np.pi * 1j * class_map0) * np.sqrt(varphi.T)
+        return np.exp(2 * np.pi * 1j * class_map) * np.sqrt(varphi.T)
 
     return _assemble(
         class_map0,
