@@ -179,12 +179,18 @@ class ComplexProjectiveCoords(EMCoords):
         )
 
         # reduce dimensionality of complex projective space
-        self.ppca = PPCA(n_components=proj_dim, projective_dim_red_mode= projective_dim_red_mode)
-
-        X = self.ppca.fit_transform(
-            class_map, self.verbose, save=save_projections
-        )
-        self._variance = self.ppca.variance
+        if X_query is None:
+            self.ppca = PPCA(n_components=proj_dim,
+                            projective_dim_red_mode=projective_dim_red_mode)
+            X = self.ppca.fit_transform(
+                class_map, self.verbose, save=save_projections
+            )
+            self._variance = self.ppca.variance
+        elif (self.ppca is None) or (not self.ppca.is_fit()):
+            raise ValueError('Please get coordinates for original data and set\
+                              save_projections to True!')
+        else:
+            X = self.ppca.transform(class_map)
 
         return X
 
