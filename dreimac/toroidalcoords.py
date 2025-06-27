@@ -43,6 +43,8 @@ class ToroidalCoords(EMCoords):
 
     def get_coordinates(
         self,
+        X_query=None,
+        distance_matrix_query=False,
         perc=0.5,
         cocycle_idxs=[0],
         partunity_fn=PartUnity.linear,
@@ -54,6 +56,10 @@ class ToroidalCoords(EMCoords):
 
         Parameters
         ----------
+        X_query: ndarray(M, d) or None
+            A point cloud to compute the toroidal coordinates on. If None, uses self.X.
+        distance_matrix_query: boolean
+            If true, treat X_query as the distances of landmarks to the query point cloud
         perc : float
             Percent coverage. Must be between 0 and 1.
         cocycle_idx : integer
@@ -71,11 +77,11 @@ class ToroidalCoords(EMCoords):
 
         Returns
         -------
-        thetas : ndarray(n, N)
+        thetas : ndarray(n, M)
             List of circular coordinates, with n the length of cocycle_idxs
 
         """
-
+       
         # get representative cocycles and the intersection of their supports
         homological_dimension = 1
         cohomdeaths, cohombirths, cocycles = zip(
@@ -106,7 +112,7 @@ class ToroidalCoords(EMCoords):
         )
 
         # compute partition of unity and choose a cover element for each data point
-        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn)
+        varphi, ball_indx = EMCoords.get_covering_partition(self, r_cover, partunity_fn, X_query,distance_matrix_query)
 
         # compute boundary matrix
         dist_land_land = self._dist_land_land

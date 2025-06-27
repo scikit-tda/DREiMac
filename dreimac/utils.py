@@ -735,7 +735,10 @@ class PPCA:
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
             return X, U
-
+    
+    def is_fit(self):
+        return (self.projections is not None) and (len(self.projections) > 0)
+    
     def fit_transform(self, class_map, verbose=False, save=False):
         '''
         Parameters
@@ -749,7 +752,6 @@ class PPCA:
         mode = self.projective_dim_red_mode
         X = class_map.T
         n_dim = class_map.shape[1]
-        projections = number_of_simplices_of_dimension
 
         if mode == "direct":
             XRet, self.projections = self._fit_direct(X, n_dim, verbose, save=save)
@@ -794,7 +796,6 @@ class PPCA:
         return XRet, projections
     
     def _fit_one_by_one(self, X, n_dim, verbose, save=False):
-        proj_dim = self.n_components
         XRet = None
         variance = np.zeros(X.shape[0] - 1)
         projections = []
@@ -802,9 +803,9 @@ class PPCA:
         tic = time.time()
         # Projective dimensionality reduction : Main Loop
         for i in range(n_dim - 1):
-            if i == n_dim - proj_dim - 1:
+            if i == n_dim - self.n_components - 1:
                 XRet = X
-            
+                save = False
             try:
                 _, U = np.linalg.eigh(X.dot(np.conjugate(X).T))
                 U = np.fliplr(U)
@@ -817,11 +818,10 @@ class PPCA:
                 ** 2
             )
             
-            U = U[:,0:-1]
+            U = U[:, 0:-1]
 
             if save:
                 projections.append(U)
-            
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
         
@@ -840,7 +840,7 @@ class PPCA:
         for U in self.projections:
             Y = (np.conjugate(U).T).dot(X)
             X = Y / np.linalg.norm(Y, axis=0)[None, :]
-        return X
+        return X.T
 
 
 class EquivariantPCA:

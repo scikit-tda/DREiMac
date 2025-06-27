@@ -3,6 +3,7 @@ A superclass for shared code across all different types of coordinates
 """
 import numpy as np
 from scipy.sparse.linalg import lsqr
+from scipy.spatial.distance import cdist
 import time
 from .utils import CohomologyUtils
 from ripser import ripser
@@ -43,10 +44,11 @@ class EMCoords(object):
         if verbose:
             tic = time.time()
             print("Doing TDA...")
+        self.distance_matrix = distance_matrix
         if distance_matrix is False:
-            ripser_metric_input = X 
+            ripser_metric_input = X
         elif X.shape[0] == X.shape[1]:
-            ripser_metric_input = X 
+            ripser_metric_input = X
         else:
             ripser_metric_input = X[:,:X.shape[0]]
         res = ripser(
@@ -90,7 +92,28 @@ class EMCoords(object):
         Compute the representative cocycle, given a list of cohomology classes
 
         Parameters
-        ----------
+        ----------        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are {} point not covered by a landmark".format(nzero))
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx
+
+        ----------        # varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b))
+        denom = np.sum(phi, 0)
+        nzero = np.sum(denom == 0)
+        if nzero > 0:
+            warnings.warn("There are {} point not covered by a landmark".format(nzero))
+            denom[denom == 0] = 1
+        varphi = phi / denom[None, :]
+        # To each data point, associate the index of the first open set it belongs to
+        ball_indx = np.argmax(U, 0)
+        return varphi, ball_indx
+
         cohomology_class : integer
             Integer representing the index of the persistent cohomology class.
             Persistent cohomology classes are ordered by persistence, from largest to smallest.
@@ -151,7 +174,7 @@ class EMCoords(object):
 
         return self._r_cover, self._rips_threshold
 
-    def get_covering_partition(self, r_cover, partunity_fn):
+    def get_covering_partition(self, r_cover, partunity_fn, X_query=None, distance_matrix_query=False):
         """
         Create the open covering U = {U_1,..., U_{s+1}} and partition of unity
 
@@ -161,15 +184,33 @@ class EMCoords(object):
             Covering radius
         partunity_fn: (dist_land_data, r_cover) -> phi
             A function from the distances of each landmark to a bump function
+        X_query: ndarray(M, d)
+            A point cloud to compute the circular coordinates on. If None, uses self.X.
 
         Returns
         -------
-        varphi: ndarray(n_data, dtype=float)
+        varphi: ndarray(M, dtype=float)
             varphi_j(b) = phi_j(b)/(phi_1(b) + ... + phi_{n_landmarks}(b)),
-        ball_indx: ndarray(n_data, dtype=int)
+        ball_indx: ndarray(M, dtype=int)
             The index of the first open set each data point belongs to
         """
-        dist_land_data = self._dist_land_data
+        if X_query is not None:
+            
+            if self.distance_matrix and not distance_matrix_query: #Handle the bad case first
+                raise Exception("Coordinates initialized by distance matrix. " \
+                "Please input query as a distance matrix to landmarks.")  
+            elif distance_matrix_query:
+                dist_land_data = X_query
+            else: # calculate the distance between the landmarks and the query
+                dist_land_data = cdist(self._X[self._idx_land], X_query)
+        else:
+            dist_land_data=self._dist_land_data
+                   
+       
+        
+        if dist_land_data.shape[0] != self._n_landmarks:
+            raise Exception(f"Expected shape ({self._n_landmarks}, ...) received {dist_land_data.shape}")
+        
         U = dist_land_data < r_cover
         phi = np.zeros_like(dist_land_data)
         phi[U] = partunity_fn(dist_land_data[U], r_cover)
