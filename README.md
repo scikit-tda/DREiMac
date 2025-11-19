@@ -44,11 +44,11 @@ plot_diagrams(cc._dgms, title="Persistence diagram", ax=a1)
 
 # plot the data colored by the circle-valued map constructed by DREiMac
 circular_coordinates = cc.get_coordinates()
-a2.scatter(X[:,0], X[:,1], c=circular_coordinates, s=10, cmap="viridis")
+a2.scatter(X[:,0], X[:,1], c=circular_coordinates, s=10, cmap="twilight")
 a2.set_title("Input colored by circular coordinate") ; a2.axis("off") ; a2.set_aspect("equal")
 
 # plot colorbar
-img = a3.imshow([[0,1]], cmap="viridis"); a3.set_visible(False)
+img = a3.imshow([[0,1]], cmap="twilight"); a3.set_visible(False)
 cb = plt.colorbar(mappable=img,ticks=[0,0.5,1]) ; _ = cb.ax.set_yticklabels(["0","$\pi$","2$\pi$"])
 ```
 
