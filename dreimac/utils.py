@@ -189,10 +189,14 @@ class GeometryUtils:
         assert n_landmarks <= X.shape[0]
         assert n_neighbors <= X.shape[0]
 
-        spatial_tree = KDTree(X)
-        distances_nn, indices_nn = spatial_tree.query(X, k=n_neighbors)
-        # https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997
-        n_queries = X.shape[0]
+        n_points = X.shape[0]        
+        if distance_matrix:
+            indices_nn = np.argsort(X, axis=1)[:, :n_neighbors]
+            distances_nn = X[np.arange(n_points)[:, np.newaxis], indices_nn]
+        else:            
+            spatial_tree = KDTree(X)
+            distances_nn, indices_nn = spatial_tree.query(X, k=n_neighbors)
+            ## https://github.com/scikit-learn/scikit-learn/blob/364c77e047ca08a95862becf40a04fe9d4cd2c98/sklearn/neighbors/_base.py#L997        n_queries = X.shape[0]
         n_nonzero = n_queries * n_neighbors
         indptr = np.arange(0, n_nonzero + 1, n_neighbors)
         kneighbors_graph = csr_matrix(
@@ -224,6 +228,55 @@ class GeometryUtils:
 
         return dist_landmarks_points, perm_all_points
 
+def _test_landmark_geodesic_distance_consistency():
+
+    from numpy.testing import assert_array_almost_equal
+    from scipy.spatial.distance import pdist, squareform
+    """
+    Test that landmark_geodesic_distance produces consistent results
+    whether using coordinate matrix or precomputed distance matrix.
+    """
+    # Create a 3D dataset with 50 points
+    np.random.seed(42)  # For reproducibility
+    n_points = 50
+    n_dimensions = 3
+    X = np.random.randn(n_points, n_dimensions)
+    
+    # Compute pairwise Euclidean distances using pdist
+    dist_condensed = pdist(X, metric='euclidean')
+    dist_matrix = squareform(dist_condensed)
+    
+    # Set parameters
+    n_landmarks = n_points  # Same as number of points
+    n_neighbors = 4
+    
+    # Test with coordinate matrix (distance_matrix=False)
+    result_coords, perm_all_points_coords = landmark_geodesic_distance(
+        X, 
+        n_landmarks=n_landmarks, 
+        n_neighbors=n_neighbors, 
+        distance_matrix=False
+    )
+    
+    # Test with distance matrix (distance_matrix=True)
+    result_dist, perm_all_points_coords = landmark_geodesic_distance(
+        dist_matrix, 
+        n_landmarks=n_landmarks, 
+        n_neighbors=n_neighbors, 
+        distance_matrix=True
+    )
+    
+    # Compare results
+    assert_array_almost_equal(
+        result_coords, 
+        result_dist,
+        decimal=10,
+        err_msg="Results differ between coordinate and distance matrix inputs"
+    )
+    
+    print("✓ Test passed: Both methods produce consistent results")
+    print(f"Result shape: {result_coords.shape}")
+    print(f"Max difference: {np.max(np.abs(result_coords - result_dist))}")
 
 class CohomologyUtils:
     @staticmethod
