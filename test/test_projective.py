@@ -31,6 +31,31 @@ class TestRealProjective:
         variance_threshold = 0.8
         assert np.linalg.norm(pc._variance[:target_coordinates]) >= total_variance * variance_threshold
 
+    def test_projective_consistent_on_query(self):
+        """
+        Test projective coordinates on the projective plane are consistent upto permutation.
+        Parameters
+        ----------
+        NSamples : int
+            Number of random samples on the projective plane
+        NLandmarks : int
+            Number of landmarks to take in the projective coordinates computation
+        """
+
+        n_samples = 10000
+        n_landmarks = 100
+        X, D = GeometryExamples.rp2_metric(n_samples)
+
+
+        pc = ProjectiveCoords(D, n_landmarks, distance_matrix=True, verbose=True)
+        coordinates = pc.get_coordinates(projective_dim_red_mode='exponential', save_projections=True)
+        assert len(coordinates) == len(X)
+
+        indices = np.random.randint(low=0, high=X.shape[0], size=(20,)).astype(int)
+        X_query = D[pc._idx_land, :][:, indices]
+
+        coords_query = pc.get_coordinates(X_query=X_query, distance_matrix_query=True)
+        assert np.allclose(coords_query, coordinates[indices])
 
 
     def test_klein_bottle(self):
@@ -88,6 +113,17 @@ class TestComplexProjective:
         total_variance = np.linalg.norm(cpc._variance)
         variance_threshold = 0.3
         assert np.linalg.norm(cpc._variance[:target_coordinates]) >= total_variance * variance_threshold
+
+    def test_complex_projective_on_query(self):
+        data = GeometryExamples.sphere(2000)
+        cpc = ComplexProjectiveCoords(data, n_landmarks=100)
+        target_coordinates = 1
+        coordinates = cpc.get_coordinates(proj_dim=target_coordinates, projective_dim_red_mode='exponential', save_projections=True)
+        assert len(coordinates) == len(data)
+        indices = np.random.randint(low=0, high=data.shape[0], size=(20,)).astype(int)
+        X_query = data[indices]
+        coords_query = cpc.get_coordinates(X_query=X_query)
+        assert np.allclose(coords_query, coordinates[indices])
 
     def test_moving_dot(self):
         P = GeometryExamples.moving_dot(40)
